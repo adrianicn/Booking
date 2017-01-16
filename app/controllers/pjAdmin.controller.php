@@ -90,6 +90,13 @@ class pjAdmin extends pjAppController
 	public function pjActionIndex()
 	{
 		$this->checkLogin();
+		echo "<br>";
+		echo "Usuario Servicio Sesion: ".$_SESSION['usuario_servicio'] ;
+		echo "<br>";
+		if($_SESSION['usuario_servicio'] == ""){
+			echo "salir del sistema";
+			$this->setLayout('pjActionSalir');
+		}else{
 
 		if ($this->isAdmin() || $this->isEditor() || $this->isOwner())
 		{
@@ -137,14 +144,8 @@ class pjAdmin extends pjAppController
 		} else {
 			$this->set('status', 2);
 		}
-	}
 
-	//******************************************************************************************************************************//
-	// FUNCION QUE CAPTURA EL VERIFY DE LA URL Y BUSCA EN BD                                                                                              //
-	//******************************************************************************************************************************//
-	public function pjActionVerificar()
-	{
-		$this->setLayout('pjActionAdminLogin');
+		}
 
 	}
 
@@ -167,6 +168,8 @@ class pjAdmin extends pjAppController
 	                    $data = array();
 	                    echo "Id de la tabla: ".$data['id'] = $arr[0]['id'];
 	                    echo "<br>";
+	                    echo "UUID: ".$data['uuid'] = $arr[0]['uuid'];
+	                    echo "<br>";
 		       echo "Id Usuario Servicio: ".$data['id_usuario_servicio'] = $arr[0]['id_usuario_servicio'];
 	                    echo "<br>";
 	                    echo "Consumido: ".$data['consumido'] = $arr[0]['consumido'];
@@ -175,8 +178,17 @@ class pjAdmin extends pjAppController
 	                    $usuarioServicio = $data['id_usuario_servicio'];
 	                    $consumido = $data['consumido'];
 
-	                   if($consumido === 1){
-	                    	echo "sale de la Pagina";
+	                    if ($data['uuid'] != $_GET['verify'] ){
+	                    	echo "no existe el parametro";
+	                    	$this->setLayout('pjActionSalir');
+
+	                    }else {
+
+	                    	if($consumido == 1){
+	                    	//echo "sale de la Pagina";
+	                    	//ME ENVIA A LA PAGINA DE ERROR
+	                    	$this->setLayout('pjActionSalir');
+
 	                    }else{
 
 	                    	echo "se hace el logueo en la pagina";
@@ -273,19 +285,24 @@ class pjAdmin extends pjAppController
 	                    	//****************************************************************//
 	                    }
 
+	                    }
+
+
 	            }else{
 	                    echo "no esta el parametro";
+	            	       //ME ENVIA A LA PAGINA DE ERROR
+	                    $this->setLayout('pjActionSalir');
+
 	            }
 
 	}
 
 	public function pjActionLogout()
 	{
-		if ($this->isLoged())
-        {
-        	unset($_SESSION[$this->defaultUser]);
-        }
-       	pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionLogin");
+		if ($this->isLoged()){
+        			unset($_SESSION[$this->defaultUser]);
+        		}
+       		pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionLogin");
 	}
 
 	public function pjActionMessages()

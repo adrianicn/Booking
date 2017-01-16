@@ -91,8 +91,9 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				              {text: myLabel.installPreview, url: "index.php?controller=pjAdminOptions&action=pjActionInstall&calendar_id={:id}"}
 				           ]}],
 				columns: [{text: myLabel.id, type: "text", sortable: true, editable: false},
-				          {text: myLabel.calendar, type: "text", sortable: true, width: 270, renderer: formatName},
+				          {text: myLabel.calendar, type: "text", sortable: true, width: 200, renderer: formatName},
 				          {text: myLabel.user, type: "text", sortable: true, editable: false, width: 150, renderer: formatOwner}
+					//{text: myLabel.descripcion, type: "text", sortable: false, editable: false, width: 150, renderer: formatOwner}
 				],
 				dataUrl: "index.php?controller=pjAdminCalendars&action=pjActionGetCalendar" + pjGrid.queryString,
 				dataType: "json",

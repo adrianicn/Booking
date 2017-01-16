@@ -9,7 +9,7 @@ class pjAdminCalendars extends pjAdmin
 	public function pjActionCreate()
 	{
 		$this->checkLogin();
-		
+
 		if ($this->isAdmin())
 		{
 			if (isset($_POST['calendar_create']))
@@ -21,7 +21,7 @@ class pjAdminCalendars extends pjAdmin
 						->join('pjLocaleLanguage', 't2.iso=t1.language_iso', 'left')
 						->where('t2.file IS NOT NULL')
 						->orderBy('t1.sort ASC')->findAll()->getData();
-					
+
 					$this->models['Option']->init($id);
 					$this->models['Option']->initConfirmation($id, $locale_arr);
 					$err = 'ACR03';
@@ -29,7 +29,7 @@ class pjAdminCalendars extends pjAdmin
 					{
 						pjMultiLangModel::factory()->saveMultiLang($_POST['i18n'], $id, 'pjCalendar');
 					}
-					
+
 					$data = $this->models['Option']->reset()->getAllPairs($id);
 					pjUtil::pjActionGenerateImages($id, $data);
 				} else {
@@ -41,7 +41,7 @@ class pjAdminCalendars extends pjAdmin
 					->join('pjLocaleLanguage', 't2.iso=t1.language_iso', 'left')
 					->where('t2.file IS NOT NULL')
 					->orderBy('t1.sort ASC')->findAll()->getData();
-						
+
 				$lp_arr = array();
 				foreach ($locale_arr as $v)
 				{
@@ -49,9 +49,9 @@ class pjAdminCalendars extends pjAdmin
 				}
 				$this->set('lp_arr', $locale_arr);
 				$this->set('locale_str', pjAppController::jsonEncode($lp_arr));
-				
+
 				$this->set('user_arr', pjUserModel::factory()->orderBy('t1.name ASC')->findAll()->getData());
-		
+
 				$this->appendJs('jquery.validate.min.js', PJ_THIRD_PARTY_PATH . 'validate/');
 				$this->appendJs('jquery.multilang.js', PJ_FRAMEWORK_LIBS_PATH . 'pj/js/');
 				$this->appendJs('jquery.tipsy.js', PJ_THIRD_PARTY_PATH . 'tipsy/');
@@ -63,11 +63,51 @@ class pjAdminCalendars extends pjAdmin
 			$this->set('status', 2);
 		}
 	}
-		
+
+	public function pjActionFotos()
+	{
+
+	$this->checkLogin();
+	if(!empty($_FILES)){
+		//*****************************************************//
+		//                SUBO EL ARCHIVO A LA CARPETA                     //
+		//*****************************************************//
+		$directorio = '/var/www/html/Booking/app/web/uploads/';
+		$targetDir = $directorio;
+		$usuarioServ = trim($_POST['id_usuario_servicio']);
+		$nombreFoto =  $_FILES['file']['name'];
+		$fileName = $usuarioServ.'-'.$_FILES['file']['name'];
+		$targetFile = $targetDir.$fileName;
+
+		if(move_uploaded_file($_FILES['file']['tmp_name'],$targetFile)){
+
+			//*****************************************************//
+			//           GUARDO EN LA BASE DE DATOS IMAGES                //
+			//*****************************************************//
+			$dbHost = 'localhost';
+			$dbUsername = 'root';
+			$dbPassword = '12345';
+			$dbName = 'igtrip';
+
+			$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+			if($mysqli->connect_errno){
+			        echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+			}
+
+			$id_auxiliar = 45;
+			$conn->query("INSERT INTO images (filename, original_name, created_at, updated_at, id_auxiliar, id_catalogo_fotografia, id_usuario_servicio, estado_fotografia)
+				VALUES('".$fileName."','".$nombreFoto."', '".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."',
+					45, 10, ".$usuarioServ.", 1 )");
+
+		}
+	}
+
+	}
+
 	public function pjActionDeleteCalendar()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isAdmin())
 		{
 			$resp = array();
@@ -90,7 +130,7 @@ class pjAdminCalendars extends pjAdmin
 					}
 				}
 				$this->pjActionDeleteImages($_GET['id']);
-				
+
 				pjReservationModel::factory()->where('calendar_id', $_GET['id'])->eraseAll();
 				$resp['code'] = 200;
 			} else {
@@ -100,7 +140,7 @@ class pjAdminCalendars extends pjAdmin
 		}
 		exit;
 	}
-	
+
 	private function pjActionDeleteImages($cid)
 	{
 		$arr = array(
@@ -113,7 +153,7 @@ class pjAdminCalendars extends pjAdmin
 			PJ_UPLOAD_PATH . '%u_pending_start.jpg',
 			PJ_UPLOAD_PATH . '%u_pending_end.jpg',
 		);
-		
+
 		if (is_array($cid))
 		{
 			foreach ($cid as $id)
@@ -130,11 +170,11 @@ class pjAdminCalendars extends pjAdmin
 			}
 		}
 	}
-	
+
 	public function pjActionDeleteCalendarBulk()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isAdmin())
 		{
 			if (isset($_POST['record']) && count($_POST['record']) > 0)
@@ -164,24 +204,24 @@ class pjAdminCalendars extends pjAdmin
 		}
 		exit;
 	}
-	
+
 	public function pjActionGetCalendar()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isAdmin())
 		{
 			$pjCalendarModel = pjCalendarModel::factory()
 				->join('pjMultiLang', "t2.foreign_id = t1.id AND t2.model = 'pjCalendar' AND t2.locale = '".$this->getLocaleId()."' AND t2.field = 'name'", 'left')
 				->join('pjUser', "t3.id=t1.user_id", 'left');
-			
+
 			if (isset($_GET['q']) && !empty($_GET['q']))
 			{
 				$q = $pjCalendarModel->escapeString($_GET['q']);
 				$q = str_replace(array('%', '_'), array('\%', '\_'), trim($q));
 				$pjCalendarModel->where('t2.content LIKE', "%$q%");
 			}
-				
+
 			$column = 'name';
 			$direction = 'ASC';
 			if (isset($_GET['direction']) && isset($_GET['column']) && in_array(strtoupper($_GET['direction']), array('ASC', 'DESC')))
@@ -200,18 +240,18 @@ class pjAdminCalendars extends pjAdmin
 				$page = $pages;
 			}
 
-			$data = $pjCalendarModel->select('t1.id, t1.user_id, t2.content AS name, t3.name AS user_name')
+			$data = $pjCalendarModel->select('t1.id, t1.user_id, t2.content AS name, t3.name AS user_name, t1.descripcion')
 				->orderBy("$column $direction")->limit($rowCount, $offset)->findAll()->getData();
-						
+
 			pjAppController::jsonResponse(compact('data', 'total', 'pages', 'page', 'rowCount', 'column', 'direction'));
 		}
 		exit;
 	}
-		
+
 	public function pjActionIndex()
 	{
 		$this->checkLogin();
-		
+
 		if ($this->isAdmin())
 		{
 			$this->appendJs('jquery.datagrid.js', PJ_FRAMEWORK_LIBS_PATH . 'pj/js/');
@@ -221,11 +261,11 @@ class pjAdminCalendars extends pjAdmin
 			$this->set('status', 2);
 		}
 	}
-	
+
 	public function pjActionSaveCalendar()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isAdmin())
 		{
 			$pjCalendarModel = pjCalendarModel::factory();
@@ -282,24 +322,24 @@ class pjAdminCalendars extends pjAdmin
 					->set('showPrices', true);
 			}
 		}
-		
+
 		$this->set('ABCalendar', $ABCalendar);
 	}
-	
+
 	public function pjActionGetCal()
 	{
 		$this->setAjax(true);
-		
+
 		if ($this->isXHR() && $this->isAdmin())
 		{
 			$this->__getCalendar($_GET['cid'], $_GET['year'], $_GET['month']);
 		}
 	}
-	
+
 	public function pjActionView()
 	{
 		$this->checkLogin();
-		
+
 		if ($this->isAdmin())
 		{
 			if (isset($_GET['id']) && (int) $_GET['id'] > 0)
@@ -312,7 +352,7 @@ class pjAdminCalendars extends pjAdmin
 			}
 
 			$this->__getCalendar($this->getForeignId(), date("Y"), date("n"));
-			
+
 			$this->appendJs('jquery.datagrid.js', PJ_FRAMEWORK_LIBS_PATH . 'pj/js/');
 			$this->appendCss('index.php?controller=pjFront&action=pjActionLoadCss&cid=' . $this->getForeignId() . '&' . rand(1,99999), PJ_INSTALL_URL, true);
 			$this->appendJs('pjAdminCalendars.js');

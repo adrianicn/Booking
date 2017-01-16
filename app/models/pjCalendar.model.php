@@ -13,7 +13,8 @@ class pjCalendarModel extends pjAppModel
 	protected $schema = array(
 		array('name' => 'id', 'type' => 'int', 'default' => ':NULL'),
 		array('name' => 'user_id', 'type' => 'int', 'default' => ':NULL'),
-		array('name' => 'id_usuario_servicio', 'type' => 'int', 'default' => ':NULL')
+		array('name' => 'id_usuario_servicio', 'type' => 'int', 'default' => ':NULL'),
+		array('name' => 'descripcion', 'type' => 'text', 'default' => ':NULL')
 	);
 
 	public $i18n = array('name', 'confirm_subject', 'confirm_tokens', 'payment_subject', 'payment_tokens', 'terms_url', 'terms_body');

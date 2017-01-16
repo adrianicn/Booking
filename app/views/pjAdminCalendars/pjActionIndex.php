@@ -22,9 +22,9 @@ if (isset($tpl['status']))
 			<li class="ui-state-default ui-corner-top"><a href="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminCalendars&amp;action=pjActionCreate"><?php __('lblAddCalendar'); ?></a></li>
 		</ul>
 	</div>
-	
+
 	<?php pjUtil::printNotice(@$titles['ACR10'], @$bodies['ACR10']); ?>
-	
+
 	<div class="b10">
 		<form action="" method="get" class="float_left pj-form frm-filter">
 			<input type="text" name="q" class="pj-form-field pj-form-field-search w150" placeholder="<?php __('btnSearch'); ?>" />
@@ -47,6 +47,7 @@ if (isset($tpl['status']))
 	myLabel.viewReservations = "<?php __('lblViewReservations'); ?>";
 	myLabel.viewCalendar = "<?php __('lblViewCalendar'); ?>";
 	myLabel.more = "<?php __('lblMore'); ?>";
+	myLabel.descripcion = "Descripcion";
 	myLabel.user = "<?php __('lblUser'); ?>";
 	myLabel.id = "<?php __('lblID'); ?>";
 	myLabel.calendar = "<?php __('lblCalendarName'); ?>";

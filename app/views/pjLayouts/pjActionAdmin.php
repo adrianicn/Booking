@@ -3,6 +3,9 @@
 	<head>
 		<title>Principal</title>
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+		<!--<script src="http://localhost/Booking/app/web/js/dropzone.js"></script> -->
+		<script src="http://localhost/Booking/app/web/js/dropzone2.js"></script>
+		<link type="text/css" rel="stylesheet" href="http://localhost/Booking/app/web/css/dropzone2.css">
 		<?php
 		foreach ($controller->getCss() as $css)
 		{
@@ -16,6 +19,7 @@
 		<!--[if gte IE 9]>
   		<style type="text/css">.gradient {filter: none}</style>
 		<![endif]-->
+
 	</head>
 	<body>
 		<div id="container">
