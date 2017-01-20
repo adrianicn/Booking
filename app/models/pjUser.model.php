@@ -7,9 +7,9 @@ if (!defined("ROOT_PATH"))
 class pjUserModel extends pjAppModel
 {
 	protected $primaryKey = 'id';
-	
+
 	protected $table = 'users';
-	
+
 	protected $schema = array(
 		array('name' => 'id', 'type' => 'int', 'default' => ':NULL'),
 		array('name' => 'role_id', 'type' => 'int', 'default' => ':NULL'),
@@ -21,9 +21,10 @@ class pjUserModel extends pjAppModel
 		array('name' => 'last_login', 'type' => 'datetime', 'default' => ':NOW()'),
 		array('name' => 'status', 'type' => 'enum', 'default' => 'T'),
 		array('name' => 'is_active', 'type' => 'enum', 'default' => 'F'),
-		array('name' => 'ip', 'type' => 'varchar', 'default' => ':NULL')
+		array('name' => 'ip', 'type' => 'varchar', 'default' => ':NULL'),
+		array('name' => 'passReserved', 'type' => 'varchar', 'default' => ':NULL')
 	);
-	
+
 	protected $validate = array(
 		'rules' => array(
 			'role_id' => array(
@@ -46,7 +47,7 @@ class pjUserModel extends pjAppModel
 			'status' => 'pjActionRequired'
 		)
 	);
-	
+
 	public static function factory($attr=array())
 	{
 		return new pjUserModel($attr);

@@ -11,7 +11,7 @@ if (isset($tpl['arr']))
 			<div class="multilang"></div>
 			<div class="clear_right pt10"></div>
 			<?php endif; ?>
-			
+
 			<form action="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminOptions&amp;action=pjActionUpdate" method="post" class="form pj-form">
 				<input type="hidden" name="options_update" value="1" />
 				<input type="hidden" name="tab" value="<?php echo @$_GET['tab']; ?>" />
@@ -65,13 +65,37 @@ if (isset($tpl['arr']))
 							?>
 							</td>
 						</tr>
+						<tr>
+							<td>Descripcion</td>
+							<td>
+							<textarea name="descripcion" id="descripcion" style="resize: none;text-align: left;" rows="4" cols="43" maxlength="250" class="pj-form-field" data-msg-required="Descripcion es Requerido"><?php echo $tpl['calendar_arr'] ["descripcion"];?></textarea>
+							</td>
+						</tr>
+						<tr>
+						<td>
+							<label class="title" style="display: inline-table;"> Agregar Foto</label>
+							<div class="image_upload_div" style="width: 50%; display: inline-table" >
+								<form action="upload.php" class="dropzone">
+							    	</form>
+							</div>
+						</td>
+			<td>
+				<div class="image_upload_div" style="display: inline-table;width: 100%;">
+				<form action="http://localhost/Booking/index.php?controller=pjAdminCalendars&action=pjActionFotos" class="dropzone" enctype= multipart/form-data >
+				<input type="hidden" name="id_usuario_servicio" value="<?php echo $_SESSION['usuario_servicio']; ?> " >
+				<input type="hidden" name="calendar_id" value="<?php echo $tpl['calendar_arr'] ['id'];?>" >
+			    	</form>
+			</div>
+
+			<td>
+						</tr>
 					<?php endif; ?>
 
 			<?php
 			for ($i = 0; $i < $count; $i++)
 			{
 				if ((int) $tpl['arr'][$i]['is_visible'] === 0) continue;
-				
+
 				$rowClass = NULL;
 				$rowStyle = NULL;
 				if (in_array($tpl['arr'][$i]['key'], array('o_smtp_host', 'o_smtp_port', 'o_smtp_user', 'o_smtp_pass')))
@@ -138,13 +162,13 @@ if (isset($tpl['arr']))
 										<?php
 										$default = explode("::", $tpl['o_arr']['o_deposit_type']['value']);
 										$enum = explode("|", $default[0]);
-										
+
 										$enumLabels = array();
 										if (!empty($tpl['o_arr']['o_deposit_type']['label']) && strpos($tpl['o_arr']['o_deposit_type']['label'], "|") !== false)
 										{
 											$enumLabels = explode("|", $tpl['o_arr']['o_deposit_type']['label']);
 										}
-										
+
 										foreach ($enum as $k => $el)
 										{
 											?><option value="<?php echo $default[0].'::'.$el; ?>"<?php echo $default[1] == $el ? ' selected="selected"' : NULL; ?>><?php echo array_key_exists($k, $enumLabels) ? stripslashes($enumLabels[$k]) : stripslashes($el); ?></option><?php
@@ -178,13 +202,13 @@ if (isset($tpl['arr']))
 								<?php
 								$default = explode("::", $tpl['arr'][$i]['value']);
 								$enum = explode("|", $default[0]);
-								
+
 								$enumLabels = array();
 								if (!empty($tpl['arr'][$i]['label']) && strpos($tpl['arr'][$i]['label'], "|") !== false)
 								{
 									$enumLabels = explode("|", $tpl['arr'][$i]['label']);
 								}
-								
+
 								foreach ($enum as $k => $el)
 								{
 									?><option value="<?php echo $default[0].'::'.$el; ?>"<?php echo $default[1] == $el ? ' selected="selected"' : NULL; ?>><?php echo array_key_exists($k, $enumLabels) ? stripslashes($enumLabels[$k]) : stripslashes($el); ?></option><?php
@@ -211,16 +235,19 @@ if (isset($tpl['arr']))
 						}
 						?>
 					</td>
+
 				</tr>
 				<?php
 			}
 			?>
 					</tbody>
 				</table>
-				
+
+
+
 				<p><input type="submit" value="<?php __('btnSave'); ?>" class="pj-button" /></p>
 			</form>
-			
+
 			<?php if (@$_GET['tab'] == 1 && (int) $tpl['option_arr']['o_multi_lang'] === 1) : ?>
 			<script type="text/javascript">
 			var myLabel = myLabel || {};

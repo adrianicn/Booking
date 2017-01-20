@@ -27,7 +27,13 @@
     			<!--<div id="logo">
 					<a href="https://www.phpjabbers.com/availability-booking-calendar/" target="_blank" rel="nofollow">Availability Booking Calendar</a>
 					<span>v<?php echo PJ_SCRIPT_VERSION;?></span>
-				</div>-->
+
+			</div> -->
+			<div style="text-align: center;">
+
+					<h1 style="text-align: center;font-weight: bold;color: white;font-size: 2vw !important">
+						Booking para: <?php echo $_SESSION['nombre_servicio']; ?> </h1>
+			</div>
 			</div>
 
 			<div id="middle">

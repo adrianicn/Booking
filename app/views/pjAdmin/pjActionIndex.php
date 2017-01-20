@@ -13,7 +13,8 @@ if (isset($tpl['status']))
 	<div class="dashboard_header">
 		<div class="dashboard_header_item">
 			<div class="dashboard_icon dashboard_properties"></div>
-			<div class="dashboard_info"><abbr><?php echo (int) @$tpl['info_arr'][0]['calendars']; ?></abbr><?php (int) @$tpl['info_arr'][0]['calendars'] !== 1 ? __('lblDashCalendars') : __('lblDashCalendar'); ?></div>
+			<div class="dashboard_info"><abbr><?php echo (int) @$tpl['info_arr'][0]['calendars']; ?></abbr><?php (int) @$tpl['info_arr'][0]['calendars'] !== 1 ? __('lblDashCalendars') : __('lblDashCalendar'); ?>
+			</div>
 		</div>
 		<div class="dashboard_header_item">
 			<div class="dashboard_icon dashboard_reservations"></div>

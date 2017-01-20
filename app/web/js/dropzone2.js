@@ -134,7 +134,7 @@
       acceptedMimeTypes: null,
       autoProcessQueue: true,
       autoQueue: true,
-      addRemoveLinks: true,
+      addRemoveLinks: false,
       previewsContainer: null,
       hiddenInputContainer: "body",
       capture: null,
@@ -268,9 +268,11 @@
             node.innerHTML = this.filesize(file.size);
           }
           if (this.options.addRemoveLinks) {
-            file._removeLink = Dropzone.createElement("<a class=\"dz-remove\" href=\"javascript:undefined;\" data-dz-remove>" + this.options.dictRemoveFile + "</a>");
+
+            file._removeLink = Dropzone.createElement("<a class=\"dz-remove\" href=\"http://localhost/Booking/index.php?controller=pjAdminOptions&action=pjActionRemoveImage;\" data-dz-remove>" + this.options.dictRemoveFile + "</a>");
             file.previewElement.appendChild(file._removeLink);
           }
+
           removeFileEvent = (function(_this) {
             return function(e) {
               e.preventDefault();
@@ -294,6 +296,7 @@
           _results = [];
           for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
             removeLink = _ref2[_k];
+
             _results.push(removeLink.addEventListener("click", removeFileEvent));
           }
           return _results;

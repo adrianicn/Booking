@@ -74,9 +74,10 @@ class pjAdminCalendars extends pjAdmin
 		//*****************************************************//
 		$directorio = '/var/www/html/Booking/app/web/uploads/';
 		$targetDir = $directorio;
+		$id_auxiliar = trim($_POST['calendar_id']);
 		$usuarioServ = trim($_POST['id_usuario_servicio']);
 		$nombreFoto =  $_FILES['file']['name'];
-		$fileName = $usuarioServ.'-'.$_FILES['file']['name'];
+		$fileName = $id_auxiliar.$_FILES['file']['name'];
 		$targetFile = $targetDir.$fileName;
 
 		if(move_uploaded_file($_FILES['file']['tmp_name'],$targetFile)){
@@ -94,10 +95,10 @@ class pjAdminCalendars extends pjAdmin
 			        echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 			}
 
-			$id_auxiliar = 45;
+
 			$conn->query("INSERT INTO images (filename, original_name, created_at, updated_at, id_auxiliar, id_catalogo_fotografia, id_usuario_servicio, estado_fotografia)
 				VALUES('".$fileName."','".$nombreFoto."', '".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."',
-					45, 10, ".$usuarioServ.", 1 )");
+					'".$id_auxiliar."', 10, ".$usuarioServ.", 1 )");
 
 		}
 	}
