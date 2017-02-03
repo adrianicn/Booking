@@ -26,6 +26,7 @@ if (isset($tpl['arr']))
 					<tbody>
 					<?php if (@$_GET['tab'] == 1) : ?>
 						<tr>
+							<?php  if($_SESSION["comprobar"] !=1){ ?>
 							<td><?php __('lblUser'); ?></td>
 							<td>
 								<select name="user_id" class="pj-form-field">
@@ -41,6 +42,7 @@ if (isset($tpl['arr']))
 									?>
 								</select>
 							</td>
+							<?php } ?>
 						</tr>
 						<tr>
 							<td><?php __('lblName'); ?></td>
@@ -92,6 +94,7 @@ if (isset($tpl['arr']))
 					<?php endif; ?>
 
 			<?php
+
 			for ($i = 0; $i < $count; $i++)
 			{
 				if ((int) $tpl['arr'][$i]['is_visible'] === 0) continue;
@@ -245,11 +248,98 @@ if (isset($tpl['arr']))
 
 
 
+
+
 				<p><input type="submit" value="<?php __('btnSave'); ?>" class="pj-button" /></p>
 			</form>
 
+
+
 			<?php if (@$_GET['tab'] == 1 && (int) $tpl['option_arr']['o_multi_lang'] === 1) : ?>
-			<script type="text/javascript">
+<br><br>
+<?php if (@$_GET['tab'] == 1) : ?>
+
+
+
+		<?php if(isset($tpl['fotos_calendario']) &&  $tpl['contador_fotos_calendario']>0){ ?>
+
+			<form action="http://localhost/Booking/index.php?controller=pjAdminCalendars&action=pjActionDeleteFotos" >
+			<div class="container">
+    				<div class="row">
+        					<div class="span12">
+        					<div id="owl-demo" class="owl-carousel">
+        					<?php  for($i=0; $i<$tpl['contador_fotos_calendario']; $i++){
+					$url = "app/web/icon/". $tpl['fotos_calendario'][$i]['filename'];
+                				?>
+                				  <div class="item">
+                    <img src="app/web/img/x.png" onclick='alertaConfirm( <?php echo $tpl["fotos_calendario"][$i]["id"]; ?>)'
+                    	    style=" width:25px; height:29px; position:absolute; top:2px; right:0px; cursor:pointer;" alt='' />
+                    <img src="<?php echo $url ?>" href='#' >
+
+                    <input type="text" value="<?php echo $tpl["descripcion_fotografia"][$i]["id"]; ?>" name="descripcion_fotografia_$tpl['fotos_calendario'][$i]['id']"
+                    		style='height: 15px;width: 100%;' placeholder='Descripcion'
+                    		onchange="AjaxSaveDetailsFotografia('deleteImage',<?php echo $tpl["fotos_calendario"][$i]["id"]; ?>)">
+
+                </div>
+
+
+					<?php }?>
+					</div>
+			        		</div>
+    				</div>
+			</div>
+			</form>
+	<style>
+    	#owl-demo .item{
+        		margin: 3px;
+        		padding: 5%;
+    	}
+    	#owl-demo .item img{
+	        display: block;
+	        width: 100%;
+	        height: auto;
+	}
+	</style>
+	<script>
+	 $(document).ready(function() {
+		    $("#owl-demo").owlCarousel({
+		    autoPlay: 5000,
+		            items : 4,
+		            itemsDesktop : [1199, 3],
+		            itemsDesktopSmall : [979, 3]
+		    });
+	 });
+	</script>
+	<script>
+	            function alertaConfirm(id){
+	            var r = confirm("Está seguro de que desea eliminar esta imagen?");
+	                    if (r == true) {
+	            var resp = AjaxContainerRetrunMessage("deleteImage", id);
+	            console.log(resp);
+	            location.reload();
+	            		//$("#flag_image").val('1');
+	                    } else {
+	            txt = "Cancelado";
+	                    }
+	            }
+	</script>
+
+
+
+                 	<?php }?>
+
+		<?php endif; ?>
+
+<br><br>
+
+
+             <script>
+         	$(document).ready(function () {
+             	   GetDataAjaxImagenes("<?php echo $tpl['calendar_arr'] ['id'];?>");
+    	});
+    	</script>
+
+	<script type="text/javascript">
 			var myLabel = myLabel || {};
 			myLabel.localeId = "<?php echo $controller->getLocaleId(); ?>";
 			(function ($) {

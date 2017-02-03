@@ -1,0 +1,30 @@
+function GetDataAjaxImagenes(calendarid) {
+
+    console.log(calendarid);
+    var url = "http://localhost/Booking/index.php?controller=pjAdminCalendars&action=pjActionCargarFotos";
+    console.log(url);	
+    
+    /*$.ajax({
+        type: 'GET',
+        url: url,
+        dataType: 'json',
+        success: function (data) {
+            
+            
+            $("#renderPartialImagenes").html(data.contentImagenes);
+                 
+
+        },
+        error: function (data) {
+            var errors = data.responseJSON;
+            if (errors) {
+                $.each(errors, function (i) {
+                    console.log(errors[i]);
+                });
+            }
+        }
+    });*/
+}
+
+
+//http://localhost/Booking/index.php?controller=pjAdminCalendars&action=pjActionFotos

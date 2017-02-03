@@ -24,10 +24,10 @@ if (isset($tpl['status']))
 			<div class="dashboard_icon dashboard_users"></div>
 			<div class="dashboard_info"><abbr><?php echo (int) @$tpl['info_arr'][0]['users']; ?></abbr><?php (int) @$tpl['info_arr'][0]['users'] !== 1 ? __('lblDashUsers') : __('lblDashUser'); ?></div>
 		</div>
-		<div class="dashboard_header_item dashboard_header_item_last">
+		<!-- <div class="dashboard_header_item dashboard_header_item_last">
 			<div class="dashboard_icon dashboard_users"></div>
 			<div class="dashboard_info"><abbr><?php echo $_SESSION['usuario_servicio']; ?></abbr><?php echo "Id Usuario Servicio"; ?></div>
-		</div>
+		</div> -->
 	</div>
 
 	<div class="dashboard_box">

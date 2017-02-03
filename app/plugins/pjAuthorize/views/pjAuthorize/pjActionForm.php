@@ -2,7 +2,8 @@
 require_once $controller->getConst('PLUGIN_DIR') . 'anet_php_sdk/AuthorizeNet.php';
 
 $transaction_key = $tpl['arr']['transkey'];
-$url = PJ_TEST_MODE ? 'https://test.authorize.net/gateway/transact.dll' : 'https://secure2.authorize.net/gateway/transact.dll';
+//$url = PJ_TEST_MODE ? 'https://test.authorize.net/gateway/transact.dll' : 'https://secure2.authorize.net/gateway/transact.dll';
+$url = PJ_TEST_MODE ? 'https://test.authorize.net/gateway/transact.dll' : 'https://test.authorize.net/gateway/transact.dll';
 
 $x_login        = $tpl['arr']['x_login'];
 $x_amount       = number_format($tpl['arr']['x_amount'], 2, '.', '');
@@ -24,7 +25,8 @@ $fingerprint    = AuthorizeNetSIM_Form::getFingerprint($x_login, $transaction_ke
 	<input type="hidden" name="x_show_form" value="payment_form" />
 	<input type="hidden" name="x_method" value="cc" />
 	<input type="hidden" name="x_receipt_link_method" value="LINK" />
-    <input type="hidden" name="x_receipt_link_url" value="<?php echo $tpl['arr']['x_receipt_link_url']; ?>" />
+	<!--<input type="hidden" name="x_receipt_link_url" value="http://localhost/Booking/index.php?controller=pjAdmin&action=pjActionConfirmacion" /> -->
+             <input type="hidden" name="x_receipt_link_url" value="<?php echo $tpl['arr']['x_receipt_link_url']; ?>" />
 	<input type="hidden" name="x_relay_response" value="TRUE" />
 	<input type="hidden" name="x_relay_url" value="<?php echo $tpl['arr']['x_relay_url']; ?>" />
 	<?php

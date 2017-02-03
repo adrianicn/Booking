@@ -2,7 +2,8 @@
 # HTML variables
 # https://developer.paypal.com/docs/classic/paypal-payments-standard/integration-guide/Appx_websitestandard_htmlvariables/#id08A6HI00JQU
 
-$url = PJ_TEST_MODE ? 'https://sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr';
+//$url = PJ_TEST_MODE ? 'https://sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr';
+$url = PJ_TEST_MODE ? 'https://sandbox.paypal.com/cgi-bin/webscr' : 'https://sandbox.paypal.com/cgi-bin/webscr';
 ?>
 <form action="<?php echo $url; ?>" method="post"
 	style="display: inline"

@@ -9,22 +9,24 @@ class pjPaypal extends pjPaypalAppController
 	public function pjActionConfirm()
 	{
 		$this->setLayout('pjActionEmpty');
-		
+
 		$params = $this->getParams();
 		if (!isset($params['key']) || $params['key'] != md5($this->option_arr['private_key'] . PJ_SALT))
 		{
 			return FALSE;
 		}
-		
+
 		$response = array(
 			'status' => 'FAIL'
 		);
 
-		$url = PJ_TEST_MODE ? 'ssl://sandbox.paypal.com' : 'ssl://www.paypal.com';
-		$host = PJ_TEST_MODE ? 'www.sandbox.paypal.com' : 'www.paypal.com';
+		//$url = PJ_TEST_MODE ? 'ssl://sandbox.paypal.com' : 'ssl://www.paypal.com';
+		//$host = PJ_TEST_MODE ? 'www.sandbox.paypal.com' : 'www.paypal.com';
+		$url = PJ_TEST_MODE ? 'ssl://sandbox.paypal.com' : 'ssl://sandbox.paypal.com';
+		$host = PJ_TEST_MODE ? 'www.sandbox.paypal.com' : 'www.sandbox.paypal.com';
 		$port = 443;
 		$timeout = 30;
-		
+
 		$this->log('PayPal confirm start ---');
 
 		// STEP 1: Read POST data
@@ -50,19 +52,19 @@ class pjPaypal extends pjPaypalAppController
 		$header .= "Content-Type: application/x-www-form-urlencoded\r\n";
 		$header .= "Content-Length: " . strlen($req) . "\r\n\r\n";
 		$fp = fsockopen($url, $port, $errno, $errstr, $timeout);
-		
+
 		if (!empty($errstr))
 		{
 			$this->log($errstr);
 		}
-		
+
 		// assign posted variables to local variables
 		$txn_id           = $_POST['txn_id'];
 		$payment_status   = $_POST['payment_status'];
 		$payment_amount   = @$_POST[isset($params['amount_index']) ? $params['amount_index'] : 'mc_gross'];
 		$receiver_email   = $_POST['receiver_email'];
 		$payment_currency = $_POST['mc_currency'];
-		
+
 		$response['transaction_id'] = $_POST['txn_id'];
 
 		if (isset($params['foreign_id']))
@@ -72,12 +74,12 @@ class pjPaypal extends pjPaypalAppController
 			$data['payment_date'] = @$_POST[isset($params['date_index']) ? $params['date_index'] : 'payment_date'];
 			$this->pjActionSaveIpn($params['foreign_id'], $data);
 		}
-		
+
 		if (!is_array($params['txn_id']))
 		{
 			$params['txn_id'] = array($params['txn_id']);
 		}
-		
+
 		if (!$fp)
 		{
 			$this->log($txn_id.'<br>HTTP error: ' . $errstr);
@@ -130,20 +132,20 @@ class pjPaypal extends pjPaypalAppController
 		}
 		return $response;
 	}
-	
+
 	public function pjActionSave($foreign_id, $data=array())
 	{
 		$this->setLayout('pjActionEmpty');
-		
+
 		$params = $this->getParams();
 		if (!isset($params['key']) || $params['key'] != md5($this->option_arr['private_key'] . PJ_SALT))
 		{
 			return FALSE;
 		}
-		
+
 		return $this->pjActionSaveIpn($params['foreign_id'], $params['data']);
 	}
-	
+
 	private function pjActionSaveIpn($foreign_id, $data)
 	{
 		return pjPaypalModel::factory()
@@ -160,11 +162,11 @@ class pjPaypal extends pjPaypalAppController
 			->insert()
 			->getInsertId();
 	}
-	
+
 	public function pjActionForm()
 	{
 		$this->setLayout('pjActionEmpty');
-		
+
 		$this->setAjax(true);
 		//KEYS:
 		//-------------
@@ -221,7 +223,7 @@ class pjPaypal extends pjPaypalAppController
 	public function pjActionGetDetails()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged() && $this->isAdmin())
 		{
 			if (isset($_GET['id']) && (int) $_GET['id'] > 0)
@@ -230,22 +232,22 @@ class pjPaypal extends pjPaypalAppController
 			}
 		}
 	}
-	
+
 	public function pjActionGetPaypal()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged() && $this->isAdmin())
 		{
 			$pjPaypalModel = pjPaypalModel::factory();
-			
+
 			if (isset($_GET['q']) && !empty($_GET['q']))
 			{
 				$q = $pjPaypalModel->escapeStr($_GET['q']);
 				$q = str_replace(array('%', '_'), array('\%', '\_'), $q);
 				$pjPaypalModel->where('t1.filename LIKE', "%$q%");
 			}
-				
+
 			$column = 'dt';
 			$direction = 'DESC';
 			if (isset($_GET['direction']) && isset($_GET['column']) && in_array(strtoupper($_GET['direction']), array('ASC', 'DESC')))
@@ -266,12 +268,12 @@ class pjPaypal extends pjPaypalAppController
 
 			$data = $pjPaypalModel->select('t1.*')
 				->orderBy("`$column` $direction")->limit($rowCount, $offset)->findAll()->getData();
-						
+
 			pjAppController::jsonResponse(compact('data', 'total', 'pages', 'page', 'rowCount', 'column', 'direction'));
 		}
 		exit;
 	}
-	
+
 	public function pjActionIndex()
 	{
 		$this->checkLogin();

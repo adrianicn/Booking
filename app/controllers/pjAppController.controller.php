@@ -9,25 +9,25 @@ class pjAppController extends pjController
 	public $models = array();
 
 	public $defaultLocale = 'admin_locale_id';
-	
+
 	public $defaultCalendarId = 'admin_calendar_id';
-	
+
 	public $defaultFields = 'fields';
-	
+
 	public $defaultFieldsIndex = 'fields_index';
-	
+
 	protected function loadSetFields($force=FALSE, $locale_id=NULL, $fields=NULL)
 	{
 		if (is_null($locale_id))
 		{
 			$locale_id = $this->getLocaleId();
 		}
-	
+
 		if (is_null($fields))
 		{
 			$fields = $this->defaultFields;
 		}
-	
+
 		$registry = pjRegistry::getInstance();
 		if ($force
 				|| !isset($_SESSION[$this->defaultFieldsIndex])
@@ -36,7 +36,7 @@ class pjAppController extends pjController
 				|| empty($_SESSION[$fields]))
 		{
 			pjAppController::setFields($locale_id);
-	
+
 			# Update session
 			if ($registry->is('fields'))
 			{
@@ -44,16 +44,16 @@ class pjAppController extends pjController
 			}
 			$_SESSION[$this->defaultFieldsIndex] = $this->option_arr['o_fields_index'];
 		}
-	
+
 		if (isset($_SESSION[$fields]) && !empty($_SESSION[$fields]))
 		{
 			# Load fields from session
 			$registry->set('fields', $_SESSION[$fields]);
 		}
-	
+
 		return TRUE;
 	}
-	
+
 	public static function setTimezone($timezone="UTC")
     {
     	if (in_array(version_compare(phpversion(), '5.1.0'), array(0,1)))
@@ -72,7 +72,7 @@ class pjAppController extends pjController
     {
 		pjAppModel::factory()->prepare("SET SESSION time_zone = :offset;")->exec(compact('offset'));
     }
-    
+
 	public function setTime()
 	{
 		if (isset($this->option_arr['o_timezone']))
@@ -86,7 +86,7 @@ class pjAppController extends pjController
 			} elseif ($offset === 0) {
 				$offset = "+0";
 			}
-	
+
 			pjAppController::setTimezone('Etc/GMT' . $offset);
 			if (strpos($offset, '-') !== false)
 			{
@@ -97,7 +97,7 @@ class pjAppController extends pjController
 			pjAppController::setMySQLServerTime($offset . ":00");
 		}
 	}
-    
+
     public function beforeFilter()
     {
     	if (!in_array($_GET['controller'], array('pjFront', 'pjInstaller')))
@@ -105,36 +105,38 @@ class pjAppController extends pjController
     		$pjCalendarModel = pjCalendarModel::factory();
     		if ($this->isOwner())
     		{
-    			$pjCalendarModel->where('t1.user_id', $this->getUserId());
+    			//$pjCalendarModel->where('t1.user_id', $this->getUserId());
+    			$pjCalendarModel->where('t1.id_usuario_servicio', $_SESSION['usuario_servicio']);
     		}
+
 	    	$calendars = $pjCalendarModel
 				->select('t1.*, t2.content AS `name`')
 				->join('pjMultiLang', "t2.model='pjCalendar' AND t2.foreign_id=t1.id AND t2.field='name' AND t2.locale='".$this->getLocaleId()."'", 'left')
 				->orderBy('t1.id ASC')
 				->findAll()->getDataPair('id');
 			$this->set('calendars', $calendars);
-			
+
 			if ($this->getForeignId() === false && count($calendars) > 0)
 			{
 				$keys = array_keys($calendars);
 				$this->setForeignId($keys[0]);
-				
+
 			}
     	}
-		
+
     	$this->appendJs('jquery.min.js', PJ_THIRD_PARTY_PATH . 'jquery/');
     	$dm = new pjDependencyManager(PJ_THIRD_PARTY_PATH);
     	$dm->load(PJ_CONFIG_PATH . 'dependencies.php')->resolve();
     	$this->appendJs('jquery-migrate.min.js', $dm->getPath('jquery_migrate'), FALSE, FALSE);
     	$this->appendJs('pjAdminCore.js');
     	$this->appendCss('reset.css');
-    		
+
     	$this->appendJs('js/jquery-ui.custom.min.js', PJ_THIRD_PARTY_PATH . 'jquery_ui/');
     	$this->appendCss('css/smoothness/jquery-ui.min.css', PJ_THIRD_PARTY_PATH . 'jquery_ui/');
-    		
+
     	$this->appendCss('pj-all.css', PJ_FRAMEWORK_LIBS_PATH . 'pj/css/');
     	$this->appendCss('admin.css');
-				
+
     	if ($_GET['controller'] != 'pjInstaller')
 		{
 			$this->models['Option'] = pjOptionModel::factory();
@@ -154,7 +156,7 @@ class pjAppController extends pjController
 				$this->loadSetFields();
 			}
 		}
-		
+
 		if ($_GET['controller'] == 'pjInvoice')
 		{
 			$foreign_arr = array();
@@ -168,7 +170,7 @@ class pjAppController extends pjController
 			$this->set('foreign_arr', $foreign_arr);
 		}
     }
-    
+
     public function getForeignId()
 	{
 		if (isset($_SESSION[$this->defaultCalendarId]))
@@ -177,7 +179,7 @@ class pjAppController extends pjController
 		}
 		return false;
 	}
-	
+
     public static function getTokens($booking_arr, $option_arr)
     {
     	$na = __('lblNA', true, false);
@@ -198,9 +200,9 @@ class pjAppController extends pjController
     	$cc_exp_year = @$booking_arr['payment_method'] == 'creditcard' ? (!empty($booking_arr['cc_exp_year']) ? @$booking_arr['cc_exp_year'] : $na) : $na;
     	$cc_code = !empty($booking_arr['cc_code']) ? @$booking_arr['cc_code'] : $na;
     	$payment_method = !empty($booking_arr['payment_method']) ? @$booking_arr['payment_method'] : $na;
-    	
+
     	$total_price = number_format(@$booking_arr['amount'] + @$booking_arr['tax'], 2);
-    	
+
     	$search = array(
     		'{Name}', '{Email}', '{Phone}', '{Adults}', '{Children}',
     		'{Notes}', '{Address}', '{City}', '{Country}', '{State}',
@@ -218,13 +220,13 @@ class pjAppController extends pjController
 		);
 		return compact('search', 'replace');
     }
-    
+
 	public function setForeignId($calendar_id)
 	{
 		$_SESSION[$this->defaultCalendarId] = (int) $calendar_id;
 		return $this;
 	}
-	
+
     public static function setFields($locale)
     {
     	if(isset($_SESSION['lang_show_id']) && (int) $_SESSION['lang_show_id'] == 1)
@@ -276,13 +278,13 @@ class pjAppController extends pjController
 		$Services_JSON = new pjServices_JSON();
 		return $Services_JSON->decode($str);
 	}
-	
+
 	public static function jsonEncode($arr)
 	{
 		$Services_JSON = new pjServices_JSON();
 		return $Services_JSON->encode($arr);
 	}
-	
+
 	public static function jsonResponse($arr)
 	{
 		header("Content-Type: application/json; charset=utf-8");
@@ -299,27 +301,27 @@ class pjAppController extends pjController
 	{
 		return $this->getRoleId() == 3;
 	}
-	
+
 	public function isPriceReady()
 	{
 		return $this->isAdmin() || $this->isOwner();
 	}
-	
+
 	public function isPeriodReady()
 	{
 		return $this->isAdmin() || $this->isOwner();
 	}
-	
+
 	public function isInvoiceReady()
 	{
 		return $this->isAdmin() || $this->isEditor() || $this->isOwner();
 	}
-	
+
 	public function isCountryReady()
 	{
 		return $this->isAdmin();
 	}
-	
+
 	public function isOneAdminReady()
 	{
 		return $this->isAdmin();
@@ -329,11 +331,11 @@ class pjAppController extends pjController
 	{
 		return isset($_SESSION[$this->defaultLocale]) && (int) $_SESSION[$this->defaultLocale] > 0 ? (int) $_SESSION[$this->defaultLocale] : false;
 	}
-	
+
 	public function pjActionCheckInstall()
 	{
 		$this->setLayout('pjActionEmpty');
-		
+
 		$result = array('status' => 'OK', 'code' => 200, 'text' => 'Operation succeeded', 'info' => array());
 		$folders = array('app/web/upload');
 		foreach ($folders as $dir)
@@ -346,14 +348,14 @@ class pjAppController extends pjController
 				$result['info'][] = sprintf('Folder \'<span class="bold">%1$s</span>\' is not writable. You need to set write permissions (chmod 777) to directory located at \'<span class="bold">%1$s</span>\'', $dir);
 			}
 		}
-		
+
 		return $result;
 	}
-	
+
 	public function pjActionAfterInstall()
 	{
 		$this->setLayout('pjActionEmpty');
-		
+
 		$id = pjCalendarModel::factory()->set('user_id', 1)->insert()->getInsertId();
 		if ($id !== false && (int) $id > 0)
 		{
@@ -362,7 +364,7 @@ class pjAppController extends pjController
 				2 => array('name' => 'Kalender 1'),
 				3 => array('name' => 'Calendario 1')
 			), $id, 'pjCalendar');
-			
+
 			$pjOptionModel = pjOptionModel::factory();
 			$pjOptionModel->init($id);
 			$pjOptionModel->initConfirmation($id, null);
@@ -370,10 +372,10 @@ class pjAppController extends pjController
 			$data = $data = $pjOptionModel->reset()->getAllPairs($id);
 			pjUtil::pjActionGenerateImages($id, $data);
 		}
-		
+
 		return array('status' => 'OK', 'code' => 200, 'text' => 'Operation succeeded');
 	}
-	
+
 	public function notify($notification_id, $user_id=NULL, $params=array())
 	{
 		$map = array(
@@ -382,7 +384,7 @@ class pjAppController extends pjController
 			5 => array('o_email_reservation_cancelled_subject', 'o_email_reservation_cancelled', 'o_sms_reservation_cancelled'),
 			6 => array('o_email_reservation_cancelled_subject', 'o_email_reservation_cancelled', 'o_sms_reservation_cancelled')
 		);
-		
+
 		$pjUserNotificationModel = pjUserNotificationModel::factory()
 			->select('t1.type, t2.email, t2.phone')
 			->join('pjUser', "t2.id=t1.user_id", 'inner')
@@ -393,10 +395,10 @@ class pjAppController extends pjController
 			$pjUserNotificationModel->where('t1.user_id', $user_id);
 		}
 		$recipients = $pjUserNotificationModel->findAll()->getData();
-		
+
 		$pjEmail = new pjEmail();
 		$smsPlugin = (pjObject::getPlugin('pjSms') !== NULL);
-		
+
 		foreach ($recipients as $recipient)
 		{
 			switch ($recipient['type'])
@@ -416,7 +418,7 @@ class pjAppController extends pjController
 							->setSmtpPass($this->option_arr['o_smtp_pass'])
 						;
 					}
-					
+
 					$body = $this->option_arr[@$map[$notification_id][1]];
 					switch ($notification_id)
 					{
@@ -441,7 +443,7 @@ class pjAppController extends pjController
 								$body);
 							break;
 					}
-					
+
 					$pjEmail->setFrom($recipient['email'])
 						->setTo($recipient['email'])
 						->setSubject($this->option_arr[@$map[$notification_id][0]])
@@ -467,7 +469,7 @@ class pjAppController extends pjController
 			}
 		}
 	}
-	
+
 	protected function pjActionGenerateInvoice($reservation_id)
 	{
 		if (!isset($reservation_id) || (int) $reservation_id <= 0)
@@ -484,16 +486,16 @@ class pjAppController extends pjController
 			'Pending' => 'not_paid',
 			'Cancelled' => 'cancelled'
 		);
-		
+
 		$deposit = $this->option_arr['o_deposit_type'] == 'percent' ? ($arr['amount'] * $this->option_arr['o_deposit']) / 100 : $this->option_arr['o_deposit'];
-		
+
 		$response = $this->requestAction(
 			array(
 	    		'controller' => 'pjInvoice',
 	    		'action' => 'pjActionCreate',
 	    		'params' => array(
     				'key' => md5($this->option_arr['private_key'] . PJ_SALT),
-					
+
 					'uuid' => pjInvoiceModel::factory()->getInvoiceID(),
 					'order_id' => $arr['uuid'],
 					'foreign_id' => $arr['calendar_id'],
@@ -503,9 +505,9 @@ class pjAppController extends pjController
 	    			'payment_method' => $arr['payment_method'],
 					'status' => @$map[$arr['status']],
 					'subtotal' => $arr['amount'],
-					
+
 					'tax' => $arr['tax'],
-					
+
 					'total' => $arr['amount'] + $arr['tax'],
 					'paid_deposit' => $arr['deposit'],
 					'amount_due' => $arr['amount'] + $arr['tax'] + $arr['security'] - $arr['deposit'],
@@ -551,23 +553,23 @@ class pjAppController extends pjController
 	protected function pjActionCheckDt($date_from, $date_to, $calendar_id=NULL, $id=NULL, $backend=false)
 	{
 		$calendar_id = !empty($calendar_id) ? (int) $calendar_id : $this->getForeignId();
-		
+
 		if ($backend && $calendar_id != $this->getForeignId())
 		{
 			$option_arr = pjOptionModel::factory()->getPairs($calendar_id);
 		} else {
 			$option_arr = $this->option_arr;
 		}
-		
+
 		if ($option_arr['o_price_based_on'] == 'nights' && $date_from == $date_to)
 		{
 			return array('status' => 'ERR', 'code' => 100, 'text' => '');
 		}
-		
+
 		$pjReservationModel = pjReservationModel::factory();
-		
+
 		$info = $pjReservationModel
-			->prepare(sprintf("SELECT `date_from`, `date_to` 
+			->prepare(sprintf("SELECT `date_from`, `date_to`
 				FROM `%1\$s`
 				WHERE `calendar_id` = :calendar_id
 				%2\$s
@@ -587,14 +589,14 @@ class pjAppController extends pjController
 				'id' => $id
 			))
 			->getData();
-			
+
 		$morning = array();
 		$afternoon = array();
 		$av_arr = array();
 		$booked_arr = array();
 		$nights_mode = false;
 		if ($option_arr['o_price_based_on'] == 'nights')
-		{ 
+		{
 			$nights_mode = true;
 		}
 		if(isset($info) && count($info)  >0)
@@ -623,19 +625,19 @@ class pjAppController extends pjController
 			}
 		}
 		$s_from = strtotime($date_from);
-		$s_to = strtotime($date_to);	
+		$s_to = strtotime($date_to);
   		for($z = $s_from; $z <= $s_to; $z = strtotime('+1 day', $z))
 		{
-			if(isset($booked_arr[$z]) || isset($morning[$z]) || isset($afternoon[$z])) 
+			if(isset($booked_arr[$z]) || isset($morning[$z]) || isset($afternoon[$z]))
 			{
 				$booked_value = isset($booked_arr[$z]) ? $booked_arr[$z] : 0;
 				$monring_value = isset($morning[$z]) ? $morning[$z] : 0;
 				$afternoon_value = isset($afternoon[$z]) ? $afternoon[$z] : 0;
-				
+
 				$booked_value += min($monring_value,$afternoon_value);
 				$morning[$z] -= min($monring_value, $afternoon_value);
 				$afternoon[$z] -= min($monring_value, $afternoon_value);
-				
+
 				$av_arr[$z] = $booked_value;
 				if($morning[$z] >= $afternoon[$z])
 				{
@@ -654,7 +656,7 @@ class pjAppController extends pjController
 			}
 		}
 		$cnt = max($av_arr);
-		
+
 		if(empty($id))
 		{
 			if ($cnt < (int) $option_arr['o_bookings_per_day'])
@@ -673,7 +675,7 @@ class pjAppController extends pjController
 		}
 		return $result;
 	}
-	
+
 	static public function getFromEmail()
 	{
 		$arr = pjUserModel::factory()

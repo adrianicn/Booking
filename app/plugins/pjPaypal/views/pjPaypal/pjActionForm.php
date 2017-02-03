@@ -1,5 +1,6 @@
 <?php
-$url = PJ_TEST_MODE ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr';
+//$url = PJ_TEST_MODE ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr';
+$url = PJ_TEST_MODE ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.sandbox.paypal.com/cgi-bin/webscr';
 ?>
 <form action="<?php echo $url; ?>" method="post" style="display: inline" name="<?php echo $tpl['arr']['name']; ?>" id="<?php echo $tpl['arr']['id']; ?>" target="<?php echo $tpl['arr']['target']; ?>">
 	<input type="hidden" name="cmd" value="_xclick" />
@@ -11,7 +12,7 @@ $url = PJ_TEST_MODE ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https:/
 	<input type="hidden" name="no_shipping" value="1" />
 	<input type="hidden" name="no_note" value="1" />
 	<input type="hidden" name="currency_code" value="<?php echo $tpl['arr']['currency_code']; ?>" />
-    <input type="hidden" name="return" value="<?php echo $tpl['arr']['return']; ?>" />
+             <input type="hidden" name="return" value="<?php echo $tpl['arr']['return']; ?>" />
 	<input type="hidden" name="notify_url" value="<?php echo $tpl['arr']['notify_url']; ?>" />
 	<input type="hidden" name="lc" value="US" />
 	<input type="hidden" name="rm" value="2" />

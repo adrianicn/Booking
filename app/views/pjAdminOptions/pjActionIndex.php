@@ -17,7 +17,7 @@ if (isset($tpl['status']))
 	}
 	include PJ_VIEWS_PATH . 'pjLayouts/elements/calmenu.php';
 	include_once dirname(__FILE__) . '/elements/settings_menu.php';
-	if (isset($tpl['calendars']) && count($tpl['calendars']) > 1)
+	if (isset($tpl['calendars']) && count($tpl['calendars']) > 1 && $_SESSION["comprobar"] != 1)
 	{
 		?>
 		<div class="b5 overflow">
@@ -37,7 +37,7 @@ if (isset($tpl['status']))
 			</select>
 			<a class="pj-form-langbar-tip listing-tip" href="#" title="<?php echo nl2br(__('lblOptionCopyTip', true)); ?>"></a>
 		</div>
-		
+
 		<div id="dialogCopyOptions" style="display:none" title="<?php echo htmlspecialchars(__('lblOptionCopyTitle', true)); ?>"><?php __('lblOptionCopyDesc'); ?></div>
 		<?php
 	}

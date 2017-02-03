@@ -44,6 +44,7 @@ if (isset($tpl['status']))
 
 	<form action="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminCalendars&amp;action=pjActionCreate" method="post" id="frmCreateCalendar" class="form pj-form" autocomplete="off">
 		<input type="hidden" name="calendar_create" value="1" />
+		<input type="hidden" name="activo" value="1" />
 
 		<?php if ((int) $tpl['option_arr']['o_multi_lang'] === 1 && count($tpl['lp_arr']) > 1) : ?>
 		<div class="multilangb b10"></div>
@@ -51,6 +52,7 @@ if (isset($tpl['status']))
 
 		<div class="clear_both">
 		<input type="hidden" name="id_usuario_servicio" value=" <?php echo $_SESSION['usuario_servicio']; ?> " >
+			<?php if($_SESSION["comprobar"] != 1){ ?>
 			<p>
 				<label class="title"><?php __('lblUser'); ?></label>
 				<span class="inline_block">
@@ -67,6 +69,19 @@ if (isset($tpl['status']))
 					</select>
 				</span>
 			</p>
+			<?php }else{ ?>
+
+			<p style="visibility: hidden;">
+				<label class="title"><?php __('lblUser'); ?></label>
+				<span class="inline_block">
+					<select name="user_id" id="user_id" class="pj-form-field required"
+					data-msg-required="Usuario es Requerido" >
+						<option value="1">Administrator</option>
+					</select>
+				</span>
+			</p>
+
+			<?php }?>
 			<?php
 			foreach ($tpl['lp_arr'] as $v)
 			{
@@ -93,7 +108,7 @@ if (isset($tpl['status']))
 					maxlength="250"> -->
 				</span>
 			</p>
-			<label class="title" style="display: inline-table;"> Agregar Foto</label>
+			<!--<label class="title" style="display: inline-table;"> Agregar Foto</label>
 			<div class="image_upload_div" style="width: 50%;" >
 				<form action="upload.php" class="dropzone">
 			    	</form>
@@ -102,7 +117,7 @@ if (isset($tpl['status']))
 				<form action="http://localhost/Booking/index.php?controller=pjAdminCalendars&action=pjActionFotos" class="dropzone" enctype= multipart/form-data >
 				<input type="hidden" name="id_usuario_servicio" value=" <?php echo $_SESSION['usuario_servicio']; ?> " >
 			    	</form>
-			</div>
+			</div> -->
 
 			<p>
 

@@ -192,7 +192,132 @@ class pjAdminOptions extends pjAdmin
 			$this->appendJs('jquery.tipsy.js', PJ_THIRD_PARTY_PATH . 'tipsy/');
 			$this->appendCss('jquery.tipsy.css', PJ_THIRD_PARTY_PATH . 'tipsy/');
 			$this->appendJs('pjAdminOptions.js');
-		} else {
+		}
+		elseif ($this->isOwner())
+		{
+
+			if (!isset($_GET['tab']) || (int) $_GET['tab'] <= 0)
+			{
+
+				pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdminOptions1&tab=1");
+			}
+
+			if (isset($_GET['cid']))
+			{
+				$this->setForeignId($_GET['cid']);
+				pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdminOptions&action=pjActionIndex&tab=" . $_GET['tab']);
+			}
+
+			if (isset($_GET['tab']) && in_array((int) $_GET['tab'], array(5,6)))
+			{
+				$locale_arr = pjLocaleModel::factory()->select('t1.*, t2.file')
+					->join('pjLocaleLanguage', 't2.iso=t1.language_iso', 'left')
+					->where('t2.file IS NOT NULL')
+					->orderBy('t1.sort ASC')->findAll()->getData();
+
+				$lp_arr = array();
+				foreach ($locale_arr as $v)
+				{
+					$lp_arr[$v['id']."_"] = $v['file']; //Hack for jquery $.extend, to prevent (re)order of numeric keys in object
+				}
+				$this->set('lp_arr', $locale_arr);
+				$this->set('locale_str', pjAppController::jsonEncode($lp_arr));
+
+				$arr = array();
+				$arr['i18n'] = pjMultiLangModel::factory()->getMultiLang($this->getForeignId(), 'pjCalendar');
+				$this->set('arr', $arr);
+
+				$this->appendJs('jquery.multilang.js', PJ_FRAMEWORK_LIBS_PATH . 'pj/js/');
+				if ($_GET['tab'] == 6)
+				{
+					$this->appendJs('jquery.validate.min.js', PJ_THIRD_PARTY_PATH . 'validate/');
+				}
+			} elseif (isset($_GET['tab']) && in_array((int) $_GET['tab'], array(10))) {
+				$this->set('arr', pjLimitModel::factory()->where('t1.calendar_id', $this->getForeignId())->findAll()->getData());
+			} else {
+				$tab_id = isset($_GET['tab']) && (int) $_GET['tab'] > 0 ? (int) $_GET['tab'] : 1;
+				$arr = pjOptionModel::factory()
+					->where('foreign_id', $this->getForeignId())
+					->where('tab_id', $tab_id)
+					->orderBy('t1.order ASC')
+					->findAll()
+					->getData();
+				$this->set('arr', $arr);
+
+				$tmp = $this->models['Option']->reset()->where('foreign_id', $this->getForeignId())->findAll()->getData();
+				$o_arr = array();
+				foreach ($tmp as $item)
+				{
+					$o_arr[$item['key']] = $item;
+				}
+				$this->set('o_arr', $o_arr);
+
+				$this->appendJs('jquery.miniColors.min.js', PJ_THIRD_PARTY_PATH . 'mini_colors/');
+				$this->appendCss('jquery.miniColors.css', PJ_THIRD_PARTY_PATH . 'mini_colors/');
+
+				if ($tab_id == 1)
+				{
+					$idCalendario = $this->getForeignId();
+					//*****************************************************//
+					//  BUSCO EN LA BASE LAS IMAGENES DEL CALENDARIO     //
+					//*****************************************************//
+					$dbHost = 'localhost';
+					$dbUsername = 'root';
+					$dbPassword = '12345';
+					$dbName = 'igtrip';
+
+					$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+					if($mysqli->connect_errno){
+					 echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+					}
+
+					$sql = "SELECT id,filename,descripcion_fotografia FROM images WHERE id_auxiliar = $idCalendario AND estado_fotografia = 1 AND id_catalogo_fotografia = 10";
+					$result = $conn->query($sql);
+
+					if ($result->num_rows > 0) {
+						$infoFoto = array();
+					    	while($row = $result->fetch_assoc()) {
+					             	$infoFoto[] =  $row;
+					            }
+			    			$fotos_calendario = $infoFoto;
+			    			$contador_fotos_calendario = count($fotos_calendario);
+			    			$this->set('fotos_calendario', $fotos_calendario);
+						$this->set('contador_fotos_calendario', $contador_fotos_calendario);
+			    		}
+
+					$calendar_arr = pjCalendarModel::factory()->find($this->getForeignId())->getData();
+					if (!empty($calendar_arr))
+					{
+						$calendar_arr['i18n'] = pjMultiLangModel::factory()->getMultiLang($calendar_arr['id'], 'pjCalendar');
+						$this->set('calendar_arr', $calendar_arr);
+					}
+
+					if ((int) $this->option_arr['o_multi_lang'] === 1)
+					{
+						$locale_arr = pjLocaleModel::factory()->select('t1.*, t2.file')
+							->join('pjLocaleLanguage', 't2.iso=t1.language_iso', 'left')
+							->where('t2.file IS NOT NULL')
+							->orderBy('t1.sort ASC')->findAll()->getData();
+
+						$lp_arr = array();
+						foreach ($locale_arr as $v)
+						{
+							$lp_arr[$v['id']."_"] = $v['file']; //Hack for jquery $.extend, to prevent (re)order of numeric keys in object
+						}
+						$this->set('lp_arr', $locale_arr);
+						$this->set('locale_str', pjAppController::jsonEncode($lp_arr));
+
+						$this->appendJs('jquery.multilang.js', PJ_FRAMEWORK_LIBS_PATH . 'pj/js/');
+						$this->appendJs('index.php?controller=pjAdmin&action=pjActionMessages', PJ_INSTALL_URL, true);
+					}
+					$this->set('user_arr', pjUserModel::factory()->orderBy('t1.name ASC')->findAll()->getData());
+				}
+			}
+			$this->appendJs('jquery.tipsy.js', PJ_THIRD_PARTY_PATH . 'tipsy/');
+			$this->appendCss('jquery.tipsy.css', PJ_THIRD_PARTY_PATH . 'tipsy/');
+			$this->appendJs('pjAdminOptions.js');
+		}
+		else {
 			$this->set('status', 2);
 		}
 	}
@@ -237,7 +362,7 @@ class pjAdminOptions extends pjAdmin
 	{
 		$this->checkLogin();
 
-		if ($this->isAdmin())
+		if ($this->isAdmin() || $this->isOwner() )
 		{
 			if (isset($_POST['options_update']))
 			{
@@ -306,17 +431,59 @@ class pjAdminOptions extends pjAdmin
 					$pjLimitModel->commit();
 				} else {
 					$OptionModel = pjOptionModel::factory();
-					$OptionModel
+					/*$OptionModel
 						->where('foreign_id', $this->getForeignId())
 						->where('type', 'bool')
 						->where('tab_id', $_POST['tab'])
-						->modifyAll(array('value' => '1|0::0'));
+						->modifyAll(array('value' => '1|0::0'));*/
+					//*******************************************************************//
+					//     UPDATE DE LOS DATOS PREDETERMINADOS DEL CALENDARIO  //
+					//  		PAYPAL, AUTHORIZE, EMAIL, CURRENCY                  //
+					//*******************************************************************//
 
-					$uniform = array(
+					$pjOptionModel = pjOptionModel::factory();
+					$dataKey = ["o_allow_authorize","o_allow_bank","o_allow_cash","o_allow_creditcard",
+	                    				"o_allow_paypal","o_authorize_hash","o_authorize_key","o_authorize_mid",
+	                    				"o_authorize_tz", "o_bank_account","o_cancel_url","o_currency","o_paypal_address",
+	                    				"o_send_email","o_smtp_host","o_smtp_pass","o_smtp_port","o_smtp_user",
+	                    				"o_thankyou_page"];
+	    				$dataValue = ["1|0::1","1|0::0","1|0::0","1|0::0","1|0::1","SIMON","59C8zvj42qPZ66Ff",
+	    						"287qPpCha","-43200|-39600|-36000|-32400|-28800|-25200|-21600|-18000|-14400|-10800|-7200|-3600|0|3600|7200|10800|14400|18000|21600|25200|28800|32400|36000|39600|43200|46800::0","info",
+	    						"http://localhost/Booking/index.php?controller=pjAdmin&action=pjActionError",
+	    						"AED|AFN|ALL|AMD|ANG|AOA|ARS|AUD|AWG|AZN|BAM|BBD|BDT|BGN|BHD|BIF|BMD|BND|BOB|BOV|BRL|BSD|BTN|BWP|BYR|BZD|CAD|CDF|CHE|CHF|CHW|CLF|CLP|CNY|COP|COU|CRC|CUC|CUP|CVE|CZK|DJF|DKK|DOP|DZD|EEK|EGP|ERN|ETB|EUR|FJD|FKP|GBP|GEL|GHS|GIP|GMD|GNF|GTQ|GYD|HKD|HNL|HRK|HTG|HUF|IDR|ILS|INR|IQD|IRR|ISK|JMD|JOD|JPY|KES|KGS|KHR|KMF|KPW|KRW|KWD|KYD|KZT|LAK|LBP|LKR|LRD|LSL|LTL|LVL|LYD|MAD|MDL|MGA|MKD|MMK|MNT|MOP|MRO|MUR|MVR|MWK|MXN|MXV|MYR|MZN|NAD|NGN|NIO|NOK|NPR|NZD|OMR|PAB|PEN|PGK|PHP|PKR|PLN|PYG|QAR|RON|RSD|RUB|RWF|SAR|SBD|SCR|SDG|SEK|SGD|SHP|SLL|SOS|SRD|STD|SYP|SZL|THB|TJS|TMT|TND|TOP|TRY|TTD|TWD|TZS|UAH|UGX|USD|USN|USS|UYU|UZS|VEF|VND|VUV|WST|XAF|XAG|XAU|XBA|XBB|XBC|XBD|XCD|XDR|XFU|XOF|XPD|XPF|XPT|XTS|XXX|YER|ZAR|ZMK|ZWL::USD", "fabiorecibe@gmail.com",
+	    						"mail|smtp::smtp","smtp.gmail.com","iwannatrip123","587",
+	    						"iwannatriptest@gmail.com","http://localhost/Booking/index.php?controller=pjAdmin&action=pjActionConfirmacion"];
+	    				$dataVisible = ["0","0","0","0","0","0","0","0","0","0","0","1","0","0","0","0","0","0","0"];
+	    				$contador = count($dataVisible);
+
+	    				$dbHost = 'localhost';
+					$dbUsername = 'root';
+					$dbPassword = '12345';
+					$dbName = 'igtrip';
+
+					$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+					if($mysqli->connect_errno){
+					        echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+					}
+					$id = $this->getForeignId();
+	    				for($i = 0; $i < $contador; $i++){
+
+						$sql = "UPDATE booking_abcalendar_options
+	    					SET value = '$dataValue[$i]' , is_visible = '$dataVisible[$i]'
+	    					WHERE foreign_id = $id AND  `key` = '$dataKey[$i]'";
+
+	    					if ($conn->query($sql) === TRUE) {
+						    echo "Record updated successfully";
+						} else {
+						    echo "Error updating record: " . $conn->error;
+						}
+	    				}
+
+					/*$uniform = array(
 						'o_email_new_reservation_subject', 'o_email_new_reservation', 'o_email_reservation_cancelled_subject',
 						'o_email_reservation_cancelled', 'o_email_password_reminder_subject', 'o_email_password_reminder',
 						'o_sms_new_reservation', 'o_sms_reservation_cancelled'
-					);
+					);*/
 
 					foreach ($_POST as $key => $value)
 					{
@@ -342,12 +509,14 @@ class pjAdminOptions extends pjAdmin
 
 				if (isset($_POST['tab']) && $_POST['tab'] == 1)
 				{
+					$idForaneoCalendar = $this->getForeignId();
+
 					//***********************************************************//
 					//           ACTUALIZA LA INFORMACION DEL CALENDARIO              //
 					//***********************************************************//
-					if (isset($_POST['user_id']))
+					if (isset($idForaneoCalendar))
 					{
-						pjCalendarModel::factory()->set('id', $this->getForeignId())->modify(array('user_id' => $_POST['user_id']));
+						/*pjCalendarModel::factory()->set('id', $this->getForeignId())->modify(array('user_id' => $_POST['user_id']));*/
 						pjCalendarModel::factory()->set('id', $this->getForeignId())->modify(array('descripcion' => $_POST['descripcion']));
 					}
 					if (isset($_POST['i18n']))

@@ -4,6 +4,9 @@ if (!defined("ROOT_PATH"))
 	header("HTTP/1.1 403 Forbidden");
 	exit;
 }
+
+
+
 class pjAdmin extends pjAppController
 {
 
@@ -91,9 +94,9 @@ class pjAdmin extends pjAppController
 	public function pjActionIndex()
 	{
 		$this->checkLogin();
-		echo "<br>";
-		echo "Usuario Servicio Sesion: ".$_SESSION['usuario_servicio'] ;
-		echo "<br>";
+		//echo "Usuario Servicio Sesion: ".$_SESSION['usuario_servicio'] ;
+		$_SESSION['usuario_servicio'] ;
+
 		if($_SESSION['usuario_servicio'] == ""){
 			echo "salir del sistema";
 			$this->setLayout('pjActionSalir');
@@ -101,6 +104,7 @@ class pjAdmin extends pjAppController
 
 		if ($this->isAdmin() || $this->isEditor() || $this->isOwner())
 		{
+			$idUsuarioServio = trim($_SESSION['usuario_servicio']);
 			$pjCalendarModel = pjCalendarModel::factory();
 			$pjReservationModel = pjReservationModel::factory();
 			$pjUserModel = pjUserModel::factory();
@@ -109,18 +113,19 @@ class pjAdmin extends pjAppController
 				->select("t1.id, t1.c_name, t1.created, t1.date_from, t1.date_to, t1.status, t3.content AS `calendar_name`")
 				->join('pjCalendar', 't2.id=t1.calendar_id', 'inner')
 				->join('pjMultiLang', "t3.model='pjCalendar' AND t3.foreign_id=t1.calendar_id AND t3.field='name' AND t3.locale='".$this->getLocaleId()."'", 'left')
-				->limit(3)
 				->orderBy('t1.created DESC');
 			if ($this->isOwner())
 			{
-				$pjReservationModel->where('t2.user_id', $this->getUserId());
+				//$pjReservationModel->where('t2.user_id', $this->getUserId());
+				$pjReservationModel->where('t2.id_usuario_servicio',$idUsuarioServio);
 			}
 			$reservation_arr = $pjReservationModel->findAll()->getData();
+
 			$this->set('reservation_arr', $reservation_arr);
 
 			$user_arr = $pjUserModel
 				->select(sprintf("t1.id, t1.name, t1.email, t1.last_login,
-					(SELECT COUNT(*) FROM `%s` WHERE `user_id` = `t1`.`id` LIMIT 1) AS `calendars`",
+					(SELECT COUNT(*) FROM `%s` WHERE `id_usuario_servicio` = `t1`.`id` LIMIT 1) AS `calendars`",
 					$pjCalendarModel->getTable()))
 				->orderBy('calendars DESC')
 				->limit(4)->findAll()->getData();
@@ -147,6 +152,10 @@ class pjAdmin extends pjAppController
 			//)->exec(array('user_id' => $this->getUserId()))->getData();
 			)->exec(array('id_usuario_servicio' => $_SESSION['usuario_servicio'] ))->getData();
 
+			if($this->isOwner()){
+
+				$info_arr[0]['users'] = 1;
+			}
 			$this->set('info_arr', $info_arr);
 
 			//*****************************************************//
@@ -230,32 +239,92 @@ class pjAdmin extends pjAppController
 	                    	echo "se actualiza el consumido a true";
 
 	                    	//HAGO EL UPDATE DEL CONSUMIDO A TRUE
-	                    	$pjVerificarModel = pjVerificarModel::factory();
+	                    	/*$pjVerificarModel = pjVerificarModel::factory();
 	                    	$data = array();
 	    		$data['consumido'] = 1;
-	                    	$pjVerificarModel->reset()->setAttributes(array('id' => $idTablaVerificar))->modify($data);
+	                    	$pjVerificarModel->reset()->setAttributes(array('id' => $idTablaVerificar))->modify($data);*/
 
 	                    	 //****************************************************************//
 	                    	 //                       CODIGO PARA HACER EL LOGUEO                                  //
 	                    	//****************************************************************//
 	                    	$_POST['login_user'] = 1;
+
 	                    	$pjUserModel = pjUserModel::factory();
 	                    	$userGet = $pjUserModel->where('id', $idUsuarioLaravel)
 					          ->limit(1)
 					          ->findAll()
 					          ->getData();
 
-			echo "<br>";
-			echo "Email de Usuario: ". $userGet[0]['email'];
-			echo "<br>";
-			echo "Password de Usuario: ". $userGet[0]['password'];
-			echo "<br>";
 			print_r($userGet);
-			echo "<br>";
-	                    	$_POST['login_password'] = "AY6LN9QM" ;
-	                    	$_POST['login_email'] = "info@iwannatrip.com";
-	                    	//$_POST['login_password'] = "12345";
-	                    	//$_POST['login_email']  = "fabio@gmail.com";
+			if (empty($userGet)) {
+
+			//*****************************************************//
+			//        HAGO EL INSERT DEL USUARIO  LARAVEL        //
+			//*****************************************************//
+			$dbHost = 'localhost';
+			$dbUsername = 'root';
+			$dbPassword = '12345';
+			$dbName = 'igtrip';
+
+			$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+			if($mysqli->connect_errno){
+			     echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+			}
+
+			$sql = "SELECT * FROM users WHERE id = ".$idUsuarioLaravel."";
+			$conn->query($sql);
+			foreach ($conn->query($sql) as $row) {
+        			$nombreUsuario = $row['username'] ;
+        			$emailUsuario = $row['email'] ;
+        			}
+
+        			$data = array();
+        			$data['id'] = $idUsuarioLaravel;
+        			$data['role_id'] = 3;
+        			$data['name'] = $nombreUsuario;
+        			$data['email'] = $emailUsuario;
+        			$data['password'] = 12345;
+        			$data['is_active'] = 'T';
+			$data['ip'] = $_SERVER['REMOTE_ADDR'];
+			$data['status'] = "T";
+
+			$insertUser = pjUserModel::factory($data)->insert()->getInsertId();
+			//echo "resultado id";
+			//print_r($insertUser);
+
+			$pjUserModel = pjUserModel::factory();
+	                    		$userGet = $pjUserModel->where('id', $idUsuarioLaravel)
+					          ->limit(1)
+					          ->findAll()
+					          ->getData();
+				echo "<br>";
+				echo "Email de Usuario: ". $userGet[0]['email'];
+				echo "<br>";
+				echo "Password de Usuario: ". $userGet[0]['password'];
+				echo "<br>";
+
+			}else{
+				$pjUserModel = pjUserModel::factory();
+	                    		$userGet = $pjUserModel->where('id', $idUsuarioLaravel)
+					          ->limit(1)
+					          ->findAll()
+					          ->getData();
+				echo "<br>";
+				echo "Email de Usuario: ". $userGet[0]['email'];
+				echo "<br>";
+				echo "Password de Usuario: ". $userGet[0]['password'];
+				echo "<br>";
+
+			}
+
+			//ADMINISTRADOR
+			//$_POST['login_password'] = "AY6LN9QM" ;
+	                    	//$_POST['login_email'] = "info@iwannatrip.com";
+
+			//USUARIOSERVICIOCALENDARIO
+	                    	$_POST['login_password'] = $userGet[0]['password'];
+	                    	$_POST['login_email']  = $userGet[0]['email'];
+
 	                    	if (isset($_POST['login_user']))
 			{
 				if (!pjValidation::pjActionNotEmpty($_POST['login_email']) || !pjValidation::pjActionNotEmpty($_POST['login_password']) || !pjValidation::pjActionEmail($_POST['login_email']))
@@ -315,8 +384,9 @@ class pjAdmin extends pjAppController
 	    				$this->setForeignId($calendar[0]);
 	    			}
 
-	    			if ($this->isAdmin())
+	    			if ($this->isAdmin() ||  $this->isOwner())
 	    			{
+
 		    			pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionIndex");
 	    			}
 
@@ -325,10 +395,10 @@ class pjAdmin extends pjAppController
 		    			pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionIndex");
 	    			}
 
-				if ($this->isOwner())
+				/*if ($this->isOwner())
 	    			{
 		    			pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionIndex");
-	    			}
+	    			}*/
 				}
 			} else {
 				$this->appendJs('jquery.validate.min.js', PJ_THIRD_PARTY_PATH . 'validate/');
@@ -342,7 +412,220 @@ class pjAdmin extends pjAppController
 	                    }
 
 
-	            }else{
+	            }elseif(isset($_GET['verifyCalendar'])){
+
+                        echo "<br>";
+	                echo "Identificador: ".$_GET['verifyCalendar'];
+	                echo "<br>";
+
+	                $buscar = trim($_GET['verifyCalendar']);
+	                $arr = pjVerificarModel::factory()->where('uuid', $buscar)->findAll()->getData();
+	                    //print_r($arr);
+	                $data = array();
+	                echo "Id de la tabla: ".$data['id'] = $arr[0]['id'];
+	                echo "<br>";
+	                echo "UUID: ".$data['uuid'] = $arr[0]['uuid'];
+	                echo "<br>";
+                        echo "Id Usuario Servicio: ".$data['id_usuario_servicio'] = $arr[0]['id_usuario_servicio'];
+	                echo "<br>";
+	                echo "<br>";
+                        echo "Id Usuario: ".$data['id_usuario'] = $arr[0]['id_usuario'];
+	                echo "<br>";
+	                echo "Consumido: ".$data['consumido'] = $arr[0]['consumido'];
+	                echo "<br>";
+	                $idTablaVerificar = $data['id'];
+	                $usuarioServicio = $data['id_usuario_servicio'];
+	                $consumido = $data['consumido'];
+	                $idUsuarioLaravel = $data['id_usuario'] ;
+
+	                    if ($data['uuid'] != $_GET['verifyCalendar'] ){
+	                    	echo "no existe el parametro";
+	                    	$this->setLayout('pjActionSalir');
+
+	                    }else {
+
+	                    	if($consumido == 1){
+	                    	//echo "sale de la Pagina";
+	                    	//ME ENVIA A LA PAGINA DE ERROR
+	                    	$this->setLayout('pjActionSalir');
+
+	                    }else{
+
+	                    	echo "se hace el logueo en la pagina";
+	                    	echo "<br>";
+	                    	echo $_SESSION['usuario_servicio'] = $usuarioServicio;
+	                    	echo "<br>";
+	                    	echo "se actualiza el consumido a true";
+	                    	echo "<br>";
+	                    	echo "**********************************************";
+	                    	echo "<br>";
+	                    	echo "ID DEL CALENDARIO".$id_calendar = $_GET['calendar'];
+	                    	echo "<br>";
+
+	                    	//HAGO EL UPDATE DEL CONSUMIDO A TRUE
+	                    	/*$pjVerificarModel = pjVerificarModel::factory();
+	                    	$data = array();
+	    		$data['consumido'] = 1;
+	                    	$pjVerificarModel->reset()->setAttributes(array('id' => $idTablaVerificar))->modify($data);*/
+
+	                    	 //****************************************************************//
+	                    	 //                       CODIGO PARA HACER EL LOGUEO                                  //
+	                    	//****************************************************************//
+	                    	$_POST['login_user'] = 1;
+
+	                    	$pjUserModel = pjUserModel::factory();
+	                    	$userGet = $pjUserModel->where('id', $idUsuarioLaravel)
+					          ->limit(1)
+					          ->findAll()
+					          ->getData();
+
+			print_r($userGet);
+			if (empty($userGet)) {
+
+			//*****************************************************//
+			//        HAGO EL INSERT DEL USUARIO  LARAVEL        //
+			//*****************************************************//
+			$dbHost = 'localhost';
+			$dbUsername = 'root';
+			$dbPassword = '12345';
+			$dbName = 'igtrip';
+
+			$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+			if($mysqli->connect_errno){
+			     echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+			}
+
+			$sql = "SELECT * FROM users WHERE id = ".$idUsuarioLaravel."";
+			$conn->query($sql);
+			foreach ($conn->query($sql) as $row) {
+        			$nombreUsuario = $row['username'] ;
+        			$emailUsuario = $row['email'] ;
+        			}
+
+        			$data = array();
+        			$data['id'] = $idUsuarioLaravel;
+        			$data['role_id'] = 3;
+        			$data['name'] = $nombreUsuario;
+        			$data['email'] = $emailUsuario;
+        			$data['password'] = 12345;
+        			$data['is_active'] = 'T';
+			$data['ip'] = $_SERVER['REMOTE_ADDR'];
+			$data['status'] = "T";
+
+			$insertUser = pjUserModel::factory($data)->insert()->getInsertId();
+
+			$pjUserModel = pjUserModel::factory();
+	                    		$userGet = $pjUserModel->where('id', $idUsuarioLaravel)
+					          ->limit(1)
+					          ->findAll()
+					          ->getData();
+				echo "<br>";
+				echo "Email de Usuario: ". $userGet[0]['email'];
+				echo "<br>";
+				echo "Password de Usuario: ". $userGet[0]['password'];
+				echo "<br>";
+
+			}else{
+				$pjUserModel = pjUserModel::factory();
+	                    		$userGet = $pjUserModel->where('id', $idUsuarioLaravel)
+					          ->limit(1)
+					          ->findAll()
+					          ->getData();
+				echo "<br>";
+				echo "Email de Usuario: ". $userGet[0]['email'];
+				echo "<br>";
+				echo "Password de Usuario: ". $userGet[0]['password'];
+				echo "<br>";
+
+			}
+
+			//ADMINISTRADOR
+			//$_POST['login_password'] = "AY6LN9QM" ;
+	                    	//$_POST['login_email'] = "info@iwannatrip.com";
+
+			//USUARIOSERVICIOCALENDARIO
+	                	$_POST['login_password'] = $userGet[0]['password'];
+	                	$_POST['login_email']  = $userGet[0]['email'];
+
+	                if (isset($_POST['login_user']))
+			{
+				if (!pjValidation::pjActionNotEmpty($_POST['login_email']) || !pjValidation::pjActionNotEmpty($_POST['login_password']) || !pjValidation::pjActionEmail($_POST['login_email']))
+				{
+					pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionLogin&err=4");
+				}
+				$pjUserModel = pjUserModel::factory();
+
+				$user = $pjUserModel
+					->where('t1.email', $_POST['login_email'])
+					->where(sprintf("t1.password = AES_ENCRYPT('%s', '%s')", $pjUserModel->escapeString($_POST['login_password']), PJ_SALT))
+					->limit(1)
+					->findAll()
+					->getData();
+
+				if (count($user) != 1)
+				{
+					pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionLogin&err=1");
+				} else {
+					$user = $user[0];
+					unset($user['password']);
+
+					if (!in_array($user['role_id'], array(1,2,3)))
+					{
+						pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionLogin&err=2");
+					}
+
+					if ($user['role_id'] == 3 && $user['is_active'] == 'F')
+					{
+						pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionLogin&err=2");
+					}
+
+					if ($user['status'] != 'T')
+					{
+						pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionLogin&err=3");
+					}
+
+					$last_login = date("Y-m-d H:i:s");
+	    			$_SESSION[$this->defaultUser] = $user;
+
+	    			$data = array();
+	    			$data['last_login'] = $last_login;
+	    			//UPDATE PARA EL VERIFICAR EL ULTIMO LOGIN
+	    			$pjUserModel->reset()->setAttributes(array('id' => $user['id']))->modify($data);
+
+	    			//***************************************************************************//
+	    			//      QUERY PARA SELECCIONAR LOS CALENDARIOS POR USUARIO SERVICIO         //
+	    			//***************************************************************************//
+
+				$calendar = pjCalendarModel::factory()->where('t1.id_usuario_servicio', $usuarioServicio)
+	    			->limit(1)->findAll()->getDataPair(NULL, 'id');
+
+	    			if (count($calendar) === 1)
+	    			{
+	    				$this->setForeignId($calendar[0]);
+	    			}
+
+	    			if ($this->isOwner())
+	    			{
+	    				$_SESSION["comprobar"] = true;
+					pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdminCalendars&action=pjActionView&id=".$id_calendar);
+	    			}
+
+
+
+
+				}
+			} else {
+				$this->appendJs('jquery.validate.min.js', PJ_THIRD_PARTY_PATH . 'validate/');
+				$this->appendJs('pjAdmin.js');
+			}
+	                    	//****************************************************************//
+			//       FIN DEL CODIGO DE LOGUEO  PARA SETTING CALENDAR              //
+	                    	//****************************************************************//
+	                    }
+
+	                    }
+
+                    }else{
 	                    echo "no esta el parametro";
 	            	       //ME ENVIA A LA PAGINA DE ERROR
 	                    $this->setLayout('pjActionSalir');
@@ -351,10 +634,49 @@ class pjAdmin extends pjAppController
 
 	}
 
+	public function pjActionConfirmacion()
+	{
+
+		echo "Estado".$_GET['st'];
+		if(isset($_GET['st'])){
+			if($_GET['st'] == "Completed"){
+				if(isset($_GET['cm'])){
+			                    echo "<br>";
+			                    echo "Identificador: ".$_GET['cm'];
+			                    echo "<br>";
+
+			                     $pjReservationModel = pjReservationModel::factory();
+			                     $data = array();
+			    	        $data['status'] = "Confirmed";
+			                     $pjReservationModel->reset()->setAttributes(array('id' => $_GET['cm']))->modify($data);
+
+			                     echo "Ir a Pagina de Gracias por su reserva";
+			                     echo "<br>";
+			                     //$this->setLayout('pjActionAdmin');
+			                     //$this->setLayout('pjActionConfirmar');
+			                     pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionProfile&confirmacion");
+
+
+			                }
+		              }else{
+		              	echo "Ir a la PAgina de Error";
+		              }
+		 }
+	}
+
+	public function pjActionError()
+	{
+		echo "Action Error";
+	                die();
+	}
+
+
+
 	public function pjActionLogout()
 	{
 		if ($this->isLoged()){
         			unset($_SESSION[$this->defaultUser]);
+        			session_unset();
         		}
         		//ME LLEVA A LA PAGINA DE ADMINISTRACION DE LARAVEL
        		//pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionLogin");
@@ -370,6 +692,12 @@ class pjAdmin extends pjAppController
 
 	public function pjActionProfile()
 	{
+
+		if (isset($_GET['confirmacion']))
+		{
+			$this->setLayout('pjActionConfirmar');
+
+		}
 		if (isset($_POST['profile_update']))
 		{
 			$pjUserModel = pjUserModel::factory();

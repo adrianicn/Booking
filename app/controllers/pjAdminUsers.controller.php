@@ -9,7 +9,7 @@ class pjAdminUsers extends pjAdmin
 	public function pjActionCheckEmail()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged())
 		{
 			if (!isset($_GET['email']) || empty($_GET['email']))
@@ -26,11 +26,11 @@ class pjAdminUsers extends pjAdmin
 		}
 		exit;
 	}
-	
+
 	public function pjActionCloneUser()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged())
 		{
 			if (isset($_POST['record']) && count($_POST['record']) > 0)
@@ -55,11 +55,11 @@ class pjAdminUsers extends pjAdmin
 		}
 		exit;
 	}
-	
+
 	public function pjActionCreate()
 	{
 		$this->checkLogin();
-		
+
 		if ($this->isAdmin())
 		{
 			if (isset($_POST['user_create']))
@@ -75,7 +75,7 @@ class pjAdminUsers extends pjAdmin
 					{
 						pjMultiLangModel::factory()->saveMultiLang($_POST['i18n'], $id, 'pjUser');
 					}
-					
+
 					$pjUserNotification = pjUserNotificationModel::factory();
 					if (isset($_POST['notify_email']) && is_array($_POST['notify_email']) && count($_POST['notify_email']) > 0)
 					{
@@ -91,7 +91,7 @@ class pjAdminUsers extends pjAdmin
 						}
 						$pjUserNotification->commit();
 					}
-					
+
 					if (isset($_POST['notify_sms']) && is_array($_POST['notify_sms']) && count($_POST['notify_sms']) > 0)
 					{
 						$pjUserNotification->begin();
@@ -115,7 +115,7 @@ class pjAdminUsers extends pjAdmin
 					->join('pjLocaleLanguage', 't2.iso=t1.language_iso', 'left')
 					->where('t2.file IS NOT NULL')
 					->orderBy('t1.sort ASC')->findAll()->getData();
-						
+
 				$lp_arr = array();
 				foreach ($locale_arr as $v)
 				{
@@ -123,9 +123,9 @@ class pjAdminUsers extends pjAdmin
 				}
 				$this->set('lp_arr', $locale_arr);
 				$this->set('locale_str', pjAppController::jsonEncode($lp_arr));
-				
+
 				$this->set('role_arr', pjRoleModel::factory()->orderBy('t1.id ASC')->findAll()->getData());
-		
+
 				$this->appendJs('jquery.validate.min.js', PJ_THIRD_PARTY_PATH . 'validate/');
 				$this->appendJs('jquery.multilang.js', PJ_FRAMEWORK_LIBS_PATH . 'pj/js/');
 				$this->appendJs('jquery.tipsy.js', PJ_THIRD_PARTY_PATH . 'tipsy/');
@@ -138,11 +138,11 @@ class pjAdminUsers extends pjAdmin
 			$this->set('status', 2);
 		}
 	}
-	
+
 	public function pjActionDeleteUser()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged())
 		{
 			$forbidden = array(1, $this->getUserId());
@@ -160,11 +160,11 @@ class pjAdminUsers extends pjAdmin
 		}
 		exit;
 	}
-	
+
 	public function pjActionDeleteUserBulk()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged())
 		{
 			if (isset($_POST['record']) && !empty($_POST['record']))
@@ -189,7 +189,7 @@ class pjAdminUsers extends pjAdmin
 		}
 		exit;
 	}
-	
+
 	public function pjActionExportUser()
 	{
 		if (isset($_POST['record']) && is_array($_POST['record']))
@@ -204,11 +204,11 @@ class pjAdminUsers extends pjAdmin
 		}
 		exit;
 	}
-	
+
 	public function pjActionGetNotifications()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged())
 		{
 			if (isset($_GET['id']) && (int) $_GET['id'] > 0)
@@ -223,15 +223,15 @@ class pjAdminUsers extends pjAdmin
 			}
 		}
 	}
-	
+
 	public function pjActionGetUser()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged())
 		{
 			$pjUserModel = pjUserModel::factory();
-			
+
 			if (isset($_GET['q']) && !empty($_GET['q']))
 			{
 				$q = $pjUserModel->escapeString($_GET['q']);
@@ -244,7 +244,7 @@ class pjAdminUsers extends pjAdmin
 			{
 				$pjUserModel->where('t1.status', $_GET['status']);
 			}
-				
+
 			$column = 'name';
 			$direction = 'ASC';
 			if (isset($_GET['direction']) && isset($_GET['column']) && in_array(strtoupper($_GET['direction']), array('ASC', 'DESC')))
@@ -266,16 +266,16 @@ class pjAdminUsers extends pjAdmin
 			$data = $pjUserModel->select('t1.id, t1.email, t1.name, DATE(t1.created) AS created, t1.status, t1.is_active, t1.role_id, t2.role')
 				->join('pjRole', 't2.id=t1.role_id', 'left')
 				->orderBy("$column $direction")->limit($rowCount, $offset)->findAll()->getData();
-				
+
 			pjAppController::jsonResponse(compact('data', 'total', 'pages', 'page', 'rowCount', 'column', 'direction'));
 		}
 		exit;
 	}
-	
+
 	public function pjActionIndex()
 	{
 		$this->checkLogin();
-		
+
 		if ($this->isAdmin())
 		{
 			$this->appendJs('jquery.datagrid.js', PJ_FRAMEWORK_LIBS_PATH . 'pj/js/');
@@ -285,11 +285,11 @@ class pjAdminUsers extends pjAdmin
 			$this->set('status', 2);
 		}
 	}
-	
+
 	public function pjActionSaveUser()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged())
 		{
 			$pjUserModel = pjUserModel::factory();
@@ -302,11 +302,11 @@ class pjAdminUsers extends pjAdmin
 		}
 		exit;
 	}
-	
+
 	public function pjActionStatusUser()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged())
 		{
 			if (isset($_POST['record']) && !empty($_POST['record']))
@@ -320,11 +320,11 @@ class pjAdminUsers extends pjAdmin
 		}
 		exit;
 	}
-	
+
 	public function pjActionUpdate()
 	{
 		$this->checkLogin();
-		
+
 		if ($this->isAdmin())
 		{
 			if (isset($_POST['user_update']))
@@ -334,7 +334,7 @@ class pjAdminUsers extends pjAdmin
 				{
 					pjMultiLangModel::factory()->updateMultiLang($_POST['i18n'], $_POST['id'], 'pjUser');
 				}
-			
+
 				$pjUserNotification = pjUserNotificationModel::factory();
 				$pjUserNotification->where('user_id', $_POST['id'])->eraseAll();
 				if (isset($_POST['notify_email']) && is_array($_POST['notify_email']) && count($_POST['notify_email']) > 0)
@@ -351,7 +351,7 @@ class pjAdminUsers extends pjAdmin
 					}
 					$pjUserNotification->commit();
 				}
-				
+
 				if (isset($_POST['notify_sms']) && is_array($_POST['notify_sms']) && count($_POST['notify_sms']) > 0)
 				{
 					$pjUserNotification->begin();
@@ -366,9 +366,9 @@ class pjAdminUsers extends pjAdmin
 					}
 					$pjUserNotification->commit();
 				}
-				
+
 				pjUtil::redirect(PJ_INSTALL_URL . "index.php?controller=pjAdminUsers&action=pjActionIndex&err=AU01");
-				
+
 			} else {
 				$arr = pjUserModel::factory()->find($_GET['id'])->getData();
 				if (count($arr) === 0)
@@ -377,12 +377,12 @@ class pjAdminUsers extends pjAdmin
 				}
 				$arr['i18n'] = pjMultiLangModel::factory()->getMultiLang($arr['id'], 'pjUser');
 				$this->set('arr', $arr);
-				
+
 				$locale_arr = pjLocaleModel::factory()->select('t1.*, t2.file')
 					->join('pjLocaleLanguage', 't2.iso=t1.language_iso', 'left')
 					->where('t2.file IS NOT NULL')
 					->orderBy('t1.sort ASC')->findAll()->getData();
-				
+
 				$lp_arr = array();
 				foreach ($locale_arr as $v)
 				{
@@ -390,12 +390,12 @@ class pjAdminUsers extends pjAdmin
 				}
 				$this->set('lp_arr', $locale_arr);
 				$this->set('locale_str', pjAppController::jsonEncode($lp_arr));
-				
+
 				$this->set('role_arr', pjRoleModel::factory()->orderBy('t1.id ASC')->findAll()->getData());
 				$pjUserNotification = pjUserNotificationModel::factory();
 				$this->set('email_arr', $pjUserNotification->reset()->where('t1.user_id', $arr['id'])->where('t1.type', 'email')->findAll()->getDataPair('id', 'notification_id'));
 				$this->set('sms_arr', $pjUserNotification->reset()->where('t1.user_id', $arr['id'])->where('t1.type', 'sms')->findAll()->getDataPair('id', 'notification_id'));
-				
+
 				$this->appendJs('jquery.validate.min.js', PJ_THIRD_PARTY_PATH . 'validate/');
 				$this->appendJs('jquery.multilang.js', PJ_FRAMEWORK_LIBS_PATH . 'pj/js/');
 				$this->appendJs('jquery.tipsy.js', PJ_THIRD_PARTY_PATH . 'tipsy/');

@@ -3,9 +3,22 @@
 	<head>
 		<title>Principal</title>
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-		<!--<script src="http://localhost/Booking/app/web/js/dropzone.js"></script> -->
 		<script src="http://localhost/Booking/app/web/js/dropzone2.js"></script>
 		<link type="text/css" rel="stylesheet" href="http://localhost/Booking/app/web/css/dropzone2.css">
+		<link type="text/css" rel="stylesheet" href="http://localhost/Booking/app/web/css/imageAjax/owl.carousel.css">
+		<link type="text/css" rel="stylesheet" href="http://localhost/Booking/app/web/css/imageAjax/owl.theme.css">
+		<link type="text/css" rel="stylesheet" href="http://localhost/Booking/app/web/css/imageAjax/owl.transitions.css">
+		<link type="text/css" rel="stylesheet" href="http://localhost/Booking/app/web/css/imageAjax/prettify.css">
+		<!-- <link type="text/css" rel="stylesheet" href="http://localhost/Booking/app/web/css/imageAjax/responsive.css"> -->
+		<script src="http://localhost/Booking/app/web/js/Compartido.js"></script>
+		<script src="http://localhost/Booking/app/web/js/imageAjax/jquery-1.9.1.min.js"></script>
+		<script src="http://localhost/Booking/app/web/js/imageAjax/owl.carousel.js"></script>
+		<script src="http://localhost/Booking/app/web/js/imageAjax/bootstrap-transition.js"></script>
+		<script src="http://localhost/Booking/app/web/js/imageAjax/bootstrap-collapse.js"></script>
+		<script src="http://localhost/Booking/app/web/js/imageAjax/bootstrap-tab.js"></script>
+		<script src="http://localhost/Booking/app/web/js/imageAjax/prettify.js"></script>
+		<script src="http://localhost/Booking/app/web/js/imageAjax/application.js"></script>
+
 		<?php
 		foreach ($controller->getCss() as $css)
 		{
@@ -29,9 +42,10 @@
 					<span>v<?php echo PJ_SCRIPT_VERSION;?></span>
 
 			</div> -->
+			<br> <br> <br>
 			<div style="text-align: center;">
 
-					<h1 style="text-align: center;font-weight: bold;color: white;font-size: 2vw !important">
+					<h1 style="text-align: center;font-weight: bold;color: white;font-size: 2vw !important;">
 						Booking para: <?php echo $_SESSION['nombre_servicio']; ?> </h1>
 			</div>
 			</div>
@@ -56,5 +70,6 @@
 			   	<p>Copyright &copy; <?php echo date("Y"); ?> <a href="https://www.PHPJabbers.com" target="_blank">PHPJabbers.com</a></p>
 	       		 </div>
         		</div>
+
 	</body>
 </html>

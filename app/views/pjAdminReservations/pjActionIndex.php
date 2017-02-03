@@ -1,4 +1,5 @@
 <?php
+
 if (isset($tpl['status']))
 {
 	$status = __('status', true);
@@ -32,13 +33,13 @@ if (isset($tpl['status']))
 			<li class="ui-state-default ui-corner-top"><a href="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminReservations&amp;action=pjActionExport"><?php __('lblExport'); ?></a></li>
 		</ul>
 	</div>
-	
+
 	<div class="b10">
 		<form action="" method="get" class="float_left pj-form frm-filter">
 			<input type="text" name="q" class="pj-form-field pj-form-field-search w150" placeholder="<?php __('lblReservationPlaceholderSearch'); ?>" />
 			<button type="button" class="pj-button pj-button-detailed"><span class="pj-button-detailed-arrow"></span></button>
 		</form>
-		
+
 		<div class="float_right t5">
 			<a href="#" class="pj-button btn-today"><?php __('lblToday'); ?></a>
 			<a href="#" class="pj-button btn-all"><?php __('lblAll'); ?></a>
@@ -48,7 +49,7 @@ if (isset($tpl['status']))
 		</div>
 		<br class="clear_both" />
 	</div>
-	
+
 	<div class="pj-form-filter-advanced" style="display: none">
 		<span class="pj-menu-list-arrow"></span>
 		<form action="" method="get" class="form pj-form pj-form-search frm-filter-advanced">
@@ -130,7 +131,7 @@ if (isset($tpl['status']))
 			<br class="clear_both" />
 		</form>
 	</div>
-		
+
 	<div id="grid"></div>
 	<script type="text/javascript">
 	var pjGrid = pjGrid || {};

@@ -1,7 +1,10 @@
 <?php
+
 if (isset($tpl['status']))
 {
+
 	$status = __('status', true);
+
 	switch ($tpl['status'])
 	{
 		case 2:
@@ -18,8 +21,10 @@ if (isset($tpl['status']))
 	?>
 	<div class="ui-tabs ui-widget ui-widget-content ui-corner-all b10">
 		<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
-			<li class="ui-state-default ui-corner-top ui-tabs-active ui-state-active"><a href="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminCalendars&amp;action=pjActionIndex"><?php __('menuCalendars'); ?></a></li>
-			<li class="ui-state-default ui-corner-top"><a href="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminCalendars&amp;action=pjActionCreate"><?php __('lblAddCalendar'); ?></a></li>
+			<li class="ui-state-default ui-corner-top ui-tabs-active ui-state-active">
+			<a href="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminCalendars&amp;action=pjActionIndex"><?php __('menuCalendars'); ?></a></li>
+			<li class="ui-state-default ui-corner-top">
+			<a href="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminCalendars&amp;action=pjActionCreate"><?php __('lblAddCalendar'); ?></a></li>
 		</ul>
 	</div>
 
@@ -37,7 +42,9 @@ if (isset($tpl['status']))
 	<script type="text/javascript">
 	var pjGrid = pjGrid || {};
 	pjGrid.currentCalendarId = <?php echo $controller->getForeignId(); ?>;
+	console.log(pjGrid.currentCalendarId);
 	pjGrid.queryString = "";
+	console.log(pjGrid.queryString);
 	var myLabel = myLabel || {};
 	myLabel.prices = "<?php __('plugin_price_menu', false, true); ?>";
 	myLabel.settings = "<?php __('menuSettings'); ?>";
@@ -53,6 +60,8 @@ if (isset($tpl['status']))
 	myLabel.calendar = "<?php __('lblCalendarName'); ?>";
 	myLabel.deleteSelected = "<?php __('lblDeleteSelected'); ?>";
 	myLabel.deleteConfirmation = "<?php __('lblDeleteConfirmation'); ?>";
+	console.log(myLabel);
+	console.log(pjGrid.queryString);
 	</script>
 	<?php
 }
