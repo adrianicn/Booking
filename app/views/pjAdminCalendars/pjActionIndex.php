@@ -1,5 +1,4 @@
 <?php
-
 if (isset($tpl['status']))
 {
 
@@ -44,7 +43,6 @@ if (isset($tpl['status']))
 	pjGrid.currentCalendarId = <?php echo $controller->getForeignId(); ?>;
 	console.log(pjGrid.currentCalendarId);
 	pjGrid.queryString = "";
-	console.log(pjGrid.queryString);
 	var myLabel = myLabel || {};
 	myLabel.prices = "<?php __('plugin_price_menu', false, true); ?>";
 	myLabel.settings = "<?php __('menuSettings'); ?>";
@@ -54,14 +52,11 @@ if (isset($tpl['status']))
 	myLabel.viewReservations = "<?php __('lblViewReservations'); ?>";
 	myLabel.viewCalendar = "<?php __('lblViewCalendar'); ?>";
 	myLabel.more = "<?php __('lblMore'); ?>";
-	myLabel.descripcion = "Descripcion";
 	myLabel.user = "<?php __('lblUser'); ?>";
 	myLabel.id = "<?php __('lblID'); ?>";
 	myLabel.calendar = "<?php __('lblCalendarName'); ?>";
 	myLabel.deleteSelected = "<?php __('lblDeleteSelected'); ?>";
 	myLabel.deleteConfirmation = "<?php __('lblDeleteConfirmation'); ?>";
-	console.log(myLabel);
-	console.log(pjGrid.queryString);
 	</script>
 	<?php
 }

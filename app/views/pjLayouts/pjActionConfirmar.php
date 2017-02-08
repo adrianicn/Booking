@@ -14,9 +14,21 @@
 			echo '<script src="'.(isset($js['remote']) && $js['remote'] ? NULL : PJ_INSTALL_URL).$js['path'].$js['file'].'"></script>';
 		}
 		?>
+
+	<script language="JavaScript">
+		//javascript:window.history.forward(1);
+		//javascript:window.history.back(1);
+	</script>
+	<script language="JavaScript">
+		function nobackbutton(){
+			window.location.hash="no-back-button";
+	   		window.location.hash="Again-No-back-button" //chrome
+			window.onhashchange=function(){window.location.hash="no-back-button";}
+		}
+	</script>
 	</head>
 
-	<body>
+	<body onload="nobackbutton();">
 		<div id="container">
 			<div id="header">
 				<!--<div id="logo">
