@@ -445,15 +445,13 @@ class pjAdminOptions extends pjAdmin
 					$dataKey = ["o_allow_authorize","o_allow_bank","o_allow_cash","o_allow_creditcard",
 	                    				"o_allow_paypal","o_authorize_hash","o_authorize_key","o_authorize_mid",
 	                    				"o_authorize_tz", "o_bank_account","o_cancel_url","o_currency","o_paypal_address",
-	                    				"o_send_email","o_smtp_host","o_smtp_pass","o_smtp_port","o_smtp_user",
-	                    				"o_thankyou_page"];
-	    				$dataValue = ["1|0::1","1|0::0","1|0::0","1|0::0","1|0::1","SIMON","59C8zvj42qPZ66Ff",
+	                    				"o_send_email","o_smtp_host","o_smtp_pass","o_smtp_port","o_smtp_user"];
+	    				$dataValue = ["1|0::1","1|0::0","1|0::1","1|0::0","1|0::1","SIMON","59C8zvj42qPZ66Ff",
 	    						"287qPpCha","-43200|-39600|-36000|-32400|-28800|-25200|-21600|-18000|-14400|-10800|-7200|-3600|0|3600|7200|10800|14400|18000|21600|25200|28800|32400|36000|39600|43200|46800::0","info",
 	    						"http://localhost/Booking/index.php?controller=pjAdmin&action=pjActionError",
 	    						"AED|AFN|ALL|AMD|ANG|AOA|ARS|AUD|AWG|AZN|BAM|BBD|BDT|BGN|BHD|BIF|BMD|BND|BOB|BOV|BRL|BSD|BTN|BWP|BYR|BZD|CAD|CDF|CHE|CHF|CHW|CLF|CLP|CNY|COP|COU|CRC|CUC|CUP|CVE|CZK|DJF|DKK|DOP|DZD|EEK|EGP|ERN|ETB|EUR|FJD|FKP|GBP|GEL|GHS|GIP|GMD|GNF|GTQ|GYD|HKD|HNL|HRK|HTG|HUF|IDR|ILS|INR|IQD|IRR|ISK|JMD|JOD|JPY|KES|KGS|KHR|KMF|KPW|KRW|KWD|KYD|KZT|LAK|LBP|LKR|LRD|LSL|LTL|LVL|LYD|MAD|MDL|MGA|MKD|MMK|MNT|MOP|MRO|MUR|MVR|MWK|MXN|MXV|MYR|MZN|NAD|NGN|NIO|NOK|NPR|NZD|OMR|PAB|PEN|PGK|PHP|PKR|PLN|PYG|QAR|RON|RSD|RUB|RWF|SAR|SBD|SCR|SDG|SEK|SGD|SHP|SLL|SOS|SRD|STD|SYP|SZL|THB|TJS|TMT|TND|TOP|TRY|TTD|TWD|TZS|UAH|UGX|USD|USN|USS|UYU|UZS|VEF|VND|VUV|WST|XAF|XAG|XAU|XBA|XBB|XBC|XBD|XCD|XDR|XFU|XOF|XPD|XPF|XPT|XTS|XXX|YER|ZAR|ZMK|ZWL::USD", "iwannatrip1@gmail.com",
-	    						"mail|smtp::smtp","smtp.gmail.com","iwannatrip123","587",
-	    						"iwannatriptest@gmail.com","http://localhost/Booking/index.php?controller=pjAdmin&action=pjActionConfirmacion"];
-	    				$dataVisible = ["0","0","0","0","0","0","0","0","0","0","0","1","0","0","0","0","0","0","0"];
+	    						"mail|smtp::smtp","smtp.gmail.com","iwannatrip123","587"];
+	    				$dataVisible = ["0","0","0","0","0","0","0","0","0","0","0","1","0","0","0","0","0","0"];
 	    				$contador = count($dataVisible);
 
 	    				$dbHost = 'localhost';

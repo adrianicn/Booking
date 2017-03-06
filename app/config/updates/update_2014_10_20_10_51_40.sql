@@ -47,7 +47,7 @@ INSERT INTO `fields` VALUES (NULL, 'lblCalendarMessage', 'frontend', 'Calendar m
 
 SET @id := (SELECT LAST_INSERT_ID());
 
-INSERT INTO `multi_lang` VALUES (NULL, @id, 'pjField', '::LOCALE::', 'title', 'Click on available arrival date and then on departure date to make a reservation.', 'script');
+INSERT INTO `multi_lang` VALUES (NULL, @id, 'pjField', '::LOCALE::', 'title', '.', 'script');
 
 INSERT INTO `fields` VALUES (NULL, 'opt_o_background_nav_hover', 'backend', 'Options / Month Nav Hover Background', 'script', '2014-10-20 10:32:11');
 

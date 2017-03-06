@@ -25,10 +25,11 @@ $fingerprint    = AuthorizeNetSIM_Form::getFingerprint($x_login, $transaction_ke
 	<input type="hidden" name="x_show_form" value="payment_form" />
 	<input type="hidden" name="x_method" value="cc" />
 	<input type="hidden" name="x_receipt_link_method" value="LINK" />
-	<!--<input type="hidden" name="x_receipt_link_url" value="http://localhost/Booking/index.php?controller=pjAdmin&action=pjActionConfirmacion" /> -->
-             <input type="hidden" name="x_receipt_link_url" value="<?php echo $tpl['arr']['x_receipt_link_url']; ?>" />
+	<input type="hidden" name="x_receipt_link_url" value="<?php echo $tpl['arr']['x_receipt_link_url']; ?>" />
 	<input type="hidden" name="x_relay_response" value="TRUE" />
-	<input type="hidden" name="x_relay_url" value="<?php echo $tpl['arr']['x_relay_url']; ?>" />
+	<input type="hidden" name="x_relay_url" value="http://1b5c7b67.ngrok.io/Confirmacion/gracias.php" />
+	<!--<input type="hidden" name="x_relay_url" value="http://1674af00.ngrok.io/confirmacionAuthorize" />-->
+	<!-- <input type="hidden" name="x_relay_url" value="<?php echo $tpl['arr']['x_relay_url']; ?>" /> -->
 	<?php
 	if (isset($tpl['arr']['submit']))
 	{

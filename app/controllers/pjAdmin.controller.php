@@ -412,7 +412,9 @@ class pjAdmin extends pjAppController
 	                    }
 
 
-	            }elseif(isset($_GET['verifyCalendar'])){
+	            }
+
+                    elseif(isset($_GET['verifyCalendar'])){
 
                         echo "<br>";
 	                echo "Identificador: ".$_GET['verifyCalendar'];
@@ -625,9 +627,208 @@ class pjAdmin extends pjAppController
 
 	                    }
 
-                    }else{
-	                    echo "no esta el parametro";
-	            	       //ME ENVIA A LA PAGINA DE ERROR
+                    }
+                    elseif(isset($_GET["rk"])){
+                 //****************************************************************//
+                 //                       CODIGO PARA HACER EL LOGUEO                                 //
+               //****************************************************************//
+	             $_POST['login_user'] = 1;
+        		//ADMINISTRADOR
+		echo $_POST['login_password'] = "AY6LN9QM" ;
+	             echo $_POST['login_email'] = "info@iwannatrip.com";
+
+                        if (isset($_POST['login_user']))
+			{
+				if (!pjValidation::pjActionNotEmpty($_POST['login_email']) || !pjValidation::pjActionNotEmpty($_POST['login_password']) || !pjValidation::pjActionEmail($_POST['login_email']))
+				{
+					pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionLogin&err=4");
+				}
+				$pjUserModel = pjUserModel::factory();
+
+				$user = $pjUserModel
+					->where('t1.email', $_POST['login_email'])
+					->where(sprintf("t1.password = AES_ENCRYPT('%s', '%s')", $pjUserModel->escapeString($_POST['login_password']), PJ_SALT))
+					->limit(1)
+					->findAll()
+					->getData();
+
+				if (count($user) != 1)
+				{
+					pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionLogin&err=1");
+				}
+                                else {
+					$user = $user[0];
+					unset($user['password']);
+
+					if (!in_array($user['role_id'], array(1,2,3)))
+					{
+						pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionLogin&err=2");
+					}
+
+					if ($user['role_id'] == 3 && $user['is_active'] == 'F')
+					{
+						pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionLogin&err=2");
+					}
+
+					if ($user['status'] != 'T')
+					{
+						pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionLogin&err=3");
+					}
+
+				$last_login = date("Y-m-d H:i:s");
+	    			$_SESSION[$this->defaultUser] = $user;
+
+	    			$data = array();
+	    			$data['last_login'] = $last_login;
+	    			//UPDATE PARA EL VERIFICAR EL ULTIMO LOGIN
+	    			$pjUserModel->reset()->setAttributes(array('id' => $user['id']))->modify($data);
+
+                                if ($this->isAdmin() ||  $this->isOwner()){
+                                	$dbHost = 'localhost';
+			$dbUsername = 'root';
+			$dbPassword = '12345';
+			$dbName = 'igtrip';
+
+			$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+			if($mysqli->connect_errno){
+			     echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+			}
+
+			  //***********************************************************************//
+                                	 //  VERIFICO QUE EL MD5 ENVIADO POR PAYPAL ESTE EN LA TABLA TOKENS     //
+			 //        SI ESTA EN LA TABLA VERIFICAR QUE CONSUMIDO NO SEA TRUE            //
+			//        		DE LO CONTRARIO MARCO CONSUMIDO EN TRUE                      //
+                                        //***********************************************************************//
+
+                        $sqlMD5 = "SELECT id,consumido FROM tokens WHERE uuid = '".$_GET["rk"]."' ";
+			$conn->query($sqlMD5);
+
+			$id = array();
+			$consumido = array();
+			foreach ($conn->query($sqlMD5) as $row1) {
+        				$id[] = $row1['id'];
+        				$consumido[] = $row1['consumido'];
+        			}
+	        		 $id = implode(" ", $id);
+	        		 $consumido = implode(" ", $consumido);
+	        		 $id = trim($id);
+	        		 $consumido = trim($consumido);
+
+        			if($consumido == 0){
+	        			$sqlUpdate = "UPDATE tokens SET consumido = true
+		    		WHERE id = $id";
+				$conn->query($sqlUpdate);
+			}else{
+  			$this->setLayout('pjActionSalir');
+        			//pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionProfile&confirmacion");
+                        		}
+                       //***********************************************************************//
+                       // 		CODIGO PARA COMPROBAR LA FORMA DE PAGO                      //
+                       //***********************************************************************//
+
+                       //ENTRA A PAYPAL
+                       if(isset($_POST["custom"])){
+
+                       $numeroReservacion = trim($_POST["custom"]);
+                       $estadoPago = trim($_POST["payment_status"]);
+                        //if($estadoPago === "Completed"){
+			//OBTENGO EL  ID DEL CALENDARIO
+			$sql1 = "SELECT calendar_id FROM booking_abcalendar_reservations WHERE id = ".$numeroReservacion."";
+			$conn->query($sql1);
+			$idCalendario = "";
+			foreach ($conn->query($sql1) as $row1) {
+        				$idCalendario = $row1['calendar_id'];
+        			}
+
+        			//OBTENGO EL  ID DEL USUARIO SERVICIO
+			$sql2 = "SELECT id_usuario_servicio FROM booking_abcalendar_calendars WHERE id = ".$idCalendario."";
+			$conn->query($sql2);
+			$idUsuServ = "";
+			foreach ($conn->query($sql2) as $row2) {
+        				$idUsuServ = $row2['calendar_id'];
+        			}
+
+        			//ACTUALIZO EL ESTADO DE LA RESERVA
+        			$pjReservaModel = pjReservationModel::factory();
+	                    	$data = array();
+                                       $data['status'] = "Confirmed";
+	                    	$pjReservaModel->reset()->setAttributes(array('id' => $numeroReservacion))->modify($data);
+
+	                    	//*******************************************************//
+	                    	//          HAGO EL INSERT EN LA TABLA PAGO PAYPAL              //
+	                    	//*******************************************************//
+	    	              $conn->query("INSERT INTO pago_paypals (id_reserva, nombreCalendario, estadoPago, fechaPago, montoPago,consumido, created_at, updated_at)
+				VALUES(".$_POST['custom'].",'".$_POST['item_name']."', '".$_POST['payment_status']."','".$_POST['payment_date']."', '".$_POST['payment_gross']."',false ,'".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."')");
+		             pjUtil::redirect("http://localhost:8000/confirmacionPP/".$numeroReservacion);
+	                          //pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionProfile&confirmacion");
+
+                                /*}else{
+                                        pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionProfile&verificacionPagoPaypal");
+                                }*/
+
+                       //ENTRA A AUTHORIZE
+                       }elseif(isset($_POST["x_invoice_num"])){
+
+                         $numeroReservacion = trim($_POST["x_invoice_num"]);
+                         $estadoPago = trim($_POST["x_response_reason_text"]);
+
+                        //if($estadoPago === "This transaction has been approved."){
+			//OBTENGO EL  ID DEL CALENDARIO
+			$sql1 = "SELECT calendar_id FROM booking_abcalendar_reservations WHERE id = ".$numeroReservacion."";
+			$conn->query($sql1);
+			$idCalendario = "";
+			foreach ($conn->query($sql1) as $row1) {
+        				$idCalendario = $row1['calendar_id'];
+        			}
+
+        			//ACTUALIZO EL ESTADO DE LA RESERVA
+        			$pjReservaModel = pjReservationModel::factory();
+	                    	$data = array();
+                                       $data['status'] = "Confirmed";
+	                    	$pjReservaModel->reset()->setAttributes(array('id' => $numeroReservacion))->modify($data);
+
+	                    	$sqlCash = "SELECT content FROM booking_abcalendar_multi_lang WHERE model = 'pjCalendar' AND  field = 'name' AND foreign_id =". $idCalendario;
+					$cash = $conn->query($sqlCash);
+					$nombreCalendario = "";
+					foreach ($cash as $row2) {
+        						$nombreCalendario = $row2['content'];
+        					}
+
+
+	                    	//*******************************************************//
+	                    	//          HAGO EL INSERT EN LA TABLA PAGO PAYPAL              //
+	                    	//*******************************************************//
+	    	              $conn->query("INSERT INTO pago_authorizes (id_reserva, nombreCalendario, estadoPago, fechaPago, montoPago,consumido, created_at, updated_at)
+				VALUES(".$numeroReservacion.",'".$nombreCalendario."', '".$estadoPago."','".date("Y-m-d H:i:s")."', '".$_POST['x_amount']."',false ,'".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."')");
+
+	                         pjUtil::redirect("http://localhost:8000/confirmacionTarjetaCredito/".$numeroReservacion);
+
+                                /*}else{
+                                        pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionProfile&verificacionPagoAuthorize");
+                                }*/
+
+                        }
+
+	    		}
+
+
+
+
+		}
+	        }else {
+				$this->appendJs('jquery.validate.min.js', PJ_THIRD_PARTY_PATH . 'validate/');
+				$this->appendJs('pjAdmin.js');
+		}
+
+                                      	//****************************************************************//
+			//       FIN DEL CODIGO DE LOGUEO  PARA SETTING CALENDAR              //
+	                    	//****************************************************************//
+
+
+
+                    }
+                    else{
+	                    //ME ENVIA A LA PAGINA DE ERROR
 	                    $this->setLayout('pjActionSalir');
 
 	            }
@@ -637,7 +838,30 @@ class pjAdmin extends pjAppController
 	public function pjActionConfirmacion()
 	{
 
-		echo "Estado".$_GET['st'];
+
+		 //********************************************************//
+		//                                Para Authorize                                          //
+		//********************************************************//
+		if(isset($_GET["auth"])){
+			$authorize = $_GET["auth"];
+		           $results = print_r($authorize, true);
+		           $file = "/var/www/html/pruebaFacturas.txt";
+			$open = fopen($file,"a");
+			if ( $open ) {
+			    fwrite($open,$results);
+			    fclose($open);
+			}
+			pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionProfile&confirmacion");
+			/*$pjReservationModel = pjReservationModel::factory();
+			$data = array();
+			$data['status'] = "Confirmed";
+			$pjReservationModel->reset()->setAttributes(array('id' => $_GET["auth"]))->modify($data);
+			pjUtil::redirect($_SERVER['PHP_SELF'] . "?controller=pjAdmin&action=pjActionProfile&confirmacion");*/
+		}
+
+                //********************************************************//
+		//                                Para Paypal                                               //
+		//********************************************************//
 		if(isset($_GET['st'])){
 			if($_GET['st'] == "Completed"){
 				if(isset($_GET['cm'])){
@@ -696,8 +920,28 @@ class pjAdmin extends pjAppController
 		if (isset($_GET['confirmacion']))
 		{
 			$this->setLayout('pjActionConfirmar');
-
 		}
+
+                if (isset($_GET['confirmacionAuthorize']))
+		{
+			$this->setLayout('pjActionConfirmarAuthorize');
+		}
+
+                 if (isset($_GET['verificacionPago']))
+		{
+			$this->setLayout('pjActionError');
+		}
+
+               if (isset($_GET['verificacionPagoPaypal']))
+		{
+			$this->setLayout('pjActionErrorPaypal');
+		}
+
+                if (isset($_GET['verificacionPagoAuthorize']))
+		{
+			$this->setLayout('pjActionErrorAuthorize');
+		}
+
 		if (isset($_POST['profile_update']))
 		{
 			$pjUserModel = pjUserModel::factory();
@@ -745,3 +989,5 @@ class pjAdmin extends pjAppController
 	}
 }
 ?>
+
+

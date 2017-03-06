@@ -2,6 +2,7 @@
 //$url = PJ_TEST_MODE ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr';
 $url = PJ_TEST_MODE ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.sandbox.paypal.com/cgi-bin/webscr';
 ?>
+
 <form action="<?php echo $url; ?>" method="post" style="display: inline" name="<?php echo $tpl['arr']['name']; ?>" id="<?php echo $tpl['arr']['id']; ?>" target="<?php echo $tpl['arr']['target']; ?>">
 	<input type="hidden" name="cmd" value="_xclick" />
 	<input type="hidden" name="business" value="<?php echo $tpl['arr']['business']; ?>" />

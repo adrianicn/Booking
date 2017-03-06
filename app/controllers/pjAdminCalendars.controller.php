@@ -20,6 +20,16 @@ class pjAdminCalendars extends pjAdmin
 
 				if ($id !== false && (int) $id > 0)
 				{
+					$dbHost = 'localhost';
+					$dbUsername = 'root';
+					$dbPassword = '12345';
+					$dbName = 'igtrip';
+
+					$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+					if($mysqli->connect_errno){
+					        echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+					}
+
 					$locale_arr = pjLocaleModel::factory()->select('t1.*, t2.file')
 						->join('pjLocaleLanguage', 't2.iso=t1.language_iso', 'left')
 						->where('t2.file IS NOT NULL')
@@ -36,36 +46,48 @@ class pjAdminCalendars extends pjAdmin
 					$data = $this->models['Option']->reset()->getAllPairs($id);
 					pjUtil::pjActionGenerateImages($id, $data);
 
+					//************************************************************************//
+					//          SELECT Y UPDATE AL SEACHENGINE PARA EL; USUARIO SERVICIO          //
+					//************************************************************************//
+					 $searchEngine = "SELECT search FROM searchengine WHERE id_usuario_servicio = '".$_POST["id_usuario_servicio"]."' ";
+					$conn->query($sqlMD5);
+
+					$search = "";
+					foreach ($conn->query($searchEngine) as $row1) {
+		        				$search = $row1['search'];
+		        			}
+		        			//$_POST['i18n'][1]['name'];
+					$_POST['i18n'][2]['name'];
+		        			$nombreCalendario = $_POST['i18n'][2]['name'];
+		        			$descripcion = $_POST['descripcion'];
+		        			$search = $search." ".$nombreCalendario." ".$descripcion;
+		        			$updateSearchEngine = "UPDATE searchengine SET search = '$search'
+	    					WHERE id_usuario_servicio = '".$_POST["id_usuario_servicio"]."' ";
+
+	    				$conn->query($updateSearchEngine);
+
 					//*******************************************************************//
 					//     UPDATE DE LOS DATOS PREDETERMINADOS DEL CALENDARIO  //
 					//  		PAYPAL, AUTHORIZE, EMAIL, CURRENCY                  //
 					//*******************************************************************//
 
 					$pjOptionModel = pjOptionModel::factory();
-
+					$ramdomKey = md5(uniqid(rand(1,6)));
+					$url_Paypal = "http://localhost/Booking/index.php?controller=pjAdmin&action=pjActionLogin&rk=".$ramdomKey;
 	                    			$dataKey = ["o_allow_authorize","o_allow_bank","o_allow_cash","o_allow_creditcard",
 	                    				"o_allow_paypal","o_authorize_hash","o_authorize_key","o_authorize_mid",
 	                    				"o_authorize_tz", "o_bank_account","o_cancel_url","o_currency","o_paypal_address",
 	                    				"o_send_email","o_smtp_host","o_smtp_pass","o_smtp_port","o_smtp_user",
 	                    				"o_thankyou_page"];
-	    				$dataValue = ["1|0::1","1|0::0","1|0::0","1|0::0","1|0::1","SIMON","59C8zvj42qPZ66Ff",
+	    				$dataValue = ["1|0::1","1|0::0","1|0::1","1|0::0","1|0::1","SIMON","59C8zvj42qPZ66Ff",
 	    						"287qPpCha","-43200|-39600|-36000|-32400|-28800|-25200|-21600|-18000|-14400|-10800|-7200|-3600|0|3600|7200|10800|14400|18000|21600|25200|28800|32400|36000|39600|43200|46800::0","info",
 	    						"http://localhost/Booking/index.php?controller=pjAdmin&action=pjActionError",
 	    						"AED|AFN|ALL|AMD|ANG|AOA|ARS|AUD|AWG|AZN|BAM|BBD|BDT|BGN|BHD|BIF|BMD|BND|BOB|BOV|BRL|BSD|BTN|BWP|BYR|BZD|CAD|CDF|CHE|CHF|CHW|CLF|CLP|CNY|COP|COU|CRC|CUC|CUP|CVE|CZK|DJF|DKK|DOP|DZD|EEK|EGP|ERN|ETB|EUR|FJD|FKP|GBP|GEL|GHS|GIP|GMD|GNF|GTQ|GYD|HKD|HNL|HRK|HTG|HUF|IDR|ILS|INR|IQD|IRR|ISK|JMD|JOD|JPY|KES|KGS|KHR|KMF|KPW|KRW|KWD|KYD|KZT|LAK|LBP|LKR|LRD|LSL|LTL|LVL|LYD|MAD|MDL|MGA|MKD|MMK|MNT|MOP|MRO|MUR|MVR|MWK|MXN|MXV|MYR|MZN|NAD|NGN|NIO|NOK|NPR|NZD|OMR|PAB|PEN|PGK|PHP|PKR|PLN|PYG|QAR|RON|RSD|RUB|RWF|SAR|SBD|SCR|SDG|SEK|SGD|SHP|SLL|SOS|SRD|STD|SYP|SZL|THB|TJS|TMT|TND|TOP|TRY|TTD|TWD|TZS|UAH|UGX|USD|USN|USS|UYU|UZS|VEF|VND|VUV|WST|XAF|XAG|XAU|XBA|XBB|XBC|XBD|XCD|XDR|XFU|XOF|XPD|XPF|XPT|XTS|XXX|YER|ZAR|ZMK|ZWL::USD", "iwannatrip1@gmail.com",
 	    						"mail|smtp::smtp","smtp.gmail.com","iwannatrip123","587",
-	    						"iwannatriptest@gmail.com","http://localhost/Booking/index.php?controller=pjAdmin&action=pjActionConfirmacion"];
+	    						"iwannatriptest@gmail.com",$url_Paypal];
+
 	    				$dataVisible = ["0","0","0","0","0","0","0","0","0","0","0","1","0","0","0","0","0","0","0"];
 	    				$contador = count($dataVisible);
-
-	    				$dbHost = 'localhost';
-					$dbUsername = 'root';
-					$dbPassword = '12345';
-					$dbName = 'igtrip';
-
-					$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
-					if($mysqli->connect_errno){
-					        echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
-					}
 
 	    				for($i = 0; $i < $contador; $i++){
 

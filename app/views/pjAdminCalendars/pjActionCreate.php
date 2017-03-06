@@ -102,10 +102,7 @@ if (isset($tpl['status']))
 				<label class="title"> Descripcion</label>
 				<span class="inline_block">
 					<textarea name="descripcion" id="descripcion" style="resize: none;" rows="4" cols="43" maxlength="250" class="pj-form-field required"
-					data-msg-required="Descripcion es Requerido" placeholder="Describe yourself here...">
-					</textarea>
-					<!--<input type="text" name="descripcion" class="pj-form-field required" data-msg-required="Descripcion es Requerido" style="width: 300px;height:50px;"
-					maxlength="250"> -->
+					data-msg-required="Descripcion es Requerido" placeholder="Descripcion del Calendario"></textarea>
 				</span>
 			</p>
 			<!--<label class="title" style="display: inline-table;"> Agregar Foto</label>

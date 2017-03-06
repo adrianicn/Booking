@@ -7,28 +7,28 @@ if (!defined("ROOT_PATH"))
 class pjFront extends pjAppController
 {
 	public $defaultCaptcha = 'StivaSoftCaptcha';
-	
+
 	public $defaultLocale = 'front_locale_id';
-	
+
 	public $defaultCalendar = 'ABCalendar';
-	
+
 	public function __construct()
 	{
 		$this->setLayout('pjActionFront');
-		
+
 		self::allowCORS();
 	}
-	
+
 	public function afterFilter()
 	{
 		$locale_arr = pjLocaleModel::factory()->select('t1.*, t2.file, t2.title')
 			->join('pjLocaleLanguage', 't2.iso=t1.language_iso', 'left')
 			->where('t2.file IS NOT NULL')
 			->orderBy('t1.sort ASC')->findAll()->getData();
-		
+
 		$this->set('locale_arr', $locale_arr);
 	}
-	
+
 	public function beforeFilter()
 	{
 		if (isset($_GET['cid']) && (int) $_GET['cid'] > 0)
@@ -38,14 +38,14 @@ class pjFront extends pjAppController
 			$this->set('option_arr', $this->option_arr);
 			$this->setTime();
 		}
-		
+
 		if ((isset($_GET['cid']) && (int) $_GET['cid'] > 0) || (in_array($_GET['action'], array('pjActionGetAvailability'))))
 		{
 			if (isset($_GET['locale']) && (int) $_GET['locale'] > 0)
 			{
 				$this->pjActionSetLocale($_GET['locale']);
 			}
-			
+
 			if ($this->pjActionGetLocale() === FALSE)
 			{
 				$locale_arr = pjLocaleModel::factory()->where('is_default', 1)->limit(1)->findAll()->getData();
@@ -60,7 +60,7 @@ class pjFront extends pjAppController
 			}
 		}
 	}
-	
+
 	public function beforeRender()
 	{
 		if (isset($_GET['iframe']))
@@ -68,7 +68,7 @@ class pjFront extends pjAppController
 			$this->setLayout('pjActionIframe');
 		}
 	}
-	
+
 	public function pjActionLoad()
 	{
 		header("Content-Type: text/javascript; charset=utf-8");
@@ -82,19 +82,19 @@ class pjFront extends pjAppController
 		->where('t1.calendar_id', $_GET['cid'])
 		->findAll()
 		->getData();
-			
+
 		foreach ($limit_arr as $k => $limit)
 		{
 			$limit_arr[$k] = array_map("intval", $limit);
 		}
-	
+
 		$this->set('limit_arr', $limit_arr);
 	}
-	
+
 	public function pjActionLoadCalendar()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR())
 		{
 			$limit_arr = pjLimitModel::factory()
@@ -102,21 +102,21 @@ class pjFront extends pjAppController
 			->where('t1.calendar_id', $_GET['cid'])
 			->findAll()
 			->getData();
-	
+
 			foreach ($limit_arr as $k => $limit)
 			{
 				$limit_arr[$k] = array_map("intval", $limit);
 			}
-				
+
 			$this->set('limit_arr', $limit_arr);
 		}
 	}
-	
+
 	public function pjActionLoadAvail()
 	{
 		$this->setAjax(true);
 	}
-	
+
 	public function pjActionLoadAvailability()
 	{
 		header("Content-Type: text/javascript; charset=utf-8");
@@ -134,18 +134,18 @@ class pjFront extends pjAppController
 			->findAll()
 			->limit(1)
 			->getDataIndex(0);
-	
+
 			if ($arr !== FALSE && isset($arr['o_timezone']))
 			{
 				pjFront::pjActionSetTime($arr['o_timezone']);
 			}
 		}
 	}
-	
+
 	public function pjActionCancel()
 	{
 		$this->setLayout('pjActionIframe');
-		
+
 		if (isset($_GET['id']) && (int) $_GET['id'] > 0 && isset($_GET['cid']) && (int) $_GET['cid'] > 0 &&
 			isset($_GET['hash']) && !empty($_GET['hash']) && $_GET['hash'] == sha1($_GET['id'] . PJ_SALT))
 		{
@@ -163,7 +163,7 @@ class pjFront extends pjAppController
 				->limit(1)
 				->findAll()
 				->getData();
-				
+
 			if (!empty($arr))
 			{
 				$arr = $arr[0];
@@ -176,7 +176,7 @@ class pjFront extends pjAppController
 					$err = '&err=AR13';
 					$this->notify(5, NULL, $arr);
 					$this->notify(6, $arr['user_id'], $arr);
-					
+
 					if (!empty($this->option_arr['o_cancel_url']) && preg_match('/http(s)?:\/\//', $this->option_arr['o_cancel_url']))
 					{
 						pjUtil::redirect($this->option_arr['o_cancel_url']);
@@ -184,7 +184,7 @@ class pjFront extends pjAppController
 				}
 				pjUtil::redirect(sprintf("%sindex.php?controller=pjFront&action=pjActionCancel&cid=%u&id=%u&hash=%s%s", PJ_INSTALL_URL, $_GET['cid'], $_GET['id'], $_GET['hash'], $err));
 			}
-				
+
 			if (empty($arr))
 			{
 				$this->set('status', 'AR16');
@@ -194,12 +194,12 @@ class pjFront extends pjAppController
 		} else {
 			$this->set('status', 'AR15');
 		}
-		
+
 		$this
 			->appendCss('admin.css')
 			->appendCss('pj-button.css', PJ_FRAMEWORK_LIBS_PATH . 'pj/css/');
 	}
-	
+
 	public function pjActionCaptcha()
 	{
 		$this->setAjax(true);
@@ -209,22 +209,22 @@ class pjFront extends pjAppController
 		$Captcha->init(isset($_GET['rand']) ? $_GET['rand'] : null);
 		exit;
 	}
-	
+
 	public function pjActionCheckCaptcha()
 	{
 		$this->setAjax(true);
-		
+
 		if ($this->isXHR())
 		{
 			echo @$_SESSION[$this->defaultCaptcha] === strtoupper($_GET['captcha']) ? 'true' : 'false';
 		}
 		exit;
 	}
-	
+
 	public function pjActionCheckDates()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR())
 		{
 			$date_from = date("Y-m-d", @$_GET['start_dt']);
@@ -250,13 +250,13 @@ class pjFront extends pjAppController
 			$this->log('Authorize.NET plugin not installed');
 			exit;
 		}
-		
+
 		if (!isset($_POST['x_invoice_num']))
 		{
 			$this->log('Missing arguments');
 			exit;
 		}
-		
+
 		$pjInvoiceModel = pjInvoiceModel::factory();
 		$pjReservationModel = pjReservationModel::factory();
 
@@ -293,7 +293,7 @@ class pjFront extends pjAppController
 					'md5_setting' => $option_arr['o_authorize_hash'],
 					'key' => md5($this->option_arr['private_key'] . PJ_SALT)
 				);
-				
+
 				$response = $this->requestAction(array('controller' => 'pjAuthorize', 'action' => 'pjActionConfirm', 'params' => $params), array('return'));
 				if ($response !== FALSE && $response['status'] === 'OK')
 				{
@@ -301,12 +301,12 @@ class pjFront extends pjAppController
 						->reset()
 						->set('id', $booking_arr['id'])
 						->modify(array('status' => ucfirst($option_arr['o_status_if_paid'])));
-						
+
 					$pjInvoiceModel
 						->reset()
 						->set('id', $invoice_arr['id'])
 						->modify(array('status' => 'paid', 'modified' => ':NOW()'));
-					
+
 					pjFront::pjActionConfirmSend($option_arr, $booking_arr, 'payment');
 				} elseif (!$response) {
 					$this->log('Authorization failed');
@@ -325,7 +325,7 @@ class pjFront extends pjAppController
 	public function pjActionConfirmPaypal()
 	{
 		$this->setAjax(true);
-		
+
 		if (pjObject::getPlugin('pjPaypal') === NULL)
 		{
 			$this->log('Paypal plugin not installed');
@@ -378,12 +378,12 @@ class pjFront extends pjAppController
 						'txn_id' => $response['transaction_id'],
 						'processed_on' => ':NOW()'
 					));
-					
+
 					$pjInvoiceModel
 						->reset()
 						->set('id', $invoice_arr['id'])
 						->modify(array('status' => 'paid', 'modified' => ':NOW()'));
-						
+
 					pjFront::pjActionConfirmSend($option_arr, $booking_arr, 'payment');
 				} elseif (!$response) {
 					$this->log('Authorization failed');
@@ -398,7 +398,7 @@ class pjFront extends pjAppController
 		}
 		exit;
 	}
-	
+
 	private static function pjActionConfirmSend($option_arr, $booking_arr, $type)
 	{
 		if (!in_array($type, array('confirm', 'payment')))
@@ -419,7 +419,7 @@ class pjFront extends pjAppController
 		$tokens = pjAppController::getTokens($booking_arr, $option_arr);
 
 		$from_email = pjAppController::getFromEmail();
-		
+
 		switch ($type)
 		{
 			case 'confirm':
@@ -450,11 +450,11 @@ class pjFront extends pjAppController
 				break;
 		}
 	}
-	
+
 	public function pjActionGetBookingForm()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR())
 		{
 			if (!isset($_SESSION[$this->defaultCalendar]))
@@ -472,7 +472,7 @@ class pjFront extends pjAppController
 					$start_dt = $_GET['end_dt'];
 					$end_dt = $_GET['start_dt'];
 				}
-				
+
 				$_SESSION[$this->defaultCalendar] = array_merge($_SESSION[$this->defaultCalendar], compact('start_dt', 'end_dt'));
 			}
 
@@ -486,7 +486,7 @@ class pjFront extends pjAppController
 					@$_SESSION[$this->defaultCalendar]['c_adults'],
 					@$_SESSION[$this->defaultCalendar]['c_children']
 				));
-				
+
 			} elseif (pjObject::getPlugin('pjPeriod') !== NULL && $this->option_arr['o_price_plugin'] == 'period') {
 				$this->set('price_arr', pjPeriodModel::factory()->getPrice(
 					$_GET['cid'],
@@ -497,7 +497,7 @@ class pjFront extends pjAppController
 					@$_SESSION[$this->defaultCalendar]['c_children']
 				));
 			}
-			
+
 			if ((int) $this->option_arr['o_bf_terms'] !== 1)
 			{
 				$this->set('cal_arr', pjCalendarModel::factory()
@@ -508,7 +508,7 @@ class pjFront extends pjAppController
 					->getData()
 				);
 			}
-			
+
 			if ((int) $this->option_arr['o_bf_country'] !== 1)
 			{
 				$this->set('country_arr', pjCountryModel::factory()
@@ -520,11 +520,11 @@ class pjFront extends pjAppController
 			}
 		}
 	}
-	
+
 	public function pjActionGetCalendar()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR())
 		{
 			if (isset($this->option_arr['o_timezone']))
@@ -536,7 +536,7 @@ class pjFront extends pjAppController
 					$m = (int) $_GET['month'];
 					$y = (int) $_GET['year'];
 				}
-				
+
 				$ABCalendar = new pjABCalendar();
 				$ABCalendar
 					->setWeekTitle(__('lblWeekTitle', true, false))
@@ -583,16 +583,16 @@ class pjFront extends pjAppController
 							->set('showPrices', true);
 					}
 				}
-				
+
 				$this->set('ABCalendar', $ABCalendar);
 			}
 		}
 	}
-	
+
 	public function pjActionGetPeriods()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR())
 		{
 			if (!isset($_GET['month']) && !isset($_GET['year']))
@@ -602,7 +602,7 @@ class pjFront extends pjAppController
 				$m = (int) $_GET['month'];
 				$y = (int) $_GET['year'];
 			}
-			
+
 			$date_from = date("Y-m-d", mktime(0, 0, 0, $m, 1, $y));
 			$date_to = date("Y-m-d", mktime(0, 0, 0, $m + (int) $_GET['view'], 0, $y));
 
@@ -620,16 +620,16 @@ class pjFront extends pjAppController
 				$periods[$k]['start_ts'] = strtotime($period['start_date']);
     			$periods[$k]['end_ts'] = strtotime($period['end_date']);
 			}
-			
+
 			pjAppController::jsonResponse($periods);
 		}
 		exit;
 	}
-	
+
 	public function pjActionGetPrice()
 	{
 		$this->setAjax(true);
-		
+
 		if ($this->isXHR())
 		{
 			if (pjObject::getPlugin('pjPrice') !== NULL && $this->option_arr['o_price_plugin'] == 'price')
@@ -654,11 +654,11 @@ class pjFront extends pjAppController
 			}
 		}
 	}
-	
+
 	public function pjActionGetPaymentForm()
 	{
 		$this->setAjax(true);
-		
+
 		if ($this->isXHR())
 		{
 			$booking_arr = pjReservationModel::factory()
@@ -666,9 +666,9 @@ class pjFront extends pjAppController
 				->select('t1.*, t2.content as calendar_name')
 				->find($_GET['reservation_id'])
 				->getData();
-				
+
 			$invoice_arr = pjInvoiceModel::factory()->find($_GET['invoice_id'])->getData();
-				
+
 			switch ($_GET['payment_method'])
 			{
 				case 'paypal':
@@ -701,21 +701,22 @@ class pjFront extends pjAppController
 						'x_relay_url' => PJ_INSTALL_URL . 'index.php?controller=pjFront&action=pjActionConfirmAuthorize&cid=' . $_GET['cid']
 					));
 					break;
+
 			}
-			
+
 			$this->set('booking_arr', $booking_arr);
 			$this->set('get', $_GET);
 		}
 	}
-	
+
 	public function pjActionGetSummaryForm()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR())
 		{
 			$_SESSION[$this->defaultCalendar] = array_merge($_SESSION[$this->defaultCalendar], $_POST);
-			
+
 			if (pjObject::getPlugin('pjPrice') !== NULL && $this->option_arr['o_price_plugin'] == 'price')
 			{
 				$this->set('price_arr', pjPriceModel::factory()->getPrice(
@@ -736,7 +737,7 @@ class pjFront extends pjAppController
 					(int) $this->option_arr['o_bf_children'] !== 1 ? @$_SESSION[$this->defaultCalendar]['c_children'] : 0
 				));
 			}
-			
+
 			if ((int) $this->option_arr['o_bf_country'] !== 1 && isset($_SESSION[$this->defaultCalendar]['c_country']))
 			{
 				$this->set('country_arr', pjCountryModel::factory()
@@ -747,19 +748,19 @@ class pjFront extends pjAppController
 			}
 		}
 	}
-	
+
 	public function pjActionImage()
 	{
 		$this->setAjax(true);
 		$this->setLayout('pjActionEmpty');
-		
+
 		$w = isset($_GET['width']) && (int) $_GET['width'] > 0 ? intval($_GET['width']) : 100;
 		$h = isset($_GET['height']) && (int) $_GET['height'] > 0 ? intval($_GET['height']) : 100;
-		
+
 		# Spatial_anti-aliasing. Make an image larger then it's intended
 		$width = $w * 10;
 		$height = $h * 10;
-		
+
 		$image = imagecreatetruecolor($width, $height);
 		if (function_exists('imageantialias'))
 		{
@@ -768,14 +769,14 @@ class pjFront extends pjAppController
 		$backgroundColor = pjUtil::html2rgb($_GET['color1']);
 		$color = imagecolorallocate($image, $backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
 		imagefill($image, 0, 0, $color);
-		
+
 		if (isset($_GET['color2']) && !empty($_GET['color2']))
 		{
 			if ($_GET['color1'] == $_GET['color2'])
 			{
 				$backgroundColor = pjUtil::html2rgb('ffffff');
 				$color = imagecolorallocate($image, $backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
-		
+
 				$values = array(
 						0, $height-2,
 						$width-2, 0,
@@ -808,8 +809,8 @@ class pjFront extends pjAppController
 		imagedestroy($new_image);
 		exit;
 	}
-	
-	
+
+
 	private static function pjActionSetTime($timezone)
 	{
 		$offset = $timezone / 3600;
@@ -830,18 +831,18 @@ class pjFront extends pjAppController
 			$offset = str_replace('+', '-', $offset);
 		}
 		pjAppController::setMySQLServerTime($offset . ":00");
-		
+
 		return;
 	}
-	
+
 	public function pjActionGetAvailability()
 	{
 		$this->setAjax(true);
-		
+
 		if ($this->isXHR())
 		{
 			$locale = isset($_GET['locale']) && !empty($_GET['locale']) ? (int) $_GET['locale'] : $this->pjActionGetLocale();
-			
+
 			$pjCalendarModel = pjCalendarModel::factory()
 				->select("t1.*, t2.content AS `title`, t3.value AS `o_bookings_per_day`, t4.value AS `o_timezone`")
 				->join('pjMultiLang', "t2.model='pjCalendar' AND t2.foreign_id=t1.id AND t2.field='name' AND t2.locale='$locale'", 'left outer')
@@ -850,7 +851,7 @@ class pjFront extends pjAppController
 			$pjReservationModel = pjReservationModel::factory();
 			$pjOptionModel = pjOptionModel::factory();
 			$arr = $pjCalendarModel->orderBy('t1.id ASC')->findAll()->getData();
-			
+
 			$last_timezone = NULL;
 			foreach ($arr as $k => $calendar)
 			{
@@ -859,14 +860,14 @@ class pjFront extends pjAppController
 				{
 					# Cache timezone
 					$last_timezone = $calendar['o_timezone'];
-					
+
 					pjFront::pjActionSetTime($calendar['o_timezone']);
 				}
-				
+
 				list($Y, $n) = explode("-", date("Y-n"));
 				$year = isset($_GET['year']) && !empty($_GET['year']) ? (int) $_GET['year'] : $Y;
 				$month = isset($_GET['month']) && !empty($_GET['month']) ? (int) $_GET['month'] : $n;
-				
+
 				$arr[$k]['date_arr'] = $pjReservationModel->getInfo(
 					$calendar['id'],
 					date("Y-m-d", mktime(0, 0, 0, $month, 1, $year)),
@@ -876,15 +877,15 @@ class pjFront extends pjAppController
 					1
 				);
 			}
-			
+
 			$this->set('arr', $arr);
 		}
 	}
-	
+
 	public function pjActionLoadAvailabilityCss()
 	{
 		header("Content-Type: text/css; charset=utf-8");
-		
+
 		$arr = array(
 			array('file' => 'ABCalendar.Availability.css', 'path' => PJ_CSS_PATH),
 			array('file' => 'ABCalendar.Availability.txt', 'path' => PJ_CSS_PATH)
@@ -895,7 +896,7 @@ class pjFront extends pjAppController
 			@readfile($item['path'] . $item['file']);
 			$string = ob_get_contents();
 			ob_end_clean();
-			
+
 			if ($string !== FALSE)
 			{
 				echo str_replace(
@@ -904,15 +905,15 @@ class pjFront extends pjAppController
 					$string) . "\n";
 			}
 		}
-		
+
 		$pjOptionModel = pjOptionModel::factory();
 		$arr = pjCalendarModel::factory()->findAll()->getData();
-		
+
 		ob_start();
 		@readfile(PJ_CSS_PATH . 'availability.txt');
 		$string = ob_get_contents();
 		ob_end_clean();
-		
+
 		foreach ($arr as $calendar)
 		{
 			$option_arr = $pjOptionModel->reset()->getPairs($calendar['id']);
@@ -1011,10 +1012,10 @@ class pjFront extends pjAppController
 				);
 			}
 		}
-		
+
 		exit;
 	}
-	
+
 	public function pjActionLoadCss()
 	{
 		$arr = array(
@@ -1028,7 +1029,7 @@ class pjFront extends pjAppController
 			@readfile($item['path'] . $item['file']);
 			$string = ob_get_contents();
 			ob_end_clean();
-			
+
 			if ($string !== FALSE)
 			{
 				echo str_replace(
@@ -1037,7 +1038,7 @@ class pjFront extends pjAppController
 					$string) . "\n";
 			}
 		}
-		
+
 		ob_start();
 		@readfile(PJ_CSS_PATH . 'ABCalendar.txt');
 		$string = ob_get_contents();
@@ -1143,11 +1144,36 @@ class pjFront extends pjAppController
 		}
 		exit;
 	}
-	
+
 	public function pjActionBookingSave()
 	{
+		//****************************************************************//
+		// ACTUALIZO LA URL EN LA TABLA OPTION E INSERTO EL MD5 EN       //
+		// 			LA TABLA TOKENS 			         //
+		//****************************************************************//
+		$dbHost = 'localhost';
+		$dbUsername = 'root';
+		$dbPassword = '12345';
+		$dbName = 'igtrip';
+
+		$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+		if($mysqli->connect_errno){
+		     echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+		}
+		$idCalendario = $_GET["cid"];
+		$datetime = date('Y-m-d H:i:s') ;
+        		$ramdomKey = md5(uniqid(rand(1,6)));
+        		$url = "http://localhost/Booking/index.php?controller=pjAdmin&action=pjActionLogin&rk=".$ramdomKey;
+
+		$sql = "UPDATE booking_abcalendar_options SET value = '$url'
+	    		WHERE foreign_id = $idCalendario AND  `key` = 'o_thankyou_page'";
+		$conn->query($sql);
+
+		$sql1 = "INSERT INTO tokens (id_calendario,uuid,consumido,created_at,updated_at) VALUES($idCalendario,'$ramdomKey',false,'$datetime','$datetime') ";
+		$conn->query($sql1);
+
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR())
 		{
 			$data = array();
@@ -1158,19 +1184,19 @@ class pjFront extends pjAppController
 				$data['uuid'] = pjUtil::uuid();
 				$data['status'] = ucfirst($this->option_arr['o_status_if_not_paid']);
 				$data['locale_id'] = $this->pjActionGetLocale();
-				
+
 				$data['date_from'] = date("Y-m-d", $_SESSION[$this->defaultCalendar]['start_dt']);
 				$data['date_to'] = date("Y-m-d", $_SESSION[$this->defaultCalendar]['end_dt']);
 				$data['price_based_on'] = $this->option_arr['o_price_based_on'];
-				
+
 				$resp = $this->pjActionCheckDt($data['date_from'], $data['date_to'], $data['calendar_id'], NULL, TRUE);
 				if ($resp['status'] == 'ERR')
 				{
 					pjAppController::jsonResponse($resp);
 				}
-				
+
 				$data = array_merge($_SESSION[$this->defaultCalendar], $data);
-	
+
 				if (pjObject::getPlugin('pjPrice') !== NULL && $this->option_arr['o_price_plugin'] == 'price')
 				{
 					$price = pjPriceModel::factory()->getPrice(
@@ -1191,12 +1217,12 @@ class pjFront extends pjAppController
 						(int) $this->option_arr['o_bf_children'] !== 1 ? @$data['c_children'] : 0
 					);
 				}
-	
+
 				$data['amount'] = @$price['amount'];
 				$data['deposit'] = @$price['deposit'];
 				$data['tax'] = @$price['tax'];
 				$data['security'] = @$price['security'];
-	
+
 				if (isset($data['payment_method']) && $data['payment_method'] != 'creditcard')
 				{
 					unset($data['cc_type']);
@@ -1205,32 +1231,32 @@ class pjFront extends pjAppController
 					unset($data['cc_exp_year']);
 					unset($data['cc_code']);
 				}
-	
+
 				$pjReservationModel = new pjReservationModel();
 				if (!$pjReservationModel->validates($data))
 				{
 					pjAppController::jsonResponse(array('status' => 'ERR', 'code' => 100, 'text' => 'Reservations data does not validate.'));
 				}
-				
+
 				$reservation_id = $pjReservationModel->setAttributes($data)->insert()->getInsertId();
 				if ($reservation_id === false || (int) $reservation_id === 0)
 				{
 					pjAppController::jsonResponse(array('status' => 'ERR', 'code' => 101, 'text' => 'Reservation was not saved.'));
 				}
-				
+
 				$invoice_arr = $this->pjActionGenerateInvoice($reservation_id);
-	
+
 				$_SESSION[$this->defaultCalendar] = NULL;
 				unset($_SESSION[$this->defaultCalendar]);
-				
+
 				if (isset($_SESSION[$this->defaultCaptcha]))
 				{
 					$_SESSION[$this->defaultCaptcha] = NULL;
 					unset($_SESSION[$this->defaultCaptcha]);
 				}
-				
+
 				$calendar_arr = pjCalendarModel::factory()->find($_GET['cid'])->getData();
-				
+
 				$params = $pjReservationModel->reset()
 					->select(sprintf("t1.*,
 						AES_DECRYPT(t1.cc_num, '%1\$s') AS `cc_num`,
@@ -1248,24 +1274,61 @@ class pjFront extends pjAppController
 					$this->notify(4, $calendar_arr['user_id'], $params);
 					pjFront::pjActionConfirmSend($this->option_arr, $params, 'confirm');
 				}
-			
+
+				if (isset($data['payment_method']) && $data['payment_method'] == 'cash')
+				{
+					/*$results = print_r($data, true);
+			                          $file = "/var/www/html/pruebaFacturas.txt";
+					$open = fopen($file,"a");
+					if ( $open ) {
+					    fwrite($open,$results);
+					    fclose($open);
+					}*/
+					$sqlCash = "SELECT content FROM booking_abcalendar_multi_lang WHERE model = 'pjCalendar' AND  field = 'name' AND foreign_id =". $data['calendar_id'];
+					$cash = $conn->query($sqlCash);
+					$nombreCalendario = "";
+					foreach ($cash as $row2) {
+        						$nombreCalendario = $row2['content'];
+        					}
+
+ 				$conn->query("INSERT INTO cashes (id_reserva, nombreCalendario, estadoPago, fechaPago, montoPago,consumido, created_at, updated_at)
+				VALUES(".$reservation_id.",'".$nombreCalendario."', 'PorProcesar','".date("Y-m-d H:i:s")."', '".$data['amount']."',false ,'".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."')");
+
+				}
+
+
 				pjAppController::jsonResponse(array(
 					'status' => 'OK', 'code' => 200, 'text' => 'Reservation was saved.',
 					'reservation_id' => $reservation_id,
 					'invoice_id' => @$invoice_arr['data']['id'],
 					'payment_method' => @$data['payment_method']
 				));
+
+
 			} else {
 				pjAppController::jsonResponse(array('status' => 'ERR', 'code' => 102, 'text' => 'Missing or empty params.'));
 			}
 		}
 		exit;
+		/*if (isset($data['payment_method']) && $data['payment_method'] == 'cash')
+					{
+					$authorize = "Entra ,as abajo".$data['payment_method']." ".$reservation_id;
+			        		$results = print_r($authorize, true);
+			                          $file = "/var/www/html/pruebaFacturas.txt";
+					$open = fopen($file,"a");
+					if ( $open ) {
+					    fwrite($open,$results);
+					    fclose($open);
+					}
+
+						pjUtil::redirect("http://localhost:8000/confirmacionEfectivo/".$reservation_id);
+		}*/
 	}
 
 	public function pjActionLocale()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR())
 		{
 			if (isset($_GET['locale_id']))
@@ -1276,7 +1339,7 @@ class pjFront extends pjAppController
 		}
 		exit;
 	}
-	
+
 	private function pjActionSetLocale($locale)
 	{
 		if ((int) $locale > 0)
@@ -1285,18 +1348,18 @@ class pjFront extends pjAppController
 		}
 		return $this;
 	}
-	
+
 	public function pjActionGetLocale()
 	{
 		return isset($_SESSION[$this->defaultLocale]) && (int) $_SESSION[$this->defaultLocale] > 0 ? (int) $_SESSION[$this->defaultLocale] : FALSE;
 	}
-	
+
 	public function isXHR()
 	{
 		// CORS
 		return parent::isXHR() || isset($_SERVER['HTTP_ORIGIN']);
 	}
-	
+
 	static protected function allowCORS()
 	{
 		$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*';

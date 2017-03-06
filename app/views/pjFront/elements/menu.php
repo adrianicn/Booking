@@ -13,7 +13,12 @@ if ((
 } else {
 	if($_GET['action'] == 'pjActionGetCalendar')
 	{
-		?><div class="abCalendarNote"><?php __('lblCalendarMessage');?></div><?php
+		?>
+		<!--<div class="abCalendarNote"><?php __('lblCalendarMessage');?></div> -->
+		<?php
+		?>
+		<div class="abCalendarNote"> </div>
+		<?php
 	}
 	$front_err = str_replace(array('"', "'"), array('\"', "\'"), __('front_err', true, true));
 	?>

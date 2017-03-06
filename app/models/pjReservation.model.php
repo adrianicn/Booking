@@ -7,9 +7,9 @@ if (!defined("ROOT_PATH"))
 class pjReservationModel extends pjAppModel
 {
 	protected $primaryKey = 'id';
-	
+
 	protected $table = 'reservations';
-	
+
 	protected $schema = array(
 		array('name' => 'id', 'type' => 'int', 'default' => ':NULL'),
 		array('name' => 'calendar_id', 'type' => 'int', 'default' => ':NULL'),
@@ -44,9 +44,10 @@ class pjReservationModel extends pjAppModel
 		array('name' => 'txn_id', 'type' => 'varchar', 'default' => ':NULL'),
 		array('name' => 'processed_on', 'type' => 'datetime', 'default' => ':NULL'),
 		array('name' => 'status', 'type' => 'enum', 'default' => ':NULL'),
-		array('name' => 'locale_id', 'type' => 'int', 'default' => ':NULL')
+		array('name' => 'locale_id', 'type' => 'int', 'default' => ':NULL'),
+		array('name' => 'tipo_usuario', 'type' => 'varchar', 'default' => ':NULL')
 	);
-	
+
 	protected $validate = array(
 		'rules' => array(
 			'calendar_id' => array(
@@ -82,12 +83,12 @@ class pjReservationModel extends pjAppModel
 			)
 		)
 	);
-	
+
 	public static function factory($attr=array())
 	{
 		return new pjReservationModel($attr);
 	}
-	
+
 	public function getInfo($calendar_id, $date_from, $date_to, $option_arr=array(), $id=NULL, $show_calendar=NULL)
 	{
 		$arr = array();
@@ -96,7 +97,7 @@ class pjReservationModel extends pjAppModel
 		{
 			$this->where('id !=', $id);
 		}
-		
+
 		$r_arr = $this
 			->where('calendar_id', $calendar_id)
 			->where('status !=', 'Cancelled')
@@ -108,7 +109,7 @@ class pjReservationModel extends pjAppModel
 		{
 			return array();
 		}
-		
+
 		$nights_mode = false;
 		if ($option_arr['o_price_based_on'] == 'nights')
 		{
@@ -167,9 +168,9 @@ class pjReservationModel extends pjAppModel
 				}
 			}
 		}
-		
+
 		ksort($arr);
-		
+
 		foreach($arr as $timestamp => $v)
 		{
 			$count = 0;
@@ -199,7 +200,7 @@ class pjReservationModel extends pjAppModel
 			}
 			$arr[$timestamp]['dt'] = date("d.m.Y", $timestamp);
 		}
-		
+
 		return $arr;
 	}
 }
