@@ -5,10 +5,14 @@ if (!defined("ROOT_PATH"))
 	exit;
 }
 require_once PJ_CONTROLLERS_PATH . 'pjAdmin.controller.php';
+/* PHP MAILER LIBRARIES*/
+require_once PJ_CONTROLLERS_PATH . 'PHPMailer/class.phpmailer.php';
+require_once PJ_CONTROLLERS_PATH . 'PHPMailer/PHPMailerAutoload.php';
+include_once(PJ_CONTROLLERS_PATH .'PHPMailer/class.phpmailer.php');
+
 class pjAdminReservations extends pjAdmin
 {
-	public function pjActionCheckUnique()
-	{
+	public function pjActionCheckUnique(){
 		$this->setAjax(true);
 
 		if ($this->isXHR() && $this->isLoged())
@@ -29,8 +33,7 @@ class pjAdminReservations extends pjAdmin
 		exit;
 	}
 
-	public function pjActionCreate()
-	{
+	public function pjActionCreate()	{
 		$this->checkLogin();
 
 		if ($this->isAdmin() || $this->isOwner() || $this->isEditor())
@@ -62,6 +65,117 @@ class pjAdminReservations extends pjAdmin
 				$insert_id = $pjReservationModel->reset()->setAttributes(array_merge($_POST, $data))->insert()->getInsertId();
 				if ($insert_id !== false && (int) $insert_id > 0)
 				{
+		            /*******************************************************************/
+		            /*   			INICIO ENVIO DE CORREO 							   */
+		            /*******************************************************************/
+					$calendarInfo = pjCalendarModel::factory()->find($_POST['calendar_id'])->getData();
+					$agrupamientoInfo = pjCalendarGroupModel::factory()->find($calendarInfo['id_agrupamiento'])->getData();
+
+					$conn = new mysqli(PJ_DB_HOST, PJ_DB_USERNAME, PJ_DB_PASS, PJ_DB_NAME);
+					if($mysqli->connect_errno){
+					     echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+					}
+
+					$usuServ = "SELECT id,id_usuario_operador FROM usuario_servicios WHERE id = ".$agrupamientoInfo['id_usuario_servicio'];
+
+					foreach ($conn->query($usuServ) as $row1) {
+							$idUsuServicio = $row1['id'];
+	        				$usuOpe = $row1['id_usuario_operador'];
+		        		}
+
+					$queryOperador = "SELECT * FROM usuario_operadores WHERE id_usuario_op = ".$usuOpe;
+
+					foreach ($conn->query($queryOperador) as $row2) {
+								$idUsuarioOperador = $row2['id_usuario_op']; 
+								$nombreOperador = $row2['nombre_contacto_operador_1'];
+								$empresaOperador = $row2['nombre_empresa_operador'];
+								$direccionOperador = $row2['direccion_empresa_operador'];
+								$telefonoOperador = $row2['telf_contacto_operador_1'];
+								$correoOperador = $row2['email_contacto_operador'];
+		        			}
+
+		        	/*$queryLogoOperador = "SELECT images.* FROM booking_abcalendar_calendars 
+		        						 INNER JOIN images on images.id_auxiliar=booking_abcalendar_calendars.id_usuario_servicio 
+		        						 WHERE booking_abcalendar_calendars.id = ".$_POST['calendar_id']." 
+		        						 AND id_catalogo_fotografia=1 
+		        						 AND estado_fotografia=1 
+		        						 AND profile_pic=1"; */
+
+					$queryLogoOperador = "SELECT images.* FROM booking_abcalendar_calendars 
+		        						 INNER JOIN images on images.id_auxiliar=booking_abcalendar_calendars.id_usuario_servicio 
+		        						 WHERE booking_abcalendar_calendars.id = ".$_POST['calendar_id']." 
+		        						 AND id_catalogo_fotografia=1 
+		        						 AND estado_fotografia=1";		        						 		
+
+		        	$arrayLogo = array();					 
+					foreach ($conn->query($queryLogoOperador) as $row3) {
+								$arrayLogo[] = $row3;
+		        			}		        						 
+		        			        			
+
+					if($_POST['status'] == 'Confirmed'){
+						$estadoReserva = 'Confirmado';
+					}elseif($_POST['status'] == 'Pending'){
+						$estadoReserva = 'Pendiente';
+					}elseif ($_POST['status'] == 'Cancelled') {
+						$estadoReserva = 'Cancelado';
+					}
+
+			        $correo = new PHPMailer(true);
+					$correo->IsSMTP();
+					$correo->SMTPAuth = true;
+					$correo->SMTPSecure = 'tls';
+					$correo->Host = "smtp.gmail.com";
+					$correo->Port = 587;
+					$correo->Username = "info@iwannatrip.com";
+					$correo->Password   = "bcmnarkkibrxtfxd";
+					$correo->SetFrom('info@iwannatrip.com', "iWaNaTrip");
+					$asunto = "Confirmacion Reserva iWaNaTrip.com";
+					$correo->Subject = $asunto;
+					//$arrayLogo = array();
+					if(empty($arrayLogo)){
+						$textodocumento = "<center><img src='".PJ_INSTALL_PATH."app/web/img/no-image-available.png'></center>";
+					}else{
+						$imagen = $arrayLogo[0]['filename'];
+						$textodocumento = "<center><img src='".PJ_INSTALL_PATH."app/web/img/index-logo.png'></center>";				
+						$textodocumento = "<center><img src='https://iwanatrip.com/public/images/icon/".$imagen."'></center>";
+					}						
+					
+					$textodocumento .= "<h1>Informaci&oacute;n del Operador del Servicio</h1>";
+					$textodocumento .= "<p><b>Nombre del Tour:</b> ".$agrupamientoInfo['nombre']."</p>";
+					$textodocumento .= "<p><b>Detalle del Tour:</b> ". utf8_decode($agrupamientoInfo['descripcion'])."</p>";
+					$textodocumento .= "<p><b>Nombre del Operador:</b> ".$nombreOperador."</p>";
+					$textodocumento .= "<p><b>Empresa del Operador:</b> ".$empresaOperador."</p>";
+					$textodocumento .= "<p><b>Direeci&oacute;n del Operador:</b> ".$direccionOperador."</p>";
+					$textodocumento .= "<p><b>Tel&eacute;fono del Operador:</b> ".$telefonoOperador."</p>";
+					$textodocumento .= "<p><b>Correo del Operador:</b> ".$correoOperador."</p>";
+					$textodocumento .= "<br>";
+					$textodocumento .= "<h1>Informaci&oacute;n de la Reservaci&oacute;n:</h1>";
+					$textodocumento .= "<p><b>Nombre:</b> ".$_POST['c_name']."</p>";
+					$textodocumento .= "<p><b>Correo:</b> ".$_POST['c_email']."</p>";
+					$textodocumento .= "<p><b>Estado de la Reservaci&oacute;n:</b> ".$estadoReserva."</p>";
+					$textodocumento .= "<p><b>Reserva Desde:</b> ".$_POST['date_from']."</p>";
+					$textodocumento .= "<p><b>Reserva Hasta:</b> ".$_POST['date_to']."</p>";
+					$textodocumento .= "<p><b>Adultos:</b> ".$_POST['c_adults']."</p>";
+					$textodocumento .= "<p><b>Ni&ntilde;os:</b> ".$_POST['c_children']."</p>";
+					$textodocumento .= "<p><b>Monto de la Reservacion:</b> ".$_POST['amount']."</p>";
+					$textodocumento .= "<br>";
+					$textodocumento .= "<h1>Codigo de la Reservaci&oacute;n:</h1>";
+					$textodocumento .= "<center><img src='https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=".$_POST['uuid']."&choe=UTF-8' /></center>";
+					$correo->MsgHTML(utf8_decode("<br/>").$textodocumento);
+					$correo->AddAddress($_POST['c_email']);
+					if(isset($calendarInfo['correo_operador'])){
+						$correo->AddAddress($calendarInfo['correo_operador']);
+					}
+					
+					if(!$correo->Send()) {
+				             	echo "Hubo un error al enviar correo " . $correo->ErrorInfo;
+				             }else{
+				                       $correo->ClearAddresses();
+				             }
+				             /*******************************************************************/
+				             /*   			FIN ENVIO DE CORREO 				*/
+				             /*******************************************************************/
 					$invoice_arr = $this->pjActionGenerateInvoice($insert_id);
 
 					$params = $pjReservationModel
@@ -106,8 +220,7 @@ class pjAdminReservations extends pjAdmin
 		}
 	}
 
-	public function pjActionCreateInvoice()
-	{
+	public function pjActionCreateInvoice(){
 		$this->setAjax(true);
 
 		if ($this->isXHR() && $this->isLoged())
@@ -118,8 +231,7 @@ class pjAdminReservations extends pjAdmin
 		exit;
 	}
 
-	public function pjActionDeleteReservation()
-	{
+	public function pjActionDeleteReservation(){
 		$this->setAjax(true);
 
 		if ($this->isXHR())
@@ -137,8 +249,7 @@ class pjAdminReservations extends pjAdmin
 		exit;
 	}
 
-	public function pjActionDeleteReservationBulk()
-	{
+	public function pjActionDeleteReservationBulk(){
 		$this->setAjax(true);
 
 		if ($this->isXHR())
@@ -152,8 +263,7 @@ class pjAdminReservations extends pjAdmin
 		exit;
 	}
 
-	public function pjActionExportReservation()
-	{
+	public function pjActionExportReservation(){
 		if (isset($_POST['record']) && is_array($_POST['record']))
 		{
 			$arr = pjReservationModel::factory()->whereIn('id', $_POST['record'])->findAll()->getData();
@@ -167,8 +277,7 @@ class pjAdminReservations extends pjAdmin
 		exit;
 	}
 
-	public function pjActionGetMessage()
-	{
+	public function pjActionGetMessage(){
 		$this->setAjax(true);
 
 		if ($this->isXHR())
@@ -209,8 +318,7 @@ class pjAdminReservations extends pjAdmin
 		exit;
 	}
 
-	public function pjActionCalcPrice()
-	{
+	public function pjActionCalcPrice(){
 		$this->setAjax(true);
 
 		if ($this->isXHR())
@@ -259,12 +367,20 @@ class pjAdminReservations extends pjAdmin
 		exit;
 	}
 
-	public function pjActionGetReservation()
-	{
+	public function pjActionGetReservation(){
 		$this->setAjax(true);
+
 
 		if ($this->isXHR())
 		{
+
+				$results = print_r($_GET, true);
+				          $file = "/var/www/html/pruebaFacturas.txt";
+				$open = fopen($file,"a");
+				if ( $open ) {
+				    fwrite($open,$results);
+				    fclose($open);
+				}
 			$pjReservationModel = pjReservationModel::factory()->join('pjCalendar', 't2.id=t1.calendar_id', 'inner');
 
 			if (isset($_GET['uuid']) && !empty($_GET['uuid']))
@@ -279,8 +395,16 @@ class pjAdminReservations extends pjAdmin
 				$pjReservationModel->where('t1.calendar_id', $_GET['calendar_id']);
 			}
 
+
 			if (isset($_GET['date']) && !empty($_GET['date']))
 			{
+				$results = print_r($_GET['date'], true);
+				          $file = "/var/www/html/pruebaFacturas.txt";
+				$open = fopen($file,"a");
+				if ( $open ) {
+				    fwrite($open,$results);
+				    fclose($open);
+				}
 				$pjReservationModel->where(sprintf("('%s' BETWEEN t1.date_from AND t1.date_to)", $pjReservationModel->escapeString($_GET['date'])));
 			}
 
@@ -403,8 +527,7 @@ class pjAdminReservations extends pjAdmin
 		exit;
 	}
 
-	public function pjActionIndex()
-	{
+	public function pjActionIndex(){
 		$this->checkLogin();
 
 		if ($this->isAdmin() || $this->isOwner() || $this->isEditor())
@@ -421,6 +544,7 @@ class pjAdminReservations extends pjAdmin
 				->select('t1.id, t2.content AS name')
 				->join('pjMultiLang', "t2.model='pjCalendar' AND t2.foreign_id=t1.id AND t2.field='name' AND t2.locale='".$this->getLocaleId()."'", 'left outer')
 				->orderBy('`name` ASC')
+				->where('t1.id_usuario_servicio', $_SESSION['usuario_servicio'])
 				->findAll()
 				->getData()
 
@@ -435,8 +559,7 @@ class pjAdminReservations extends pjAdmin
 		}
 	}
 
-	public function pjActionSaveReservation()
-	{
+	public function pjActionSaveReservation(){
 		$this->setAjax(true);
 
 		if ($this->isXHR())
@@ -492,8 +615,7 @@ class pjAdminReservations extends pjAdmin
 		exit;
 	}
 
-	public function pjActionSendMessage()
-	{
+	public function pjActionSendMessage(){
 		$this->setAjax(true);
 
 		if ($this->isXHR())
@@ -534,8 +656,7 @@ class pjAdminReservations extends pjAdmin
 		exit;
 	}
 
-	public function pjActionUpdate()
-	{
+	public function pjActionUpdate(){
 		$this->checkLogin();
 
 		if ($this->isAdmin() || $this->isOwner() || $this->isEditor())
@@ -668,8 +789,7 @@ class pjAdminReservations extends pjAdmin
 		}
 	}
 
-	private function pjActionGetAvailability($year, $month)
-	{
+	private function pjActionGetAvailability($year, $month)	{
 		$pjCalendarModel = pjCalendarModel::factory()
 			->select("t1.*, t2.content AS title, t3.value AS o_bookings_per_day")
 			->join('pjMultiLang', "t2.model='pjCalendar' AND t2.foreign_id=t1.id AND t2.field='name' AND t2.locale='".$this->getLocaleId()."'", 'left outer')
@@ -696,8 +816,7 @@ class pjAdminReservations extends pjAdmin
 		return $arr;
 	}
 
-	public function pjActionGetDashboard()
-	{
+	public function pjActionGetDashboard(){
 		$this->setAjax(true);
 
 		if ($this->isXHR())
@@ -706,8 +825,7 @@ class pjAdminReservations extends pjAdmin
 		}
 	}
 
-	public function pjActionDashboard()
-	{
+	public function pjActionDashboard(){
 		$this->checkLogin();
 
 		if ($this->isAdmin() || $this->isOwner() || $this->isEditor())
@@ -736,8 +854,7 @@ class pjAdminReservations extends pjAdmin
 		}
 	}
 
-	public function pjActionLoadCss()
-	{
+	public function pjActionLoadCss(){
 		$option_arr = pjOptionModel::factory()->getPairs($_GET['cid']);
 
 		ob_start();
@@ -843,8 +960,7 @@ class pjAdminReservations extends pjAdmin
 		exit;
 	}
 
-	public function pjActionCheckDates()
-	{
+	public function pjActionCheckDates(){
 		$this->setAjax(true);
 
 		if ($this->isXHR() && $this->isLoged())
@@ -855,8 +971,7 @@ class pjAdminReservations extends pjAdmin
 		exit;
 	}
 
-	public function pjActionExport()
-	{
+	public function pjActionExport(){
 		$this->checkLogin();
 
 		if ($this->isAdmin() || $this->isOwner() || $this->isEditor())
@@ -873,6 +988,7 @@ class pjAdminReservations extends pjAdmin
 					$pjCalendarModel->where('t1.id', $_POST['calendar_id']);
 				}
 				$calendar_arr = $pjCalendarModel
+					->where('t1.id_usuario_servicio', $_SESSION['usuario_servicio'])
 					->findAll()
 					->getData();
 				foreach($calendar_arr as $k => $v)
@@ -993,6 +1109,7 @@ class pjAdminReservations extends pjAdmin
 				->select('t1.id, t1.user_id, t2.content AS name')
 				->join('pjMultiLang', "t2.foreign_id = t1.id AND t2.model = 'pjCalendar' AND t2.locale = '".$this->getLocaleId()."' AND t2.field = 'name'", 'left')
 				->orderBy("`name` ASC")
+				->where('t1.id_usuario_servicio', $_SESSION['usuario_servicio'])
 				->findAll()
 				->getData();
 			$this->set('calendar_arr', $calendar_arr);
@@ -1003,8 +1120,8 @@ class pjAdminReservations extends pjAdmin
 			$this->set('status', 2);
 		}
 	}
-	public function pjActionExportFeed()
-	{
+
+	public function pjActionExportFeed(){
 		$this->setLayout('pjActionEmpty');
 		$access = true;
 		if(isset($_GET['p']))
@@ -1063,8 +1180,8 @@ class pjAdminReservations extends pjAdmin
 		}
 		exit;
 	}
-	public function pjGetFeedData($get)
-	{
+
+	public function pjGetFeedData($get){
 		$arr = array();
 		$status = true;
 		$type = '';

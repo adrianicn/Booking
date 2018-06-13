@@ -13,7 +13,7 @@ class pjFotosModel extends pjAppModel
 	protected $schema = array(
 		array('name' => 'id', 'type' => 'int', 'default' => ':NULL'),
 		array('name' => 'id_usuario_servicio', 'type' => 'int', 'default' => ':NULL'),
-		array('name' => 'file_name', 'type' => 'varchar' => ':NULL'),
+		array('name' => 'file_name', 'type' => 'varchar', 'default' => ':NULL'),
 		array('name' => 'uploaded', 'type' => 'datetime', 'default' => ':NOW()')
 
 	);

@@ -24,11 +24,11 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 			var $form = this;
 			$form.find(":input").removeAttr("readonly");
 	    	$form.find(".pj-button").removeAttr("disabled");
-	    	
+
 	    	$dialogPricesStatus
 				.find(".bxPriceStatusStart, .bxPriceStatusEnd").hide().end()
 				.find(".bxPriceStatusFail").show();
-	    	
+
 	    	$dialogPricesStatus.dialog("option", "close", function () {
 	    		$(this).dialog("option", "buttons", {});
 	    	});
@@ -38,11 +38,11 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 	    		}
 	    	});
 		}
-		
+
 		function resetValication() {
 			this.find("tr").removeClass("pjPrice_duplicate");
 		}
-		
+
 		if ($frmCreatePrice.length > 0 && validate) {
 			$frmCreatePrice.validate({
 				ignore: ".ignore",
@@ -50,22 +50,22 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				submitHandler: function (form) {
 
 					$dialogPricesStatus.dialog("open");
-					
-					var post, len, num, $current, $tr, i, 
+
+					var post, len, num, $current, $tr, i,
 						total = 0,
 						$form = $(form),
 						$tabs = $form.find("#tabs").find("div[id^='tabs-']"),
 						perLoop = 100 //Keep this even value
 					;
-					
+
 					$form.find(":input").not(".pj-button").attr("readonly", "readonly");
 					$form.find(".pj-button").attr("disabled", "disabled");
-					
+
 					//Validation adults & children
 					resetValication.call($form);
 					var $x_tabs, $x_adults, $x_children, x_str, x_tabid, x_match, x_adults, x_children,
 						$x_from, $x_to, x_from, x_to,
-						x_stack = [], 
+						x_stack = [],
 						x_duplicates = [],
 						x_arr = [],
 						x_dates = [];
@@ -85,7 +85,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 							x_str = [x_tabid, x_adults, x_children].join("_");
 							if ($.inArray(x_str, x_stack) !== -1) {
 								x_duplicates.push({
-									"tab_id": parseInt(x_tabid, 10), 
+									"tab_id": parseInt(x_tabid, 10),
 									"adults": parseInt(x_adults, 10),
 									"children": parseInt(x_children, 10),
 									"row": $x_adults.closest("tbody").find("tr").index($x_adults.closest("tr").get(0))
@@ -101,7 +101,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 						x_str = [x_from, x_to].join("_");
 						if ($.inArray(x_str, x_arr) !== -1) {
 							x_dates.push({
-								"tab_id": parseInt(x_tabid, 10), 
+								"tab_id": parseInt(x_tabid, 10),
 								"from": x_from,
 								"to": x_to
 							});
@@ -109,7 +109,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 						x_arr.push(x_str);
 						//--------
 					});
-					
+
 					if (x_duplicates.length > 0) {
 						for (var x = 0, xCnt = x_duplicates.length; x < xCnt; x++) {
 							$tabs.eq(x_duplicates[x].tab_id - 1).find(".pj-table tbody tr").eq(x_duplicates[x].row).next().addBack().addClass("pjPrice_duplicate");
@@ -118,64 +118,64 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 							}
 						}
 					}
-					
+
 					if (x_dates.length > 0) {
-						
+
 					}
-					
+
 					if (x_duplicates.length > 0 || x_dates.length > 0) {
 						errorHandler.call($form);
 						return;
 					}
-					
+
 					$.post("index.php?controller=pjPrice&action=pjActionDeleteAll").done(function () {
-						
+
 						$tabs.each(function (index) {
 							len = $(this).find("tbody > tr").length;
 							total += len > perLoop ? Math.ceil(len / perLoop) : 1;
 						});
-						
+
 						$tabs.each(function (index) {
 							$current = $(this);
 							i = 0;
 							$tr = $(this).find("tbody > tr");
 							len = $tr.length;
 							num = len > perLoop ? Math.ceil(len / perLoop) : 1;
-							
+
 							setPrices.call(null);
 						});
 					});
-			
+
 					function setPrices() {
 						$.ajaxSetup({async:false});
 						post = $current.find("input.datepick, :input[name^='tabs[']").serialize();
 						post += "&" + $tr.slice(i * perLoop, (i + 1) * perLoop).find(":input").serialize();
-						
+
 						i++;
 						$.post("index.php?controller=pjPrice&action=pjActionBeforeSave", post, callback);
 					}
-					
+
 					function callback(data) {
 						if (data.status === "ERR") {
 							errorHandler.call($form);
 							return;
 						}
-						
+
 						total--;
 						num--;
 						if (num > 0) {
 					        setPrices.call(null);
 					    }
-						
+
 						if (total === 0) {
 					    	$.post("index.php?controller=pjPrice&action=pjActionSave").done(function (data) {
 					    		$form.find(":input").removeAttr("readonly");
 						    	$form.find(".pj-button").removeAttr("disabled");
-						    	
+
 						    	$dialogPricesStatus
 									.find(".bxPriceStatusStart, .bxPriceStatusFail").hide().end()
 									.find(".bxPriceStatusEnd").show();
-						    	
+
 						    	$dialogPricesStatus.dialog("option", "close", function () {
 						    		$(this).dialog("option", "buttons", {});
 									window.location.reload();
@@ -192,7 +192,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				}
 			});
 		}
-		
+
 		$("#content").on("submit", "#frmCreatePrice", function (e) {
 			if (e && e.preventDefault) {
 				e.preventDefault();
@@ -207,7 +207,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 							name = ui.input.attr("name"),
 							m3 = name.match(/(\d+)_date_from\[\]/),
 							m4 = name.match(/(\d+)_date_to\[\]/);
-						
+
 						if (m3 !== null) {
 							//2_date_from[]
 							$chain = $("input[name='" + m3[1] + "_date_to[]']");
@@ -235,7 +235,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				h = $clone.html().replace(/\{INDEX\}/g, $(this).attr("rel")).replace(/\{RAND\}/g, rand);
 			$clone = $('<tr>' + h + '</tr>');
 			$clone.appendTo($(this).closest(".pj-table").find("tbody"));
-			
+
 			$clone = $("#tmplDefault tbody tr:nth-child(2)").clone();
 			h = $clone.html().replace(/\{INDEX\}/g, $(this).attr("rel")).replace(/\{RAND\}/g, rand);
 			$clone = $('<tr>' + h + '</tr>');
@@ -254,17 +254,17 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				$dialogPricesSeasonDelete.data('that', this).dialog("open");
 			}
 		});
-		
+
 		function addTab() {
 			var id = $(".ui-tabs-panel:last").attr("id"),
 				spl = id.split("-");
-		
+
 			var $tabs = $("#tabs"),
 				i = parseInt(spl[1], 10) + 1;
 			$tabs.find('ul').append(['<li><a href="#tabs-', i, '">', $tab_title_input.val(), '</a> <span class="ui-icon ui-icon-close">Remove Tab</span></li>'].join(''));
 			$tabs.append(['<div id="tabs-', i, '"></div>'].join(''));
 			$tabs.tabs('refresh');
-		
+
 			var $clone = $("#tmplSeason").clone(),
 				h = $clone.html()
 					.replace(/\{INDEX\}/g, i)
@@ -274,14 +274,14 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 			$clone.appendTo($tabs.children('div:last'));
 			$tabs.tabs('option', 'active', $tabs.find('ul li').length - 1);
 		}
-		
+
 		if ($dialogPrices.length > 0 && dialog) {
 			var $tab_title_input = $("#tab_title"),
 				validator,
 				$tabs, $dialog, $form;
-		
+
 			$tabs = $("#tabs").tabs();
-			
+
 			$dialog = $dialogPrices.dialog({
 				autoOpen: false,
 				modal: true,
@@ -304,7 +304,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 					$form[0].reset();
 				}
 			});
-			
+
 			$form = $dialog.find("form").submit(function() {
 				addTab();
 				$dialog.dialog("close");
@@ -315,12 +315,12 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 					"tab_title": "required"
 				}
 			});
-			
+
 			$(".button_add_season").click(function() {
 				$dialog.dialog("open");
 			});
 		}
-		
+
 		if ($dialogPricesDelete.length > 0 && dialog) {
 			$dialogPricesDelete.dialog({
 				autoOpen: false,
@@ -351,7 +351,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 					'Delete': function () {
 						var $tabs = $("#tabs"),
 							index = $tabs.find("li").index($($dialogPricesSeasonDelete.data("that")).parent());
-						
+
 						$tabs.find('ul li').eq(index).remove();
 						$tabs.children('div').eq(index).remove();
 						$tabs.tabs('refresh');
@@ -382,7 +382,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				buttons: {}
 			});
 		}
-		
+
 		$(document).on("click", ".pj-form-field-icon-date", function (e) {
 			$(this).parent().siblings("input[type='text']").trigger("focusin").trigger("focus");//datepicker("show");
 		});

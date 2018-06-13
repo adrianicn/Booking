@@ -7,17 +7,17 @@ if (!defined("ROOT_PATH"))
 class pjPrice extends pjPriceAppController
 {
 	public $sessionPrice = 'pjPrice_session';
-	
+
 	public function pjActionCreate()
 	{
 		$this->checkLogin();
-		
+
 		if (!$this->isPriceReady())
 		{
 			$this->set('status', 2);
 			return;
 		}
-		
+
 		$err = 'PPR02';
 		if (isset($_POST['price_create']))
 		{
@@ -26,7 +26,7 @@ class pjPrice extends pjPriceAppController
 			foreach ($_POST['tabs'] as $tab_id => $tab_name)
 			{
 				$i = $tab_id;
-				
+
 				$data = array();
 				$data['tab_id'] = $i;
 				$data['season'] = $tab_name;
@@ -56,24 +56,24 @@ class pjPrice extends pjPriceAppController
 		}
 		pjUtil::redirect(PJ_INSTALL_URL . "index.php?controller=pjPrice&action=pjActionIndex&err=$err");
 	}
-	
+
 	public function pjActionIndex()
 	{
 		$this->checkLogin();
-		
+
 		if (!$this->isPriceReady())
 		{
 			$this->set('status', 2);
 			return;
 		}
-		
+
 		$pjPriceModel = pjPriceModel::factory();
 		$_arr = $pjPriceModel
 			->where('t1.foreign_id', $this->getForeignId())
 			->orderBy('t1.tab_id ASC, t1.id ASC, t1.date_from DESC, t1.date_to DESC')
 			->findAll()
 			->getData();
-		
+
 		$arr = array();
 		foreach ($_arr as $k => $v)
 		{
@@ -83,7 +83,7 @@ class pjPrice extends pjPriceAppController
 			}
 			$arr[$v['season']][] = $v;
 		}
-		
+
 		$query = sprintf("SELECT p1.id, p1.foreign_id, p1.tab_id, p1.season, p1.date_from, p1.date_to,
 			p2.id AS `p2_id`, p2.foreign_id AS `p2_foreign_id`, p2.tab_id AS `p2_tab_id`, p2.season AS `p2_season`, p2.date_from AS `p2_date_from`, p2.date_to AS `p2_date_to`
 			FROM (
@@ -102,7 +102,7 @@ class pjPrice extends pjPriceAppController
 			AND p1.tab_id != p2.tab_id
 			GROUP BY p1.foreign_id, p1.tab_id, p2.foreign_id, p2.tab_id", $pjPriceModel->getTable());
 		$overlap_arr = $pjPriceModel->reset()->prepare($query)->exec()->getData();
-		
+
 		$this
 			->set('arr', $arr)
 			->set('overlap_arr', $overlap_arr)
@@ -115,7 +115,7 @@ class pjPrice extends pjPriceAppController
 	public function pjActionDeleteAll()
 	{
 		$this->setAjax(true);
-		
+
 		if ($this->isXHR() && $this->isLoged() && $this->isPriceReady())
 		{
 			//pjPriceModel::factory()->where('foreign_id', $this->getForeignId())->eraseAll();
@@ -123,18 +123,18 @@ class pjPrice extends pjPriceAppController
 		}
 		exit;
 	}
-	
+
 	public function pjActionBeforeSave()
 	{
 		$this->setAjax(true);
-		
+
 		if ($this->isXHR() && $this->isLoged() && $this->isPriceReady())
 		{
 			if (!isset($_SESSION[$this->sessionPrice]) || !is_array($_SESSION[$this->sessionPrice]))
 			{
 				$_SESSION[$this->sessionPrice] = array();
 			}
-			
+
 			if (isset($_POST['tabs']))
 			{
 				if (isset($_SESSION[$this->sessionPrice]['tabs']))
@@ -145,7 +145,7 @@ class pjPrice extends pjPriceAppController
 					$_SESSION[$this->sessionPrice]['tabs'] = $_SESSION[$this->sessionPrice]['tabs'] + $_POST['tabs'];
 					unset($_POST['tabs']);
 				}
-				
+
 				$_SESSION[$this->sessionPrice] = array_merge($_SESSION[$this->sessionPrice], $_POST);
 				pjAppController::jsonResponse(array('status' => 'OK', 'code' => 200, 'text' => ''));
 			}
@@ -153,20 +153,20 @@ class pjPrice extends pjPriceAppController
 		}
 		exit;
 	}
-	
+
 	public function pjActionSave()
 	{
 		$this->setAjax(true);
-		
+
 		if ($this->isXHR() && $this->isLoged() && $this->isPriceReady())
 		{
 			if (!isset($_SESSION[$this->sessionPrice]) || empty($_SESSION[$this->sessionPrice]))
 			{
 				pjAppController::jsonResponse(array('status' => 'ERR', 'code' => 100, 'text' => ''));
 			}
-			
+
 			$STORE = $_SESSION[$this->sessionPrice];
-			
+
 			$tmp = array();
 			$tab_ids = array();
 			foreach ($STORE['tabs'] as $tab_id => $tab_name)
@@ -199,14 +199,14 @@ class pjPrice extends pjPriceAppController
 					$tmp[] = $string;
 				}
 			}
-			
+
 			$insert_ids = array();
 			$pjPriceModel = pjPriceModel::factory();
 			$pjPriceModel->where('foreign_id', $this->getForeignId())/*->whereIn('tab_id', $tab_ids)*/->eraseAll();
 			foreach ($STORE['tabs'] as $tab_id => $tab_name)
 			{
 				$i = $tab_id;
-				
+
 				$data = array();
 				$data['tab_id'] = $i;
 				$data['season'] = $tab_name;
@@ -235,10 +235,10 @@ class pjPrice extends pjPriceAppController
 				}
 				//$pjPriceModel->commit();
 			}
-						
+
 			$_SESSION[$this->sessionPrice] = NULL;
 			unset($_SESSION[$this->sessionPrice]);
-			
+
 			if (in_array(false, $insert_ids) || in_array(0, $insert_ids))
 			{
 				pjAppController::jsonResponse(array('status' => 'ERR', 'code' => 100, 'text' => ''));

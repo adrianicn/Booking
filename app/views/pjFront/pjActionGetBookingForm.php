@@ -101,6 +101,19 @@ $jquery_validation = __('jquery_validation', true);
 			</div>
 			<?php
 		}
+		if ((int) $tpl['option_arr']['o_bf_lastname'] !== 1)
+		{
+			?>
+			<div class="abParagraph">
+				<div class="abParagraphInner">
+					<label class="abTitle"><?php echo "Lastname"; ?></label>
+					<span class="abControl">
+						<input type="text" name="c_lastname" class="abText abStretch<?php echo (int) $tpl['option_arr']['o_bf_lastname'] === 3 ? ' required' : NULL; ?>" value="<?php echo htmlspecialchars(@$STORAGE['c_lastname']); ?>" data-msg-required="<?php echo $jquery_validation['required'];?>" />
+					</span>
+				</div>
+			</div>
+			<?php
+		}
 		if ((int) $tpl['option_arr']['o_bf_email'] !== 1)
 		{
 			?>
@@ -109,6 +122,19 @@ $jquery_validation = __('jquery_validation', true);
 					<label class="abTitle"><?php __('bf_email'); ?></label>
 					<span class="abControl">
 						<input type="text" name="c_email" class="abText abStretch email<?php echo (int) $tpl['option_arr']['o_bf_email'] === 3 ? ' required' : NULL; ?>" value="<?php echo htmlspecialchars(@$STORAGE['c_email']); ?>" data-msg-required="<?php echo $jquery_validation['required'];?>" data-msg-email="<?php echo $jquery_validation['email'];?>"/>
+					</span>
+				</div>
+			</div>
+			<?php
+		}
+		if ((int) $tpl['option_arr']['o_bf_cedula'] !== 1)
+		{
+			?>
+			<div class="abParagraph">
+				<div class="abParagraphInner">
+					<label class="abTitle"><?php echo "Identificacion"; ?></label>
+					<span class="abControl">
+						<input type="text" name="c_cedula" class="abText abStretch<?php echo (int) $tpl['option_arr']['o_bf_cedula'] === 3 ? ' required' : NULL; ?>" value="<?php echo htmlspecialchars(@$STORAGE['c_cedula']); ?>" data-msg-required="<?php echo $jquery_validation['required'];?>" />
 					</span>
 				</div>
 			</div>
@@ -236,73 +262,7 @@ $jquery_validation = __('jquery_validation', true);
 					</span>
 				</div>
 			</div>
-			
-			<div class="abParagraph abCcWrap" style="display: <?php echo @$STORAGE['payment_method'] != 'creditcard' ? 'none' : NULL; ?>">
-				<div class="abParagraphInner">
-					<label class="abTitle"><?php __('bf_cc_type'); ?></label>
-					<span class="abControl">
-						<select name="cc_type" class="abSelect required" data-msg-required="<?php echo $jquery_validation['required'];?>">
-							<option value="">---</option>
-							<?php
-							foreach (__('cc_types', true) as $k => $v)
-							{
-								?><option value="<?php echo $k; ?>"<?php echo @$STORAGE['cc_type'] != $k ? NULL : ' selected="selected"'; ?>><?php echo $v; ?></option><?php
-							}
-							?>
-						</select>
-					</span>
-				</div>
-			</div>
-			<div class="abParagraph abCcWrap" style="display: <?php echo @$STORAGE['payment_method'] != 'creditcard' ? 'none' : NULL; ?>">
-				<div class="abParagraphInner">
-					<label class="abTitle"><?php __('bf_cc_num'); ?></label>
-					<span class="abControl">
-						<input type="text" name="cc_num" class="abText abStretch required" value="<?php echo htmlspecialchars(@$STORAGE['cc_num']); ?>" data-msg-required="<?php echo $jquery_validation['required'];?>"/>
-					</span>
-				</div>
-			</div>
-			<div class="abParagraph abCcWrap" style="display: <?php echo @$STORAGE['payment_method'] != 'creditcard' ? 'none' : NULL; ?>">
-				<div class="abParagraphInner">
-					<label class="abTitle"><?php __('bf_cc_sec'); ?></label>
-					<span class="abControl">
-						<input type="text" name="cc_code" class="abText abStretch required" value="<?php echo htmlspecialchars(@$STORAGE['cc_code']); ?>" data-msg-required="<?php echo $jquery_validation['required'];?>"/>
-					</span>
-				</div>
-			</div>
-			<div class="abParagraph abCcWrap" style="display: <?php echo @$STORAGE['payment_method'] != 'creditcard' ? 'none' : NULL; ?>">
-				<div class="abParagraphInner">
-					<label class="abTitle"><?php __('bf_cc_exp'); ?></label>
-					<span class="abControl">
-					<?php
-					$time = pjTime::factory()
-						->attr('name', 'cc_exp_month')
-						->attr('id', 'cc_exp_month')
-						->attr('class', 'abText abW100 required')
-						->attr('data-msg-required', $jquery_validation['required'])
-						->prop('format', 'F');
-					if (isset($STORAGE['cc_exp_month']) && !is_null($STORAGE['cc_exp_month']))
-					{
-						$time->prop('selected', $STORAGE['cc_exp_month']);
-					}
-					echo $time->month();
-					?>
-					<?php
-					$time = pjTime::factory()
-						->attr('name', 'cc_exp_year')
-						->attr('id', 'cc_exp_year')
-						->attr('class', 'abText abW80 required')
-						->attr('data-msg-required', $jquery_validation['required'])
-						->prop('left', 0)
-						->prop('right', 10);
-					if (isset($STORAGE['cc_exp_year']) && !is_null($STORAGE['cc_exp_year']))
-					{
-						$time->prop('selected', $STORAGE['cc_exp_year']);
-					}
-					echo $time->year();
-					?>
-					</span>
-				</div>
-			</div>
+
 			<div class="abParagraph abBankWrap" style="display: <?php echo @$STORAGE['payment_method'] != 'bank' ? 'none' : NULL; ?>">
 				<div class="abParagraphInner">
 					<label class="abTitle"><?php __('bf_bank_account'); ?></label>
@@ -354,7 +314,8 @@ $jquery_validation = __('jquery_validation', true);
 			<div class="abParagraphInner">
 				<label class="abTitle">&nbsp;</label>
 				<span class="abControl">
-					<button type="submit" class="abButton abButtonDefault abSelectorContinue abFloatleft abMR5"><?php __('bf_continue'); ?></button>
+					<button type="submit" class="abButton abButtonDefault abSelectorContinue abFloatleft abMR5"><?php echo "Validar Datos"; ?></button>
+					<!--<button type="submit" class="abButton abButtonDefault abSelectorContinue abFloatleft abMR5"><?php __('bf_continue'); ?></button> -->
 					<button type="button" class="abButton abButtonCancel abSelectorCancel abFloatleft"><?php __('bf_cancel'); ?></button>
 				</span>
 			</div>

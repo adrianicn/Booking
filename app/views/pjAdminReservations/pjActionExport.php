@@ -15,7 +15,7 @@ if (isset($tpl['status']))
 		$bodies = __('error_bodies', true);
 		pjUtil::printNotice(@$titles[$_GET['err']], @$bodies[$_GET['err']]);
 	}
-	
+
 	?>
 	<div class="ui-tabs ui-widget ui-widget-content ui-corner-all b10">
 		<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
@@ -30,27 +30,27 @@ if (isset($tpl['status']))
 			<li class="ui-state-default ui-corner-top ui-tabs-active ui-state-active"><a href="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminReservations&amp;action=pjActionExport"><?php __('lblExport'); ?></a></li>
 		</ul>
 	</div>
-	
+
 	<?php
 	$week_start = isset($tpl['option_arr']['o_week_start']) && in_array((int) $tpl['option_arr']['o_week_start'], range(0,6)) ? (int) $tpl['option_arr']['o_week_start'] : 0;
 	$jqDateFormat = pjUtil::jqDateFormat($tpl['option_arr']['o_date_format']);
-	
+
 	$titles = __('error_titles', true);
 	$bodies = __('error_bodies', true);
 	pjUtil::printNotice(@$titles['AR21'], @$bodies['AR21']);
-	
+
 	$export_formats = __('export_formats', true, false);
 	$export_types = __('export_types', true, false);
 	$export_periods = __('export_periods', true, false);
 	?>
-	
+
 	<form action="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminReservations&amp;action=pjActionExport" method="post" id="frmExportReservations" class="form pj-form">
 		<input type="hidden" name="reservation_export" value="1" />
 		<p>
 			<label class="title"><?php __('lblCalendar'); ?></label>
 			<span class="inline_block">
 				<select name="calendar_id" class="pj-form-field w200">
-					<option value="0">-- <?php __('lblAll');?> --</option>
+					<!-- <option value="0">-- <?php __('lblAll');?> --</option> -->
 					<?php
 					foreach ($tpl['calendar_arr'] as $k => $v)
 					{
@@ -113,8 +113,8 @@ if (isset($tpl['status']))
 						<?php
 						foreach(__('coming_arr', true) as $k => $v)
 						{
-							?><option value="<?php echo $k;?>"<?php echo isset($_POST['coming_period']) ? ($_POST['coming_period'] == $k ? ' selected="selected"' : null) : null; ?>><?php echo $v;?></option><?php 
-						} 
+							?><option value="<?php echo $k;?>"<?php echo isset($_POST['coming_period']) ? ($_POST['coming_period'] == $k ? ' selected="selected"' : null) : null; ?>><?php echo $v;?></option><?php
+						}
 						?>
 					</select>
 				</span>
@@ -123,8 +123,8 @@ if (isset($tpl['status']))
 						<?php
 						foreach(__('made_arr', true) as $k => $v)
 						{
-							?><option value="<?php echo $k;?>"<?php echo isset($_POST['made_period']) ? ($_POST['made_period'] == $k ? ' selected="selected"' : null) : null; ?>><?php echo $v;?></option><?php 
-						} 
+							?><option value="<?php echo $k;?>"<?php echo isset($_POST['made_period']) ? ($_POST['made_period'] == $k ? ' selected="selected"' : null) : null; ?>><?php echo $v;?></option><?php
+						}
 						?>
 					</select>
 				</span>
@@ -140,13 +140,13 @@ if (isset($tpl['status']))
 				</span>
 			</span>
 		</p>
-		
+
 		<p>
 			<label class="title">&nbsp;</label>
 			<input type="submit" id="abSubmitButton" value="<?php isset($_POST['type']) ? ($_POST['type'] == 'file' ? __('btnExport') : __('btnGetFeedURL') ) :  __('btnExport'); ?>" class="pj-button" />
 		</p>
 		<?php
-		if(isset($_POST['type']) && $_POST['type'] == 'feed') 
+		if(isset($_POST['type']) && $_POST['type'] == 'feed')
 		{
 			?>
 			<div class="abFeedContainer">
@@ -157,7 +157,7 @@ if (isset($tpl['status']))
 				</span>
 			</div>
 			<?php
-		} 
+		}
 		?>
 	</form>
 	<script type="text/javascript">

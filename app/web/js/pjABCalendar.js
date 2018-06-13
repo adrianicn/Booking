@@ -1,41 +1,41 @@
 /*!
  * Availability Booking Calendar v4.0
  * http://www.phpjabbers.com/availability-booking-calendar/
- * 
+ *
  * Copyright 2013, StivaSoft Ltd.
  * http://www.phpjabbers.com/license-agreement.php
  * http://www.phpjabbers.com/licence-explained.php
- * 
+ *
  * Date: Fri Aug 02 09:42:32 2013 +0200
  */
 (function (window, undefined) {
 	"use strict";
 	var document = window.document;
-	
+
 	pjQ.$.ajaxSetup({
 		xhrFields: {
 			withCredentials: true
 		}
 	});
-	
+
 	function ABTooltip(opts) {
 		if (!(this instanceof ABTooltip)) {
 			return new ABTooltip(opts);
 		}
-		
+
 		this.opts = null;
 		this.$tooltip = null;
 		this.$tooltipInner = null;
-		
+
 		this.init.call(this, opts);
-		
+
 		return this;
 	}
-	
+
 	ABTooltip.prototype = {
 		init: function (opts) {
 			this.opts = opts;
-			
+
 			var pid = 'abCalendarTooltip_' + this.opts.cid;
 			pjQ.$("#" + pid).remove();
 			this.$tooltip = pjQ.$('<div style="display: none" class="abCalendarTooltip" id="' + pid + '"></div>').appendTo("body");
@@ -51,35 +51,35 @@
 		show: function (el) {
 			var $this = pjQ.$(el),
 				offset = $this.offset();
-			
+
 			this.$tooltipInner.html($this.find(".abCalendarLinkDate").data("price"));
 			this.$tooltip.show().css({
 				"left": (offset.left + ($this.outerWidth() - this.$tooltip.outerWidth()) / 2) + "px",
 				"top": (offset.top - this.$tooltip.outerHeight()) + "px"
 			});
-		}	
+		}
 	};
-	
+
 	function ABCancelIcon(opts) {
 		if (!(this instanceof ABCancelIcon)) {
 			return new ABCancelIcon(opts);
 		}
-		
+
 		this.opts = null;
 		this.$cancel = null;
-		
+
 		this.init.call(this, opts);
-		
+
 		return this;
 	}
-	
+
 	ABCancelIcon.prototype = {
 		init: function (opts) {
 			this.opts = opts;
-			
+
 			var pid = 'abCalendarCancel_' + this.opts.cid;
 			pjQ.$("#" + pid).remove();
-			
+
 			this.$cancel = pjQ.$('<div style="display: none" class="abCalendarCancel" id="' + pid + '"></div>').appendTo("body");
 		},
 		hide: function () {
@@ -91,19 +91,19 @@
 		show: function (el) {
 			var $this = pjQ.$(el),
 				offset = $this.offset();
-			
+
 			this.$cancel.show().css({
 				"left": (offset.left + $this.outerWidth() - this.$cancel.outerWidth()) + "px",
 				"top": (offset.top + $this.outerHeight() - this.$cancel.outerHeight()) + "px"
 			});
-		}	
+		}
 	};
-	
+
 	function ABCalendar(opts) {
 		if (!(this instanceof ABCalendar)) {
 			return new ABCalendar(opts);
 		}
-		
+
 		this.selector = ".abCalendarDate, .abCalendarReservedNightsStart, .abCalendarReservedNightsEnd, .abCalendarPendingNightsStart, .abCalendarPendingNightsEnd, .abCalendarNightsReservedPending, .abCalendarNightsPendingReserved, .abCalendarNightsPendingPending, .abCalendarPartial";
 		this.opts = null;
 		this.$abWrapper = null;
@@ -116,28 +116,28 @@
 		this.outerHeight = null;
 		this.reset.call(this);
 		this.init.call(this, opts);
-		
+
 		return this;
 	}
-	
+
 	function log() {
 		if (window && window.console && window.console.log) {
 			window.console.log.apply(window.console, arguments);
 		}
 	}
-	
+
 	function assert() {
 		if (window && window.console && window.console.assert) {
 			window.console.assert.apply(window.console, arguments);
 		}
 	}
-	
+
 	ABCalendar.sortByTime = function (a, b) {
 		var aTime = Number(a.getAttribute("data-time")),
-			bTime = Number(b.getAttribute("data-time")); 
+			bTime = Number(b.getAttribute("data-time"));
 		return ((aTime < bTime) ? -1 : ((aTime > bTime) ? 1 : 0));
 	};
-	
+
 	ABCalendar.prototype = {
 		reset: function () {
 			this.selectedTime = [];
@@ -151,7 +151,7 @@
 			this.$firstCell = null;
 			this.$secondCell = null;
 			this.message_type = null;
-			
+
 			return this;
 		},
 		init: function (opts) {
@@ -161,7 +161,7 @@
 			this.$abWrapper = pjQ.$("#abWrapper_" + this.opts.cid);
 			this.$abCalendar = pjQ.$("#abCalendar_" + this.opts.cid);
 			this.$abLoader = pjQ.$("#abLoader_" + this.opts.cid);
-			
+
 			mid = "abCalendarMessage_" + this.opts.cid;
 			pjQ.$("#" + mid).remove();
 			this.$abMessage = pjQ.$('<div style="display: none" class="abCalendarMessage" id="' + mid + '"></div>').appendTo("body");
@@ -176,11 +176,11 @@
 					e.preventDefault();
 				}
 				var $this = pjQ.$(this);
-				
+
 				self.message_type = 'calendar';
 				self.loadHandler.call(self);
 				self.getCalendar.call(self, $this.data('year'), $this.data('month'));
-				
+
 				return false;
 			}).on("click.ab", ".abSelectorCancel", function () {
 				self.start_dt = null;
@@ -199,7 +199,7 @@
 					if (data.code === undefined) {
 						return;
 					}
-					if (parseInt(data.code, 10) === 200) 
+					if (parseInt(data.code, 10) === 200)
 					{
 						self.getPaymentForm.call(self, data);
 					} else {
@@ -212,7 +212,7 @@
 			}).on("click.ab", ".abSelectorReturn", function () {
 				var $this = pjQ.$(this),
 					$continue = $this.siblings(".abSelectorConfirm");
-				
+
 				$this.attr("disabled", "disabled");
 				$continue.attr("disabled", "disabled");
 				$this.prepend('<i class="fa fa-repeat fa-spin"></i>&nbsp;');
@@ -221,9 +221,9 @@
 				self.$abWrapper.find(".abCcWrap").hide();
 				self.$abWrapper.find(".abBankWrap").hide();
 				switch (pjQ.$("option:selected", this).val()) {
-				case 'creditcard':
+				/*case 'creditcard':
 					self.$abWrapper.find(".abCcWrap").show();
-					break;
+					break;*/
 				case 'bank':
 					self.$abWrapper.find(".abBankWrap").show();
 					break;
@@ -356,20 +356,20 @@
 					self.paint.call(self, this);
 				});
 			}
-			
+
 			if (this.opts.show_prices) {
-				
+
 				this.tooltip = new ABTooltip({
 					cid: this.opts.cid
 				});
-				
+
 				this.$abWrapper.on("mouseenter.ab", this.selector, function (e) {
 					self.tooltip.show(this);
 				}).on("mouseleave.ab", this.selector, function (e) {
 					self.tooltip.hide();
 				});
 			}
-			
+
 			if (this.opts.booking_behavior === 1) {
 				pjQ.$(document).on("click.ab", function (e) {
 					if (e.target.className.match(/abCalendar/) === null) {
@@ -389,11 +389,11 @@
 					}
 				});
 			}
-			
+
 			this.cancel = new ABCancelIcon({
 				cid: this.opts.cid
 			});
-			
+
 		},
 		errorGuide: function (click, range, time, el) {
 			var str, pattern, i, iCnt,
@@ -416,7 +416,7 @@
 				for (i = 0; i < iCnt; i += 1) {
 					if (time < this.periods[i].start_ts || time > this.periods[i].end_ts) {
 						continue;
-					} 
+					}
 					stack.push(pattern
 						.replace('{FROM}', this.opts.days[this.periods[i].from_day != 7 ? this.periods[i].from_day : 0])
 						.replace('{TO}', this.opts.days[this.periods[i].to_day != 7 ? this.periods[i].to_day : 0])
@@ -431,25 +431,25 @@
 				for (i = 0, iCnt = range.from.length; i < iCnt; i += 1) {
 					from = new Date(range.from[i] * 1000);
 					to = new Date((range.to[i] * 1000));
-					
+
 					if (this.start_dt < time) {
-						
+
 						stack.push(pattern.replace('{DAY}', range.toWeekDays.join("|")));
 						/*stack.push(pattern.replace('{DAY}', range.toWeekDays.join("")));
 						if (this.start_dt === range.from[i]) {
 							stack.push(pattern.replace('{DAY}', range.toWeekDays[i]));
-							
+
 							if (this.start_dt + 86400 * 7 === range.to[i]) {
 								stack.push(pattern.replace('{DAY}', "next " + this.opts.days[to.getDay()]));
 							}
-							
+
 						}*/
-						
+
 					} else if (this.start_dt > time) {
 						stack.push(pattern.replace('{DAY}', range.fromWeekDays.join("|")));
 						/*if (this.start_dt === range.to[i]) {
 							stack.push(pattern.replace('{DAY}', range.fromWeekDays[i]));
-							
+
 							if (this.start_dt - 86400 * 7 === range.from[i]) {
 								stack.push(pattern.replace('{DAY}', "previous " + this.opts.days[from.getDay()]));
 							}
@@ -464,7 +464,7 @@
 			if (type === 'show') {
 				var $el = pjQ.$(el),
 					offset = $el.offset();
-			
+
 				this.$abMessageInner.html(message);
 				this.$abMessage.show().css({
 					"left": (offset.left + ($el.outerWidth() - this.$abMessage.outerWidth()) / 2) + "px",
@@ -477,7 +477,7 @@
 				});
 				this.$abMessageInner.html("");
 			}
-			
+
 			return this;
 		},
 		loadHandler: function () {
@@ -524,7 +524,7 @@
 			if(this.message_type != 'paypal' && this.message_type != 'authorize')
 			{
 				this.$abCalendar.html("");
-			}	
+			}
 			this.$abLoader.find('span.abLoaderMessage').html(msg);
 			this.$abLoader.show();
 
@@ -550,7 +550,7 @@
 		},
 		getBookingForm: function () {
 			var self = this;
-			
+
 			pjQ.$.get([this.opts.folder, "index.php?controller=pjFront&action=pjActionGetBookingForm"].join(""), {
 				"cid": self.opts.cid,
 				"view": self.opts.view,
@@ -575,7 +575,7 @@
 					rules: {},
 					messages: {},
 					submitHandler: function (form) {
-						pjQ.$(form).find(":button, :submit").attr("disabled", "disabled");	
+						pjQ.$(form).find(":button, :submit").attr("disabled", "disabled");
 						pjQ.$(form).find(":submit").prepend('<i class="fa fa-repeat fa-spin"></i>&nbsp;');
 						self.getSummaryForm.call(self, form);
 						return false;
@@ -624,9 +624,9 @@
 					}
 				});
 				self.$abLoader.hide();
-				
+
 				pjQ.$(window).resize(res).trigger("resize");
-				
+
 				var dt = new Date();
 				self.month = month || dt.getMonth() + 1;
 				self.year = year || dt.getFullYear();
@@ -655,7 +655,7 @@
 		},
 		getPaymentForm: function (obj) {
 			var self = this;
-			pjQ.$.get([this.opts.folder, "index.php?controller=pjFront&action=pjActionGetPaymentForm&cid=", 
+			pjQ.$.get([this.opts.folder, "index.php?controller=pjFront&action=pjActionGetPaymentForm&cid=",
 			           this.opts.cid, "&reservation_id=", obj.reservation_id, "&payment_method=", obj.payment_method, "&invoice_id=", obj.invoice_id].join("")).done(function (data) {
 				self.$abCalendar.html(data);
 				switch (obj.payment_method) {
@@ -670,10 +670,24 @@
 					self.$abCalendar.find("form[name='abAuthorize']").trigger('submit');
 					break;
 				case 'creditcard':
+					console.log('Respuesta Tarjeta de Credito',obj);
+					if(obj.url == 1){
+						self.start_dt = null;
+						self.end_dt = null;
+						self.getCalendar.call(self, self.year, self.month);
+						alert('No se pudo realizar la operacion');
+					}else{
+						window.location.href = obj.url;
+					}
+					break;
+				case 'cash':
+					console.log('Objeto',obj);
+					window.location.href = obj.url;
+					break;
 				case 'bank':
 					self.$abLoader.hide();
 					break;
-				}				
+				}
 			}).fail(function () {
 				log("Deferred is rejected");
 			});
@@ -681,9 +695,27 @@
 		getSummaryForm: function (form) {
 			var self = this,
 				qs = this.$abWrapper.find("form.abSelectorBookingForm").serialize();
-			pjQ.$.post([this.opts.folder, "index.php?controller=pjFront&action=pjActionGetSummaryForm&cid=", this.opts.cid, "&view=", this.opts.view, "&locale=", this.opts.locale, "&index=", this.opts.index].join(""), qs).done(function (data) {
-				self.$abCalendar.html(data);				
+			pjQ.$.post([this.opts.folder, "index.php?controller=pjFront&action=pjActionGetSummaryForm&cid=", this.opts.cid, "&view=", this.opts.view, "&locale=", this.opts.locale, "&index=", this.opts.index].join(""), qs)
+			.done(function (data) {
+				var cadena = data,
+				inicio = 0,
+				fin    = 2,
+				subCadena = cadena.substring(inicio, fin);
+				var nueva = subCadena.trim();
+				if(nueva == '00'){
+					pjQ.$(form).find(":button, :submit").removeAttr("disabled");
+					self.start_dt = null;
+					self.end_dt = null;
+					pjQ.$(form).prepend('<i class="fa fa-repeat fa-spin"></i>&nbsp;');
+					pjQ.$(form).attr("disabled", "disabled");
+					pjQ.$(form).siblings().attr("disabled", "disabled");
+					self.getCalendar.call(self, self.year, self.month);
+					alert('No se puede Realizar la reserva. Supero en numero Disponibles de Asientos');
+				}else{
+					self.$abCalendar.html(data);
+				}
 			}).fail(function () {
+				window.console.log.apply('Exitoso');
 				log("Deferred is rejected");
 				pjQ.$(form).find(":button, :submit").removeAttr("disabled");
 			});
@@ -694,13 +726,13 @@
 				selectedClass = [],
 				selectedTime = [],
 				paintedData = [];
-			
+
 			if (end_dt < start_dt) {
 				tmp = start_dt;
 				start_dt = end_dt;
 				end_dt = tmp;
 			}
-			
+
 			for (k = 0, kCnt = this.selectedTime.length; k < kCnt; k += 1) {
 				if (this.selectedTime[k] >= start_dt && this.selectedTime[k] <= end_dt) {
 					index = pjQ.$.inArray(this.selectedTime[k], this.selectedTime);
@@ -708,7 +740,7 @@
 					a_t = this.selectedTime.slice(index, index + 1);
 					selectedClass.push(a_c[0]);
 					selectedTime.push(a_t[0]);
-					
+
 					a_p = pjQ.$.grep(this.paintedData, (function (time) {
 						return function (el, i) {
 							return el !== undefined && el.getAttribute("data-time") == time;
@@ -717,7 +749,7 @@
 					paintedData.push(a_p[0]);
 				}
 			}
-			
+
 			this.paintedData = paintedData;
 			this.selectedClass = selectedClass;
 			this.selectedTime = selectedTime;
@@ -733,9 +765,9 @@
 				this.$abWrapper.find(this.selector).each(function (i, item) {
 					$item = pjQ.$(item);
 					time = parseInt($item.data("time"), 10);
-					if ((self.start_dt > end_dt && time <= self.start_dt && time >= end_dt) || 
+					if ((self.start_dt > end_dt && time <= self.start_dt && time >= end_dt) ||
 						(self.start_dt < end_dt && time >= self.start_dt && time <= end_dt)) {
-						
+
 						$item.addClass("abCalendarSelect");
 						// Add painted table cell to the stack
 						self.paintedData.push($item.get(0));
@@ -762,21 +794,21 @@
 					$item = pjQ.$(item);
 					time = parseInt($item.data("time"), 10);
 					index = pjQ.$.inArray(time, self.selectedTime);
-					if ((self.start_dt > end_dt && time <= self.start_dt && time >= end_dt) || 
+					if ((self.start_dt > end_dt && time <= self.start_dt && time >= end_dt) ||
 						(self.start_dt < end_dt && time >= self.start_dt && time <= end_dt)) {
-						
+
 						if (index === -1) {
 							self.selectedTime.push(time);
 							self.selectedClass.push($item.attr("class"));
 						}
-						
+
 						$item.addClass("abCalendarMark");
 					} else {
 						if (index !== -1) {
 							self.selectedTime.splice(index, 1);
 							self.selectedClass.splice(index, 1);
 						}
-						
+
 						$item.removeClass("abCalendarMark");
 					}
 				});
@@ -795,7 +827,7 @@
 		_first: function ($el, time) {
 			this.start_dt = time;
 			this.$firstCell = $el;
-			
+
 			if (this.opts.booking_behavior === 2 && this.opts.price_plugin === "price") {
 				// Single booking
 				this.end_dt = this.start_dt;
@@ -813,11 +845,11 @@
 		_limit: function (end_dt, tdays, el) {
 			// Check limits for selected dates
 			var index, x, i, iCnt, j, msg,
-				start = this.start_dt < end_dt ? this.start_dt : end_dt, 
+				start = this.start_dt < end_dt ? this.start_dt : end_dt,
 				end = this.start_dt < end_dt ? end_dt : this.start_dt,
-				passDate = [], limitDate = [], 
+				passDate = [], limitDate = [],
 				passedDate = [], limitedDate = [];
-			
+
 			iCnt = this.opts.limits.length;
 			if (iCnt > 0) {
 				//for (j = start, x = 0; j < end; j += 86400, x += 1) {
@@ -842,7 +874,7 @@
 					//break; //Only for Start date. Comment the break statement to apply for all dates between Start and End
 				}
 			}
-			log(passedDate, limitedDate);	
+			log(passedDate, limitedDate);
 			//if (passDate.length > 0) {
 			if (passedDate.length > 0) {
 				//index = pjQ.$.inArray(false, passDate);
@@ -863,12 +895,12 @@
 					return false;
 				}
 			}
-			
+
 			return true;
 		},
 		_clear: function()
 		{
-			if (this.start_dt === null && this.end_dt === null) 
+			if (this.start_dt === null && this.end_dt === null)
 			{
 				this.selectedTime = [];
 				this.selectedClass = [];
@@ -887,7 +919,7 @@
 				$el = pjQ.$(el),
 				time = parseInt($el.data("time"), 10),
 				range = $el.data("range");
-	
+
 			if (this.start_dt === null && this.end_dt === null) {
 				// First click (Start date)
 				this.paintedData = [];
@@ -898,7 +930,7 @@
 					this._clear.call(this);
 					return;
 				}
-				
+
 				// weekly booking
 				if (range.start === null && range.end === null && range.middle !== null) {
 					log('Daily bookings are disabled 1');
@@ -907,7 +939,7 @@
 					this._clear.call(this);
 					return;
 				}
-				
+
 				if (range.start === null && range.end !== null && range.middle !== null) {
 					log('Daily bookings are disabled 2');
 					//this.errorHandler.call(this, 'show', "Daily bookings are disabled (first click)", el);
@@ -915,7 +947,7 @@
 					this._clear.call(this);
 					return;
 				}
-				
+
 				if (range.start === null && range.end !== null && range.middle == null) {
 					log('Daily bookings are disabled 3');
 					//this.errorHandler.call(this, 'show', "Daily bookings are disabled (first click)", el);
@@ -923,10 +955,10 @@
 					this._clear.call(this);
 					return;
 				}
-				
+
 				this._first.call(this, $el, time);
 				return;
-				
+
 			} else {
 				// Second click (End date)
 				if (this.start_dt === time && this.opts.booking_behavior !== 2) {
@@ -934,31 +966,31 @@
 					this.errorHandler.call(this, 'show', this.opts.error_msg.single_na, el);
 					return;
 				}
-				
+
 				if (range.start === null && range.end === null && range.middle === null) {
 					log('Out of range (second click)');
 					this.errorHandler.call(this, 'show', this.opts.error_msg.range_out, el);
 					return;
 				}
-				
+
 				reverse = time > this.start_dt ? false : true;
 				if (!reverse) {
-					
+
 					if (range.end === null && range.middle !== null) {
 						log('Daily bookings are disabled');
 						//this.errorHandler.call(this, 'show', "Daily bookings are disabled (second click)", el);
 						this.errorGuide.call(this, 2, range, time, el);
 						return;
 					}
-					if ((range.end !== null && range.middle !== null) || (range.end !== null && range.middle === null)) 
+					if ((range.end !== null && range.middle !== null) || (range.end !== null && range.middle === null))
 					{
 						var $firstRange = this.$firstCell.data("range");
 						var data_time = this.$firstCell.data("time");
 						var isValid = false;
-						for (i = 0, iCnt = $firstRange.toWeekDays.length; i < iCnt; i += 1) 
+						for (i = 0, iCnt = $firstRange.toWeekDays.length; i < iCnt; i += 1)
 						{
 							var j,jCnt;
-							for (j = 0, jCnt = range.toW.length; j < jCnt; j += 1) 
+							for (j = 0, jCnt = range.toW.length; j < jCnt; j += 1)
 							{
 								if( $firstRange.toWeekDays[i] == range.toW[j])
 								{
@@ -981,16 +1013,16 @@
 						this.errorGuide.call(this, 2, $firstRange, time, el);
 						return;
 					}
-					if ((range.start !== null && range.middle !== null) || (range.start !== null && range.middle === null)) 
-					{						
+					if ((range.start !== null && range.middle !== null) || (range.start !== null && range.middle === null))
+					{
 						var data_time = this.$firstCell.data("time");
 						var isValid = false;
-						for (i = 0, iCnt = range.toWeekDays.length; i < iCnt; i += 1) 
+						for (i = 0, iCnt = range.toWeekDays.length; i < iCnt; i += 1)
 						{
 							var j,jCnt;
 							if($firstRange.toW)
 							{
-								for (j = 0, jCnt = $firstRange.toW.length; j < jCnt; j += 1) 
+								for (j = 0, jCnt = $firstRange.toW.length; j < jCnt; j += 1)
 								{
 									if( range.toWeekDays[i] == $firstRange.toW[j])
 									{
@@ -1008,17 +1040,17 @@
 						}
 					}
 				}
-				
+
 				end_dt = time;
-				
+
 				tdays = Math.abs(end_dt - this.start_dt) / 86400;
 				if (this.opts.price_based_on === "days") {
 					tdays += 1;
 				}
-				
+
 				// Strip all dates that not conform to selected range
 				this.clear.call(this, this.start_dt, end_dt);
-				
+
 				for (i = 0, iCnt = this.selectedClass.length; i < iCnt; i += 1) {
 					if (this.selectedClass[i].match("abCalendarReserved") !== null && this.selectedClass[i].match("abCalendarReservedNights") === null) {
 						log('You can not select fully booked days (second click)');
@@ -1026,12 +1058,12 @@
 						return;
 					}
 				}
-				
+
 				// Sort TD cells
 				this.paintedData.sort(ABCalendar.sortByTime);
-				crFirst = pjQ.$(this.paintedData).first().data("range"); 
+				crFirst = pjQ.$(this.paintedData).first().data("range");
 				crLast = pjQ.$(this.paintedData).last().data("range");
-				for (i = 0, iCnt = this.paintedData.length; i < iCnt; i += 1) 
+				for (i = 0, iCnt = this.paintedData.length; i < iCnt; i += 1)
 				{
 					/*cellRange = pjQ.$(this.paintedData[i]).data("range");
 					if (cellRange.start === null && cellRange.end === null && cellRange.middle === null) {
@@ -1047,25 +1079,25 @@
 						return;
 					}*/
 				}
-				
+
 				// Bug ID: 1293
 				/*if ((crFirst.start || crFirst.end) && crFirst.weekly != crLast.weekly) {
 					this.errorGuide.call(this, 2, range, time, el);
 					log('1');
 					return;
 				}*/
-				
+
 				if (crFirst.weekly == crLast.weekly && (crFirst.start === null || crLast.end === null)) {
 					log('Invalid period');
 					this.errorGuide.call(this, 2, range, time, el);
 					return;
 				}
-				
+
 				// Check limits for selected dates
 				if (!this._limit.call(this, end_dt, tdays, el)) {
 					return;
 				}
-				
+
 				this._second.call(this, $el, end_dt);
 				return;
 			}
@@ -1075,19 +1107,19 @@
 				$el = pjQ.$(el),
 				nightsStart = 0,
 				nightsEnd = 0,
-				pStart = false, 
-				pEnd = false, 
-				pendingReserved = false, 
-				reservedPending = false, 
+				pStart = false,
+				pEnd = false,
+				pendingReserved = false,
+				reservedPending = false,
 				partial = false,
 				time = parseInt($el.data("time"), 10);
-	
+
 			if (this.start_dt === null && this.end_dt === null) {
-				
+
 				// First click (Start date)
 				this._first.call(this, $el, time);
 				return;
-				
+
 			} else {
 				// Second click (End date)
 				if (this.start_dt === time && this.opts.booking_behavior !== 2 && this.opts.price_based_on === "nights") {
@@ -1095,9 +1127,9 @@
 					this.errorHandler.call(this, 'show', this.opts.error_msg.single_na, el);
 					return;
 				}
-				
+
 				end_dt = time;
-				
+
 				tdays = Math.abs(end_dt - this.start_dt) / 86400;
 				if (this.opts.price_based_on === "days") {
 					tdays += 1;
@@ -1105,7 +1137,7 @@
 
 				// Strip all dates that not conform to selected range
 				this.clear.call(this, this.start_dt, end_dt);
-				
+
 				for (i = 0, iCnt = this.selectedClass.length; i < iCnt; i += 1) {
 					if (this.selectedClass[i].match("abCalendarPendingNightsStart") !== null) {
 						pStart = true;
@@ -1123,30 +1155,30 @@
 						partial = true;
 					}
 				}
-				
+
 				if (pendingReserved && reservedPending) {
 					log('p&r');
 					this.errorHandler.call(this, 'show', this.opts.error_msg.fully_booked, el);
 					return;
 				}
-				
+
 				for (i = 0, iCnt = this.selectedClass.length; i < iCnt; i += 1) {
 					if (this.selectedClass[i].match("abCalendarReserved") !== null && this.selectedClass[i].match("abCalendarReservedNights") === null) {
 						log('Rvd');
 						this.errorHandler.call(this, 'show', this.opts.error_msg.fully_booked, el);
 						return;
 					}
-					
+
 					if (this.selectedClass[i].match("abCalendarReservedNightsStart") !== null) {
 						nightsStart += 1;
 					}
-					
+
 					if (this.selectedClass[i].match("abCalendarReservedNightsEnd") !== null) {
 						nightsEnd += 1;
 					}
 
-					if (this.selectedClass[i].match("abCalendarPending") !== null && 
-						this.selectedClass[i].match("abCalendarPendingNights") === null && 
+					if (this.selectedClass[i].match("abCalendarPending") !== null &&
+						this.selectedClass[i].match("abCalendarPendingNights") === null &&
 						//(this.selectedClass[i].match("abCalendarPendingNights") === null || (pStart && pEnd)) &&
 						this.selectedClass[i].match("abCalendarPartial") === null) {
 						log('Pndg');
@@ -1154,36 +1186,36 @@
 						return;
 					}
 				}
-				
+
 				if (!partial && pStart && pEnd) {
 					log('!ptl&start&end');
 					this.errorHandler.call(this, 'show', this.opts.error_msg.fully_booked, el);
 					return;
 				}
-				
+
 				if (nightsStart > 1 || nightsEnd > 1) {
 					log('nS&nE');
 					this.errorHandler.call(this, 'show', this.opts.error_msg.fully_booked, el);
 					return;
 				}
-				
+
 				// Check limits for selected dates
 				if (!this._limit.call(this, end_dt, tdays, el)) {
 					return;
 				}
-				
+
 				this._second.call(this, $el, end_dt);
 				return;
 			}
 		}
 	};
-	
+
 	// expose
 	window.ABCalendar = ABCalendar;
 })(window);
 
 function res() {
-    
+
 	var _td = pjQ.$(".abCalendarTable td");
 	var td_width = _td.width();
 	_td.height(td_width);

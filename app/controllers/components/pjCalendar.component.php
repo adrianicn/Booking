@@ -6,7 +6,7 @@ class pjCalendar
     private $startMonth = 1;
 
     private $dayNames = array("S", "M", "T", "W", "T", "F", "S");
-    
+
     private $weekDays = array("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday");
 
     private $monthNames = array(
@@ -25,19 +25,19 @@ class pjCalendar
     );
 
     private $daysInMonth = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
-    
+
     private $showNextLink = true;
-    
+
     private $showPrevLink = true;
-    
+
     private $weekTitle = "#";
-    
+
     private $prevLink = "&lt;";
-    
+
     private $nextLink = "&gt;";
-    
+
     private $na = 'N/A';
-    
+
     private $classTable = "abCalendarTable";
     private $classTablePrice = "abCalendarTablePrice";
     private $classWeekDay = "abCalendarWeekDay";
@@ -64,45 +64,45 @@ class pjCalendar
 	private $classPriceStatic = "abCalendarPriceStatic";
 	private $classLinkDate = "abCalendarLinkDate";
 	private $classPartial = "abCalendarPartial";
-    
+
     public function __construct()
     {
-    	
+
     }
-    
+
     public function setNA($value)
     {
     	$this->na = $value;
     	return $this;
     }
-    
+
     public function getNA()
     {
     	return $this->na;
     }
-    
+
     public function setPrevLink($value)
     {
     	$this->prevLink = $value;
     	return $this;
     }
-    
+
 	public function setNextLink($value)
     {
     	$this->nextLink = $value;
     	return $this;
     }
-    
+
 	public function getPrevLink()
     {
     	return $this->prevLink;
     }
-    
+
 	public function getNextLink()
     {
     	return $this->nextLink;
     }
-    
+
     public function setShowNextLink($value)
     {
     	if (is_bool($value))
@@ -111,12 +111,12 @@ class pjCalendar
     	}
     	return $this;
     }
-    
+
     public function getShowNextLink()
     {
     	return $this->showNextLink;
     }
-    
+
 	public function setShowPrevLink($value)
     {
     	if (is_bool($value))
@@ -125,7 +125,7 @@ class pjCalendar
     	}
     	return $this;
     }
-    
+
     public function getShowPrevLink()
     {
     	return $this->showPrevLink;
@@ -146,13 +146,13 @@ class pjCalendar
     {
     	return $this->weekDays;
     }
-    
+
     public function setWeekDays($days)
     {
     	$this->weekDays = $days;
     	return $this;
     }
-    
+
     public function getMonthNames()
     {
         return $this->monthNames;
@@ -185,7 +185,7 @@ class pjCalendar
         $this->startMonth = $month;
         return $this;
     }
-    
+
 	public function setWeekTitle($title)
     {
         $this->weekTitle = $title;
@@ -219,9 +219,9 @@ class pjCalendar
         {
             return 0;
         }
-   
+
         $d = $this->daysInMonth[$month - 1];
-   
+
         if ($month == 2)
         {
             if ($year%4 == 0)
@@ -237,7 +237,7 @@ class pjCalendar
                 }
             }
         }
-    
+
         return $d;
     }
 
@@ -248,7 +248,7 @@ class pjCalendar
     	{
     		$reservationsInfo = pjUtil::fixSingleDay($reservationsInfo);
     	}
-    	
+
     	$end_arr = array();
     	foreach ($this->periods as $timestamp_arr)
     	{
@@ -256,7 +256,7 @@ class pjCalendar
     		{
 	    		foreach($timestamp_arr as $range)
 	    		{
-	    			$timestamp = $range['end_ts'] + 24*60*60;    			
+	    			$timestamp = $range['end_ts'] + 24*60*60;
 	    			if(!in_array($timestamp, $end_arr))
 	    			{
 	    				$end_arr[] = $timestamp;
@@ -264,10 +264,10 @@ class pjCalendar
 	    		}
     		}
     	}
-    	
+
     	$max_index = count($this->periods) > 0 ? max(array_keys($this->periods)) : NULL;
     	$min_index = count($this->periods) > 0 ? min(array_keys($this->periods)) : NULL;
-    	
+
     	$haystack = array(
 	    	'calendarStatus1' => $this->classCalendar,
 			'calendarStatus2' => $this->classReserved,
@@ -280,7 +280,7 @@ class pjCalendar
 			'calendarStatus_3_2' => $this->classNightsPendingReserved,
     		'calendarStatusPartial' => $this->classPartial
 		);
-		
+
 		$imageMap = array(
 		/*'abCalendarReservedNightsStart' => sprintf("%sindex.php?controller=pjFront&action=pjActionImage&color1=%s&color2=%s&width=120&height=120", PJ_INSTALL_URL, str_replace('#', '', $this->options['o_background_available']), str_replace('#', '', $this->options['o_background_booked'])),
 			'abCalendarReservedNightsEnd' => sprintf("%sindex.php?controller=pjFront&action=pjActionImage&color1=%s&color2=%s&width=120&height=120", PJ_INSTALL_URL, str_replace('#', '', $this->options['o_background_booked']), str_replace('#', '', $this->options['o_background_available'])),
@@ -300,23 +300,23 @@ class pjCalendar
 			'abCalendarPendingNightsStart' => sprintf("%s%s%u_pending_start.jpg", PJ_INSTALL_URL, PJ_UPLOAD_PATH, $this->calendarId),
 			'abCalendarPendingNightsEnd' => sprintf("%s%s%u_pending_end.jpg", PJ_INSTALL_URL, PJ_UPLOAD_PATH, $this->calendarId)
 		);
-		
+
 		$rand = rand(1,9999);
         $s = "";
 
         $a = $this->adjustDate($m, $y);
         $month = $a[0];
         $year = $a[1];
-        
+
     	$daysInMonth = $this->getDaysInMonth($month, $year);
     	$date = getdate(mktime(12, 0, 0, $month, 1, $year));
-    	
+
     	$first = $date["wday"];
     	$monthName = $this->monthNames[$month];
-    	
+
     	$prev = $this->adjustDate($month - 1, $year);
     	$next = $this->adjustDate($month + 1, $year);
-    	
+
     	if ($showYear == 1)
     	{
     	    $prevMonth = $this->getCalendarLink($prev[0], $prev[1]);
@@ -325,26 +325,26 @@ class pjCalendar
     	    $prevMonth = "";
     	    $nextMonth = "";
     	}
-    	
+
     	$search = array('Month', 'Year');
     	$replace = array($monthName, $showYear > 0 ? $year : "");
     	$header = str_replace($search, $replace, $this->options['o_month_year_format']);
-		    	
+
     	$prevM = ((int) $month - 1) < 1 ? 12 : (int) $month - 1;
     	$prevY = ((int) $month - 1) < 1 ? (int) $year - 1 : (int) $year;
-    	
+
     	$nextM = ((int) $month + 1) > 12 ? 1 : (int) $month + 1;
     	$nextY = ((int) $month + 1) > 12 ? (int) $year + 1 : (int) $year;
-    	
+
     	$cols = $this->weekNumbers ? 8 : 7;
-    	
+
     	$s .= "<table class=\"".($this->isPrice ? $this->classTablePrice : $this->classTable)."\" cellspacing=\"0\" cellpadding=\"0\">\n";
     	$s .= "<tbody><tr>\n";
     	$s .= "<td class=\"".$this->classMonth." ".$this->classMonthPrev."\">" . (!$this->getShowPrevLink() ? '<div class="abCalendarMonthInner">&nbsp;</div>' : '<div class="abCalendarMonthInner"><a data-cid="'.$this->calendarId.'" data-direction="prev" data-month="'.$prevM.'" data-year="'.$prevY.'" href="'.$prevMonth['href'].'" class="'.$prevMonth['class'].'">'.$this->getPrevLink().'</a></div>')  . "</td>\n";
     	$s .= "<td class=\"".$this->classMonth."\" colspan=\"".($cols == 7 ? 5 : 6)."\">$header</td>\n";
     	$s .= "<td class=\"".$this->classMonth." ".$this->classMonthNext."\">" . (!$this->getShowNextLink() ? '<div class="abCalendarMonthInner">&nbsp;</div>' : '<div class="abCalendarMonthInner"><a data-cid="'.$this->calendarId.'" data-direction="next" data-month="'.$nextM.'" data-year="'.$nextY.'" href="'.$nextMonth['href'].'" class="'.$nextMonth['class'].'">'.$this->getNextLink().'</a></div>')  . "</td>\n";
     	$s .= "</tr>\n";
-    	
+
     	$s .= "<tr>\n";
     	if ($this->weekNumbers)
     	{
@@ -367,12 +367,12 @@ class pjCalendar
     	}
 
         $today = getdate(time());
-    	
+
         $rows = 0;
     	while ($d <= $daysInMonth)
     	{
     	    $s .= "<tr>\n";
-    	    
+
     	    if ($this->weekNumbers)
     	    {
     	    	$s .= $weekNumPattern;
@@ -383,7 +383,7 @@ class pjCalendar
     	    	$timestamp = mktime(0, 0, 0, $month, $d, $year);
     	    	$isPast = false;
     	    	$class = "";
-    	    	
+
     	    	if ($year == $today["year"] && $month == $today["mon"] && $d == $today["mday"])
     	    	{
     	    		$class = $this->classCalendar; //calendarToday
@@ -398,7 +398,7 @@ class pjCalendar
     	    		$class = $this->classCalendar;
     	    		$scope = 1;
     	    	}
-    	    	
+
     	    	$_class = NULL;
         	    if ($d > 0 && $d <= $daysInMonth && !$isPast)
         	    {
@@ -409,20 +409,18 @@ class pjCalendar
         	    		$_class = $class;
         	    	}
         	    }
-        	    
+
         	    if ($d < 1 || $d > $daysInMonth) {
         	    	$s .= '<td class="'.$class.'">';
         	    } else {
         	    	$dataRange = array('start' => NULL, 'middle' => NULL, 'end' => NULL, 'weekly' => NULL, 'from' => array(), 'to' => array(), 'weekday'=>array());
-        	    	if (array_key_exists($timestamp, $this->periods) && is_array($this->periods[$timestamp]))
-        	    	{
-        	    		foreach ($this->periods[$timestamp] as $range)
-        	    		{
-        	    			switch ($timestamp)
-        	    			{
+        	    	if (array_key_exists($timestamp, $this->periods) && is_array($this->periods[$timestamp])){
+        	    		foreach ($this->periods[$timestamp] as $range){
+        	    			switch ($timestamp){
         	    				case $range['from']:
         	    					$dataRange['start'] = true;
         	    					$dataRange['from'][] = intval($range['from']);
+
         	    					if(in_array($timestamp, $end_arr))
         	    					{
         	    						$dataRange['end'] = true;
@@ -466,7 +464,7 @@ class pjCalendar
 		        	    				$dataRange['weekly'] = true;
 		        	    			}
 		        	    			$dataRange['fromWeekDays'][] = $this->weekDays[date('w', $range['from'])];
-		        	    			
+
 		        	    			if(isset($this->periods[$range['from']]))
 		        	    			{
 		        	    				$run = $range['from'];
@@ -492,18 +490,25 @@ class pjCalendar
         	    			}
         	    		}
         	    	}
-        	    	
-        	    	$s .= '<td
-        	    		class="abCalendarCell '.$class.'"
-        	    		data-range="'. htmlentities($this->JSON->encode($dataRange)) .'"
-        	    		data-cid="'.$this->calendarId.'" data-time="'.$timestamp.'">';
+
+                        /*if($this->prices[$timestamp]['price'] == 0.16){
+                            $s .= '<td
+                            class="abCalendarCell abCalendarReserved"
+                            data-range="'. htmlentities($this->JSON->encode($dataRange)) .'"
+                            data-cid="'.$this->calendarId.'" data-time="'.$timestamp.'">';
+                        }else{
+                            $s .= '<td
+                            class="abCalendarCell '.$class.'"
+                            data-range="'. htmlentities($this->JSON->encode($dataRange)) .'"
+                            data-cid="'.$this->calendarId.'" data-time="'.$timestamp.'">';
+                        }*/
+
         	    }
-    	               
-    	        if ($d > 0 && $d <= $daysInMonth)
-    	        {
-    	        	$price = NULL;
-    	        	$price_only = NULL;
-    	        	$data_price = NULL;
+
+    	if ($d > 0 && $d <= $daysInMonth){
+        	        	$price = NULL;
+        	        	$price_only = NULL;
+        	        	$data_price = NULL;
 
     	        	//if (!is_null($_class) && array_key_exists($_class, $imageMap))
     	        	$_class = preg_replace('/(\s*'.$this->classPartial.'\s*)/', '', $_class);
@@ -513,20 +518,79 @@ class pjCalendar
     	        		$s .= sprintf('<div class="abImageWrap"><img src="%s?rand=%u" class="abImage" alt="" /></div>', $imageMap[$_class], $rand);
     	        	}
     	        	if ($this->isPrice) {
-    	        		 $price = '<p class="'.$this->classPriceStatic.'">'.(isset($this->prices[$timestamp]) ? pjUtil::formatCurrencySign($this->prices[$timestamp]['priceMin'], $this->options['o_currency']) : $this->getNA()).'</p>';
+    	        		 $price = '<p class="'.$this->classPriceStatic.'">'.(isset($this->prices[$timestamp]) ? pjUtil::formatCurrencySign($this->prices[$timestamp]['priceMin'], $this->options['o_currency'])." ". "/ Availability ".$this->options['o_bookings_per_day'] : $this->getNA()).'</p>';
     	        		 $s .= '<div class="'.$this->classLinkDate.'"><span class="abCalendarLinkDateInner">1'.$d.'</span></div>'.$price;
     	        	} else {
     	        		if ($this->showPrices)
     	        		{
-    	        			$price_only = (
-    	        				isset($this->prices[$timestamp]) ?
-    	        				($this->prices[$timestamp]['priceNum'] > 1 ? __('lblPriceFrom', true) ." ". pjUtil::formatCurrencySign($this->prices[$timestamp]['priceMin'], $this->options['o_currency']) : pjUtil::formatCurrencySign($this->prices[$timestamp]['priceMin'], $this->options['o_currency'])) :
-    	        				$this->getNA()
-    	        			);
-    	        			//$price = '<span class="'.$this->classPrice.'">'.$price_only.'</span>';
-    	        			$data_price = sprintf(' data-price="%s"', pjSanitize::html($price_only));
+
+                                                    $conn = new mysqli(PJ_DB_HOST, PJ_DB_USERNAME, PJ_DB_PASS, PJ_DB_NAME);
+                                                    if($mysqli->connect_errno){
+                                                         echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+                                                    }
+                                                    /*$today = getdate(time());
+                                                    $mesActual = date("m");
+                                                    $fecha = $today["year"] ."-".$mesActual."-".$d;*/
+
+                                                    $verALgo = date('d m Y',$timestamp)."  ==> ";
+                                                    $anio = date('Y',$timestamp);
+                                                    $mes = date("m",$timestamp);
+                                                    $dia = date("d",$timestamp);
+                                                    $results = print_r($verALgo, true);
+                                                    $fecha = $anio ."-".$mes."-".$dia;
+
+                                                    /*$sqlConfirmada = "SELECT COUNT(id) as confirmed FROM booking_abcalendar_reservations where date_from = '".$fecha."' and status = 'Confirmed' and calendar_id = ".$this->calendarId;
+                                                    $confirmada = $conn->query($sqlConfirmada);
+                                                    foreach ($confirmada as $row1) {
+                                                        $ccC = $row1['confirmed'];
+                                                    }
+                                                    $sqlPendiente = "SELECT COUNT(id) as confirmed FROM booking_abcalendar_reservations where date_from = '".$fecha."' and status = 'Pending' and calendar_id = ".$this->calendarId;
+                                                    $pendiente = $conn->query($sqlPendiente);
+                                                    foreach ($pendiente as $row1) {
+                                                        $ccP = $row1['confirmed'];
+                                                    }
+                                                    $disponibles  = $this->options['o_bookings_per_day'] - ($ccC + $ccP);*/
+
+                                                   $sqlConfirmada = "SELECT SUM(c_adults + c_children) as confirmed FROM booking_abcalendar_reservations where date_from = '".$fecha."' and status = 'Confirmed' and calendar_id = ".$this->calendarId;
+                                                    $confirmada = $conn->query($sqlConfirmada);
+                                                    foreach ($confirmada as $row1) {
+                                                        $ccC = $row1['confirmed'];
+                                                    }
+
+                                                    $sqlPendiente = "SELECT SUM(c_adults + c_children) as confirmed FROM booking_abcalendar_reservations where date_from = '".$fecha."' and status = 'Pending' and calendar_id = ".$this->calendarId;
+                                                    $pendiente = $conn->query($sqlPendiente);
+                                                    foreach ($pendiente as $row1) {
+                                                        $ccP = $row1['confirmed'];
+                                                    }
+                                                    $disponibles  = $this->options['o_bookings_per_day'] - ($ccC + $ccP);
+
+                                                if($this->prices[$timestamp]['price'] > 0){
+                                                    $price_only = (
+                                                        isset($this->prices[$timestamp]) ?
+                                                        ($this->prices[$timestamp]['priceNum'] > 1 ? "Availability: ".$disponibles." "." / ".__('lblPriceFrom', true) ." ". pjUtil::formatCurrencySign($this->prices[$timestamp]['priceMin'], $this->options['o_currency']) : "Availability : ".$disponibles." "." / ".pjUtil::formatCurrencySign($this->prices[$timestamp]['priceMin'], $this->options['o_currency'])) :
+                                                        $this->getNA()
+                                                    );
+                                                    $data_price = sprintf(' data-price="%s"', pjSanitize::html($price_only));
+                                                }
+
+                                                if($this->prices[$timestamp]['price'] == 0.16){
+                                                    $s .= '<td
+                                                    class="abCalendarCell abCalendarReserved"
+                                                    data-range="'. htmlentities($this->JSON->encode($dataRange)) .'"
+                                                    data-cid="'.$this->calendarId.'" data-time="'.$timestamp.'">';
+                                                }elseif($disponibles == 0){
+                                                    $s .= '<td
+                                                    class="abCalendarCell abCalendarReserved"
+                                                    data-range="'. htmlentities($this->JSON->encode($dataRange)) .'"
+                                                    data-cid="'.$this->calendarId.'" data-time="'.$timestamp.'">';
+                                                }else{
+                                                    $s .= '<td
+                                                    class="abCalendarCell '.$class.'"
+                                                    data-range="'. htmlentities($this->JSON->encode($dataRange)) .'"
+                                                    data-cid="'.$this->calendarId.'" data-time="'.$timestamp.'">';
+                                                }
     	        		}
-    	        		
+
     	        		/*$res_left_class = '';
     	        		$res_right_class = '';
     	        		if($scope == 1)
@@ -586,10 +650,10 @@ class pjCalendar
 	    	        				}
 	    	        			}
 	    	        		}
-    	        		}	
+    	        		}
     	        		$div_left = '<div class="abLeft'.$res_left_class.'"></div>';
     	        		$div_right = '<div class="abRight'.$res_right_class.'"></div>';
-    	        		
+
     	        		$s .= '<div class="'.$this->classLinkDate.'"'.$data_price.'><span class="abCalendarLinkDateInner">'.$d.'</span>'.$price.$div_left.$div_right.'</div>';*/
     	        		$s .= '<div class="'.$this->classLinkDate.'"'.$data_price.'><span class="abCalendarLinkDateInner">'.$d.'</span>'.$price.'</div>';
     	        	}
@@ -597,7 +661,7 @@ class pjCalendar
     	        	{
     	        		$s .= '</div>';
     	        	}
-    	        	
+
     	            //$link = $this->getDateLink($d, $month, $year);
     	            //$s .= $link == "" ? $d : '<a rel="'.$timestamp.'" href="'.$link['href'].'"'.(!empty($link['onclick']) ? ' onclick="'.$link['onclick'].'"' : NULL).' class="'.$link['class'].'">'.$d.'</a>';
 
@@ -615,7 +679,7 @@ class pjCalendar
     	    $s .= "</tr>\n";
     	    $rows++;
     	}
-    	
+
     	if ($rows == 5)
     	{
     		if ($cols == 7)
@@ -625,7 +689,7 @@ class pjCalendar
     			$s .= '<tr><td class="abCalendarWeekNum">&nbsp;</td>' . str_repeat('<td class="'.$this->classEmpty.'">&nbsp;</td>', 7) . "</tr>";
     		}
     	}
-    	
+
     	$s .= "</tbody></table>\n";
 
     	return $s;
@@ -636,20 +700,20 @@ class pjCalendar
         $a = array();
         $a[0] = $month;
         $a[1] = $year;
-        
+
         while ($a[0] > 12)
         {
             $a[0] -= 12;
             $a[1]++;
         }
-        
+
         while ($a[0] <= 0)
         {
             $a[0] += 12;
             $a[1]--;
         }
-        
+
         return $a;
-    }    
+    }
 }
 ?>

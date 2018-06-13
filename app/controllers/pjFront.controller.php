@@ -655,8 +655,7 @@ class pjFront extends pjAppController
 		}
 	}
 
-	public function pjActionGetPaymentForm()
-	{
+	public function pjActionGetPaymentForm(){
 		$this->setAjax(true);
 
 		if ($this->isXHR())
@@ -709,48 +708,92 @@ class pjFront extends pjAppController
 		}
 	}
 
-	public function pjActionGetSummaryForm()
-	{
+	public function pjActionGetSummaryForm(){
 		$this->setAjax(true);
 
 		if ($this->isXHR())
 		{
-			$_SESSION[$this->defaultCalendar] = array_merge($_SESSION[$this->defaultCalendar], $_POST);
 
-			if (pjObject::getPlugin('pjPrice') !== NULL && $this->option_arr['o_price_plugin'] == 'price')
-			{
-				$this->set('price_arr', pjPriceModel::factory()->getPrice(
-					$_GET['cid'],
-					date("Y-m-d", $_SESSION[$this->defaultCalendar]['start_dt']),
-					date("Y-m-d", $_SESSION[$this->defaultCalendar]['end_dt']),
-					$this->option_arr,
-					@$_SESSION[$this->defaultCalendar]['c_adults'],
-					(int) $this->option_arr['o_bf_children'] !== 1 ? @$_SESSION[$this->defaultCalendar]['c_children'] : 0
-				));
-			} elseif (pjObject::getPlugin('pjPeriod') !== NULL && $this->option_arr['o_price_plugin'] == 'period') {
-				$this->set('price_arr', pjPeriodModel::factory()->getPrice(
-					$_GET['cid'],
-					date("Y-m-d", $_SESSION[$this->defaultCalendar]['start_dt']),
-					date("Y-m-d", $_SESSION[$this->defaultCalendar]['end_dt']),
-					$this->option_arr,
-					@$_SESSION[$this->defaultCalendar]['c_adults'],
-					(int) $this->option_arr['o_bf_children'] !== 1 ? @$_SESSION[$this->defaultCalendar]['c_children'] : 0
-				));
-			}
+			$fechaInicio = date("Y-m-d", $_SESSION[$this->defaultCalendar]['start_dt']);
+                                        $conn = new mysqli(PJ_DB_HOST, PJ_DB_USERNAME, PJ_DB_PASS, PJ_DB_NAME);
+                                        if($mysqli->connect_errno){
+                                             echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+                                        }
+                                        /*$sqlCorreo = "SELECT COUNT(id) as correo FROM booking_abcalendar_reservations where date_from = '".$fechaInicio."' and c_email = '".trim($_POST['c_email'])."' and calendar_id = ".$_GET['cid'];
+                                        $correo = $conn->query($sqlCorreo);
+                                        foreach ($correo as $row1) {
+                                            $correo = $row1['correo'];
+                                        } */
 
-			if ((int) $this->option_arr['o_bf_country'] !== 1 && isset($_SESSION[$this->defaultCalendar]['c_country']))
-			{
-				$this->set('country_arr', pjCountryModel::factory()
-					->select('t1.*, t2.content AS name')
-					->join('pjMultiLang', "t2.model='pjCountry' AND t2.foreign_id=t1.id AND t2.field='name' AND t2.locale='".$this->pjActionGetLocale()."'", 'left outer')
-					->where('t1.status', 'T')
-					->find($_SESSION[$this->defaultCalendar]['c_country'])->getData());
-			}
+                                        $fecha = date("Y-m-d", $_SESSION[$this->defaultCalendar]['start_dt']);
+                                        $idCalendario = $_GET['cid'];
+                                       $sqlConfirmada = "SELECT SUM(c_adults + c_children) as confirmed FROM booking_abcalendar_reservations where date_from = '".$fecha."' and status = 'Confirmed' and calendar_id = ".$idCalendario;
+                                        $confirmada = $conn->query($sqlConfirmada);
+                                        foreach ($confirmada as $row1) {
+                                            $ccC = $row1['confirmed'];
+                                        }
+
+                                        $sqlPendiente = "SELECT SUM(c_adults + c_children) as confirmed FROM booking_abcalendar_reservations where date_from = '".$fecha."' and status = 'Pending' and calendar_id = ".$idCalendario;
+                                        $pendiente = $conn->query($sqlPendiente);
+                                        foreach ($pendiente as $row1) {
+                                            $ccP = $row1['confirmed'];
+                                        }
+
+                                        $sqlBookingPerDay = "SELECT * FROM booking_abcalendar_options where foreign_id = $idCalendario AND `key` = 'o_bookings_per_day'";
+                                        $perday = $conn->query($sqlBookingPerDay);
+                                        foreach ($perday as $row2) {
+                                            $o_bookings_per_day = $row2['value'];
+                                        }
+
+                                        if($ccC == NULL && $ccP == NULL ){
+                                        	$disponibles  = $o_bookings_per_day;
+                                        	$totalReservacion = $_POST['c_adults'] + $_POST['c_children'];
+                                        	$cuenta = $disponibles - $totalReservacion;
+                                        }else{
+				$disponibles  = $o_bookings_per_day - ($ccC + $ccP);
+                                        	$totalReservacion = $_POST['c_adults'] + $_POST['c_children'];
+                                        	$cuenta = $disponibles - $totalReservacion;
+                                        }
+
+                                        if($cuenta > -1){
+                                        	echo '01';
+				$_SESSION[$this->defaultCalendar] = array_merge($_SESSION[$this->defaultCalendar], $_POST);
+
+				if (pjObject::getPlugin('pjPrice') !== NULL && $this->option_arr['o_price_plugin'] == 'price')
+				{
+					$this->set('price_arr', pjPriceModel::factory()->getPrice(
+						$_GET['cid'],
+						date("Y-m-d", $_SESSION[$this->defaultCalendar]['start_dt']),
+						date("Y-m-d", $_SESSION[$this->defaultCalendar]['end_dt']),
+						$this->option_arr,
+						@$_SESSION[$this->defaultCalendar]['c_adults'],
+						(int) $this->option_arr['o_bf_children'] !== 1 ? @$_SESSION[$this->defaultCalendar]['c_children'] : 0
+					));
+				} elseif (pjObject::getPlugin('pjPeriod') !== NULL && $this->option_arr['o_price_plugin'] == 'period') {
+					$this->set('price_arr', pjPeriodModel::factory()->getPrice(
+						$_GET['cid'],
+						date("Y-m-d", $_SESSION[$this->defaultCalendar]['start_dt']),
+						date("Y-m-d", $_SESSION[$this->defaultCalendar]['end_dt']),
+						$this->option_arr,
+						@$_SESSION[$this->defaultCalendar]['c_adults'],
+						(int) $this->option_arr['o_bf_children'] !== 1 ? @$_SESSION[$this->defaultCalendar]['c_children'] : 0
+					));
+				}
+
+				if ((int) $this->option_arr['o_bf_country'] !== 1 && isset($_SESSION[$this->defaultCalendar]['c_country'])){
+					$this->set('country_arr', pjCountryModel::factory()
+						->select('t1.*, t2.content AS name')
+						->join('pjMultiLang', "t2.model='pjCountry' AND t2.foreign_id=t1.id AND t2.field='name' AND t2.locale='".$this->pjActionGetLocale()."'", 'left outer')
+						->where('t1.status', 'T')
+						->find($_SESSION[$this->defaultCalendar]['c_country'])->getData());
+				}
+                                        }else{
+                                        	echo '00';
+                                        }
 		}
 	}
 
-	public function pjActionImage()
-	{
+	public function pjActionImage(){
 		$this->setAjax(true);
 		$this->setLayout('pjActionEmpty');
 
@@ -811,8 +854,7 @@ class pjFront extends pjAppController
 	}
 
 
-	private static function pjActionSetTime($timezone)
-	{
+	private static function pjActionSetTime($timezone){
 		$offset = $timezone / 3600;
 		if ($offset > 0)
 		{
@@ -835,8 +877,7 @@ class pjFront extends pjAppController
 		return;
 	}
 
-	public function pjActionGetAvailability()
-	{
+	public function pjActionGetAvailability(){
 		$this->setAjax(true);
 
 		if ($this->isXHR())
@@ -882,8 +923,7 @@ class pjFront extends pjAppController
 		}
 	}
 
-	public function pjActionLoadAvailabilityCss()
-	{
+	public function pjActionLoadAvailabilityCss(){
 		header("Content-Type: text/css; charset=utf-8");
 
 		$arr = array(
@@ -1016,8 +1056,7 @@ class pjFront extends pjAppController
 		exit;
 	}
 
-	public function pjActionLoadCss()
-	{
+	public function pjActionLoadCss(){
 		$arr = array(
 			array('file' => 'ABCalendar.css', 'path' => PJ_CSS_PATH),
 			array('file' => 'ABFonts.min.css', 'path' => PJ_CSS_PATH)
@@ -1151,24 +1190,14 @@ class pjFront extends pjAppController
 		// ACTUALIZO LA URL EN LA TABLA OPTION E INSERTO EL MD5 EN       //
 		// 			LA TABLA TOKENS 			         //
 		//****************************************************************//
-		$dbHost = 'localhost';
-		$dbUsername = 'root';
-		$dbPassword = '12345';
-		$dbName = 'igtrip';
-
-		$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+		$conn = new mysqli(PJ_DB_HOST, PJ_DB_USERNAME, PJ_DB_PASS, PJ_DB_NAME);
 		if($mysqli->connect_errno){
 		     echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 		}
 		$idCalendario = $_GET["cid"];
 		$datetime = date('Y-m-d H:i:s') ;
-        		$ramdomKey = md5(uniqid(rand(1,6)));
-        		$url = "http://localhost/Booking/index.php?controller=pjAdmin&action=pjActionLogin&rk=".$ramdomKey;
 
-		$sql = "UPDATE booking_abcalendar_options SET value = '$url'
-	    		WHERE foreign_id = $idCalendario AND  `key` = 'o_thankyou_page'";
-		$conn->query($sql);
-
+		//INSERTO EN LA TABLA TOKEN PARA PODER VERIFICAR
 		$sql1 = "INSERT INTO tokens (id_calendario,uuid,consumido,created_at,updated_at) VALUES($idCalendario,'$ramdomKey',false,'$datetime','$datetime') ";
 		$conn->query($sql1);
 
@@ -1275,34 +1304,130 @@ class pjFront extends pjAppController
 					pjFront::pjActionConfirmSend($this->option_arr, $params, 'confirm');
 				}
 
+				/*****************************************************************/
+				/*                         PARA EL PAGO CON CASH                               */
+				/*****************************************************************/
 				if (isset($data['payment_method']) && $data['payment_method'] == 'cash')
 				{
-					/*$results = print_r($data, true);
-			                          $file = "/var/www/html/pruebaFacturas.txt";
-					$open = fopen($file,"a");
-					if ( $open ) {
-					    fwrite($open,$results);
-					    fclose($open);
-					}*/
-					$sqlCash = "SELECT content FROM booking_abcalendar_multi_lang WHERE model = 'pjCalendar' AND  field = 'name' AND foreign_id =". $data['calendar_id'];
+					/*$sqlCash = "SELECT content FROM booking_abcalendar_multi_lang WHERE model = 'pjCalendar' AND  field = 'name' AND foreign_id =". $data['calendar_id'];
 					$cash = $conn->query($sqlCash);
 					$nombreCalendario = "";
 					foreach ($cash as $row2) {
         						$nombreCalendario = $row2['content'];
         					}
 
- 				$conn->query("INSERT INTO cashes (id_reserva, nombreCalendario, estadoPago, fechaPago, montoPago,consumido, created_at, updated_at)
-				VALUES(".$reservation_id.",'".$nombreCalendario."', 'PorProcesar','".date("Y-m-d H:i:s")."', '".$data['amount']."',false ,'".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."')");
+	 				$conn->query("INSERT INTO cashes (id_reserva, nombreCalendario, estadoPago, fechaPago, montoPago,consumido, created_at, updated_at)
+					VALUES(".$reservation_id.",'".$nombreCalendario."', 'PorProcesar','".date("Y-m-d H:i:s")."', '".$data['amount']."',false ,'".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."')");*/
+					$tokenReserva = md5($reservation_id);
+					$sql = "UPDATE booking_abcalendar_reservations SET token_consulta = '$tokenReserva'
+				    		WHERE id = $reservation_id";
+					$conn->query($sql);
+					/*RECUPERO EL NOMBRE DEL CALENDARIO*/
+					$sqlCash = "SELECT content FROM booking_abcalendar_multi_lang WHERE model = 'pjCalendar' AND  field = 'name' AND foreign_id =". $data['calendar_id'];
+					$cash = $conn->query($sqlCash);
+					$nombreCalendario = "";
+					foreach ($cash as $row2) {
+        						$nombreCalendario = $row2['content'];
+        					}
+        					/*GUARDO LA INFORMACION EN LA TABLA DE PAGOS*/
+        					$conn->query("INSERT INTO pagos(`calendario_id`, `reservacion_id`, `nombre_calendario`, `tipo`, `estado_pago`, `fecha_pago`, `consumido`,`token`)
+					VALUES(".$data['calendar_id'].",".$reservation_id.",'".$nombreCalendario."', 'cash','Pendiente', '".date("Y-m-d H:i:s")."',0,'".$tokenReserva."')");
+					$urlCash = PJ_URL_LARAVEL.'/confirmacionEfectivo/'.$tokenReserva;
 
 				}
 
+				/*****************************************************************/
+				/*              PARA EL PAGO CON TARJETA DE CREDITO                  */
+				/*     ARMO LA INFORMACION Y REDIRECCIONO A PAGO MEDIOS  */
+				/*****************************************************************/
+				if (isset($data['payment_method']) && $data['payment_method'] == 'creditcard'){
 
-				pjAppController::jsonResponse(array(
-					'status' => 'OK', 'code' => 200, 'text' => 'Reservation was saved.',
-					'reservation_id' => $reservation_id,
-					'invoice_id' => @$invoice_arr['data']['id'],
-					'payment_method' => @$data['payment_method']
-				));
+					$tokenReserva = md5($reservation_id);
+					$sql = "UPDATE booking_abcalendar_reservations SET token_consulta = '$tokenReserva'
+				    		WHERE id = $reservation_id";
+					$conn->query($sql);
+					/*RECUPERO EL NOMBRE DEL CALENDARIO*/
+					$sqlCash = "SELECT content FROM booking_abcalendar_multi_lang WHERE model = 'pjCalendar' AND  field = 'name' AND foreign_id =". $data['calendar_id'];
+					$cash = $conn->query($sqlCash);
+					$nombreCalendario = "";
+					foreach ($cash as $row2) {
+        						$nombreCalendario = $row2['content'];
+        					}
+        					/*GUARDO LA INFORMACION EN LA TABLA DE PAGOS*/
+        					$conn->query("INSERT INTO pagos(`calendario_id`, `reservacion_id`, `nombre_calendario`, `tipo`, `estado_pago`, `fecha_pago`, `consumido`,`token`)
+					VALUES(".$data['calendar_id'].",".$reservation_id.",'".$nombreCalendario."', 'tdc','Pendiente', '".date("Y-m-d H:i:s")."',0,'".$ramdomKey."')");
+
+        					/*ARMO EL ARRAY CON LA INFORMACION PARA PAGO MEDIOS*/
+			    		$dataOrden = array(	'commerce_id' => '8226', //ID unico por comercio
+			    				'customer_id' => $data['c_cedula'] , //Identificaci�n del tarjeta habiente (RUC, C�dula, Pasaporte)
+			    				'customer_name' => $data['c_name'], //Nombres del tarjeta habiente
+			    				'customer_lastname' => $data['c_lastname'], //Apellidos del tarjeta habiente
+			    				'customer_phones' => $data['c_phone'],  //Tel�fonos del tarjeta habiente
+			    				//'customer_address' => $data['c_address'],  //Direcci�n del tarjeta habiente
+			    				'customer_address' => 'San Carlos',  //Direcci�n del tarjeta habiente
+			    				'customer_email' => $data['c_email'],  //Correo electr�nico del tarjeta habiente
+			    				'customer_language' => 'es',  //Idioma del tarjeta habiente
+			    				'order_description' => $nombreCalendario,  //Descripci�n de la �rden
+			    				'order_amount' => $data['amount'], //Monto total de la �rden
+			    				'order_id' => $reservation_id, //id de la reservacion
+			    				//'response_url' => 'https://f3f39f3f.ngrok.io/pagoMedios.php',
+			    				'response_url' => ' https://89405492.ngrok.io/confirmacion',
+			    				//'response_url' => PJ_URL_LARAVEL.'/confirmacion/'.$tokenReserva,
+			    			);
+			    		//./ngrok http 8000
+			    		//$url = 'https://app.pagomedios.com/api/setorder/'; //URL del servicio web REST
+			    		$url = 'https://app.redypago.com/api/setorder/'; //URL del servicio web REST
+			 	    	$params = http_build_query( $dataOrden ); //Tranformamos un array en formato GET
+				    	//Consumo del servicio Rest
+				    	$curl = curl_init();
+				    	curl_setopt($curl, CURLOPT_URL, $url.'?'.$params);
+					//curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+				    	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+				    	curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+				    	curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+				    	$response = curl_exec($curl);
+				    	curl_close($curl);
+				    	$array = json_decode($response);
+
+					if($array->status == 1){
+						$urltdc = $array->data->payment_url;
+					}else if($array->status == 0){
+						$urltdc = PJ_URL_LARAVEL.'/errorpagotdc/'.$tokenReserva;
+					}
+
+				}
+
+				if (isset($data['payment_method']) && $data['payment_method'] == 'creditcard'){
+					if($array->data->payment_url){
+						$urltdc = $array->data->payment_url;
+					}else{
+						$urltdc = 1;
+					}
+
+					pjAppController::jsonResponse(array(
+						'status' => 'OK', 'code' => 200,
+						'reservation_id' => $reservation_id,
+						'invoice_id' => @$invoice_arr['data']['id'],
+						'payment_method' => @$data['payment_method'],
+						'url' => $urltdc
+					));
+				}elseif (isset($data['payment_method']) && $data['payment_method'] == 'cash'){
+					pjAppController::jsonResponse(array(
+						'status' => 'OK', 'code' => 200,
+						'reservation_id' => $reservation_id,
+						'invoice_id' => @$invoice_arr['data']['id'],
+						'payment_method' => @$data['payment_method'],
+						'url' => $urlCash
+					));
+				}else{
+					pjAppController::jsonResponse(array(
+						'status' => 'OK', 'code' => 200, 'text' => 'Reservation was saved.',
+						'reservation_id' => $reservation_id,
+						'invoice_id' => @$invoice_arr['data']['id'],
+						'payment_method' => @$data['payment_method']
+					));
+				}
 
 
 			} else {
@@ -1310,19 +1435,7 @@ class pjFront extends pjAppController
 			}
 		}
 		exit;
-		/*if (isset($data['payment_method']) && $data['payment_method'] == 'cash')
-					{
-					$authorize = "Entra ,as abajo".$data['payment_method']." ".$reservation_id;
-			        		$results = print_r($authorize, true);
-			                          $file = "/var/www/html/pruebaFacturas.txt";
-					$open = fopen($file,"a");
-					if ( $open ) {
-					    fwrite($open,$results);
-					    fclose($open);
-					}
 
-						pjUtil::redirect("http://localhost:8000/confirmacionEfectivo/".$reservation_id);
-		}*/
 	}
 
 	public function pjActionLocale()
@@ -1367,6 +1480,7 @@ class pjFront extends pjAppController
 		header("Access-Control-Allow-Credentials: true");
 		header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 		header("Access-Control-Allow-Headers: Origin, X-Requested-With");
+
 	}
 }
 ?>

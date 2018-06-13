@@ -7,7 +7,7 @@ if (!defined("ROOT_PATH"))
 class pjInvoice extends pjInvoiceAppController
 {
 	public $invoiceErrors = 'InvoiceErrors';
-	
+
 	private function sortTimezones(Array $array)
 	{
 		$ordered = array();
@@ -20,11 +20,11 @@ class pjInvoice extends pjInvoiceAppController
 		}
 		return $ordered + $array;
 	}
-	
+
 	public function pjActionCheckUniqueId()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && isset($_GET['uuid']))
 		{
 			$pjInvoiceModel = pjInvoiceModel::factory();
@@ -36,11 +36,11 @@ class pjInvoice extends pjInvoiceAppController
 		}
 		exit;
 	}
-	
+
 	public function pjActionAddItem()
 	{
 		$this->setAjax(true);
-		
+
 		if ($this->isXHR() && $this->isLoged() && $this->isInvoiceReady())
 		{
 			if (isset($_POST['invoice_add']))
@@ -60,7 +60,7 @@ class pjInvoice extends pjInvoiceAppController
 				}
 				pjAppController::jsonResponse(array('status' => 'ERR', 'code' => 100, 'text' => ''));
 			}
-			
+
 			if (isset($_GET['invoice_id']) && (int) $_GET['invoice_id'] > 0)
 			{
 				$this->set('arr', pjInvoiceModel::factory()->find($_GET['invoice_id'])->getData());
@@ -68,23 +68,23 @@ class pjInvoice extends pjInvoiceAppController
 			$this->set('config_arr', pjInvoiceConfigModel::factory()->getConfigData($this->getLocaleId()));
 		}
 	}
-		
+
 	public function pjActionConfirmAuthorize()
 	{
 		$this->setAjax(true);
-		
+
 		if (pjObject::getPlugin('pjAuthorize') === NULL)
 		{
 			$this->log('Authorize.NET plugin not installed');
 			exit;
 		}
-		
+
 		if (!isset($_POST['x_invoice_num']))
 		{
 			$this->log('Missing arguments');
 			exit;
 		}
-		
+
 		$pjInvoiceModel = pjInvoiceModel::factory();
 
 		$invoice_arr = $pjInvoiceModel->where('t1.uuid', $_POST['x_invoice_num'])->limit(1)->findAll()->getDataIndex(0);
@@ -94,14 +94,14 @@ class pjInvoice extends pjInvoiceAppController
 			exit;
 		}
 		$config_arr = pjInvoiceConfigModel::factory()->getConfigData($this->getLocaleId());
-		
+
 		$params = array(
 			'transkey' => @$config_arr['p_authorize_key'],
 			'x_login' => @$config_arr['p_authorize_mid'],
 			'md5_setting' => @$config_arr['p_authorize_hash'],
 			'key' => md5($this->option_arr['private_key'] . PJ_SALT)
 		);
-		
+
 		$response = $this->requestAction(array('controller' => 'pjAuthorize', 'action' => 'pjActionConfirm', 'params' => $params), array('return'));
 		if ($response !== FALSE && $response['status'] === 'OK')
 		{
@@ -118,21 +118,21 @@ class pjInvoice extends pjInvoiceAppController
 	public function pjActionConfirmPaypal()
 	{
 		$this->setAjax(true);
-		
+
 		if (pjObject::getPlugin('pjPaypal') === NULL)
 		{
 			$this->log('Paypal plugin not installed');
 			exit;
 		}
-		
+
 		if (!isset($_POST['custom']))
 		{
 			$this->log('Missing arguments');
 			exit;
 		}
-		
+
 		$pjInvoiceModel = pjInvoiceModel::factory();
-		
+
 		$invoice_arr = $pjInvoiceModel->where('t1.uuid', $_POST['custom'])->limit(1)->findAll()->getDataIndex(0);
 		if ($invoice_arr === FALSE || empty($invoice_arr))
 		{
@@ -165,7 +165,7 @@ class pjInvoice extends pjInvoiceAppController
 		}
 		exit;
 	}
-	
+
 	public function pjActionCreate()
 	{
 		$params = $this->getParams();
@@ -173,14 +173,14 @@ class pjInvoice extends pjInvoiceAppController
 		{
 			return array('status' => 'ERR', 'code' => '101', 'text' => 'Key is not set or invalid');
 		}
-		
+
 		$locale_id = isset($params['locale_id']) && !empty($params['locale_id']) ? $params['locale_id'] : $this->getLocaleId();
 		$config = pjInvoiceConfigModel::factory()->getConfigData($locale_id);
 		$config['id'] = NULL;
 		unset($config['id']);
-		
+
 		$data = array_merge($config, $params);
-		
+
 		$invoice_id = pjInvoiceModel::factory($data)->insert()->getInsertId();
 		if ($invoice_id !== FALSE && (int) $invoice_id > 0)
 		{
@@ -198,20 +198,20 @@ class pjInvoice extends pjInvoiceAppController
 			return array('status' => 'ERR', 'code' => '100', 'text' => 'Invoice has not been created.');
 		}
 	}
-	
+
 	public function pjActionCreateInvoice()
 	{
 		$this->checkLogin();
-		
+
 		if (!$this->isInvoiceReady())
 		{
 			$this->set('status', 2);
 			return;
 		}
-		
+
 		$pjInvoiceModel = pjInvoiceModel::factory();
 		$pjInvoiceItemModel = pjInvoiceItemModel::factory();
-			
+
 		if (isset($_POST['invoice_create']))
 		{
 			$data = array();
@@ -239,7 +239,7 @@ class pjInvoice extends pjInvoiceAppController
 			}
 			pjUtil::redirect(PJ_INSTALL_URL . "index.php?controller=pjInvoice&action=pjActionInvoices&err=$err");
 		} else {
-			
+
 			if (isset($_REQUEST['items']) && !empty($_REQUEST['items']))
 			{
 				$pjInvoiceItemModel->where('tmp', $_REQUEST['tmp'])->eraseAll();
@@ -251,7 +251,7 @@ class pjInvoice extends pjInvoiceAppController
 			}
 			$this->set('uuid', pjInvoiceModel::factory()->getInvoiceID());
 			$this->set('config_arr', pjInvoiceConfigModel::factory()->getConfigData($this->getLocaleId()));
-			
+
 			$this
 				->appendJs('jquery.datagrid.js', PJ_FRAMEWORK_LIBS_PATH . 'pj/js/')
 				->appendJs('jquery.validate.min.js', PJ_THIRD_PARTY_PATH . 'validate/')
@@ -260,11 +260,11 @@ class pjInvoice extends pjInvoiceAppController
 			;
 		}
 	}
-	
+
 	public function pjActionDelete()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged() && $this->isInvoiceReady())
 		{
 			$response = array();
@@ -279,11 +279,11 @@ class pjInvoice extends pjInvoiceAppController
 		}
 		exit;
 	}
-	
+
 	public function pjActionDeleteBulk()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged() && $this->isInvoiceReady())
 		{
 			if (isset($_POST['record']) && count($_POST['record']) > 0)
@@ -294,16 +294,16 @@ class pjInvoice extends pjInvoiceAppController
 		}
 		exit;
 	}
-	
+
 	public function pjActionDeleteItem()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged() && $this->isInvoiceReady())
 		{
 			$pjInvoiceItemModel = pjInvoiceItemModel::factory();
 			$invoice_item = $pjInvoiceItemModel->find($_GET['id'])->getData();
-			
+
 			if (!empty($invoice_item) && $pjInvoiceItemModel->erase()->getAffectedRows() == 1)
 			{
 				$pjInvoiceModel = pjInvoiceModel::factory();
@@ -320,15 +320,15 @@ class pjInvoice extends pjInvoiceAppController
 		}
 		exit;
 	}
-	
+
 	public function pjActionDeleteLogo()
 	{
 		$this->setAjax(true);
-		
+
 		if ($this->isXHR() && $this->isLoged() && $this->isInvoiceReady())
 		{
 			$pjInvoiceConfigModel = pjInvoiceConfigModel::factory();
-			
+
 			$arr = $pjInvoiceConfigModel->find(1)->getData();
 			if (!empty($arr) && !empty($arr['y_logo']))
 			{
@@ -346,7 +346,7 @@ class pjInvoice extends pjInvoiceAppController
 	public function pjActionEditItem()
 	{
 		$this->setAjax(true);
-		
+
 		if ($this->isXHR() && $this->isLoged() && $this->isInvoiceReady())
 		{
 			if (isset($_POST['invoice_edit']))
@@ -355,7 +355,7 @@ class pjInvoice extends pjInvoiceAppController
 				$response = array('code' => 200);
 				pjAppController::jsonResponse($response);
 			}
-			
+
 			if (isset($_GET['id']) && (int) $_GET['id'] > 0)
 			{
 				$this->set('arr', pjInvoiceItemModel::factory()
@@ -366,24 +366,34 @@ class pjInvoice extends pjInvoiceAppController
 			}
 		}
 	}
-	
+
 	public function pjActionGetInvoices()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged() && $this->isInvoiceReady())
 		{
-			$pjInvoiceModel = pjInvoiceModel::factory();
-			
+			$pjCalendarModel = pjCalendarModel::factory()
+						->select('id')
+						->where('id_usuario_servicio', $_SESSION['usuario_servicio'])
+						->findAll()->getData();
+			$array_calendarios = array();
+			foreach ($pjCalendarModel as $key => $value) {
+				$array_calendarios[] = $value['id'];
+			}
+			$pjInvoiceModel = pjInvoiceModel::factory()->whereIn('t1.foreign_id', $array_calendarios);
+
+
 			if (isset($_GET['foreign_id']))
 			{
 				$foreign_arr = $this->get('foreign_arr');
+
 				if ((int) $_GET['foreign_id'] > 0 && $foreign_arr !== FALSE && !empty($foreign_arr))
 				{
 					$pjInvoiceModel->where('t1.foreign_id', $_GET['foreign_id']);
 				}
 			}
-			
+
 			if (isset($_GET['q']) && !empty($_GET['q']))
 			{
 				$q = $pjInvoiceModel->escapeStr($_GET['q']);
@@ -399,7 +409,7 @@ class pjInvoice extends pjInvoiceAppController
 					->orWhere('t1.s_email LIKE', "%$q%")
 				;
 			}
-				
+
 			$column = 'created';
 			$direction = 'DESC';
 			if (isset($_GET['direction']) && isset($_GET['column']) && in_array(strtoupper($_GET['direction']), array('ASC', 'DESC')))
@@ -423,20 +433,20 @@ class pjInvoice extends pjInvoiceAppController
 			{
 				$data[$k]['total_formated'] = pjUtil::formatCurrencySign(number_format($v['total'], 2), !empty($v['currency']) ? $v['currency'] : $this->option_arr['o_currency']);
 			}
-						
-			pjAppController::jsonResponse(compact('data', 'total', 'pages', 'page', 'rowCount', 'column', 'direction'));
+
+			pjAppController::jsonResponse(compact('data', 'total', 'pages', 'page', 'rowCount', 'column', 'direction','pjCalendarModel'));
 		}
 		exit;
 	}
-	
+
 	public function pjActionGetItems()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged() && $this->isInvoiceReady())
 		{
 			$pjInvoiceItemModel = pjInvoiceItemModel::factory();
-			
+
 			$column = 'id';
 			$direction = 'ASC';
 			if (isset($_GET['direction']) && isset($_GET['column']) && in_array(strtoupper($_GET['direction']), array('ASC', 'DESC')))
@@ -445,7 +455,7 @@ class pjInvoice extends pjInvoiceAppController
 				$direction = strtoupper($_GET['direction']);
 			}
 			$pjInvoiceItemModel->where('t1.id', -1);
-			
+
 			if (isset($_GET['invoice_id']) && (int) $_GET['invoice_id'] > 0)
 			{
 				$pjInvoiceItemModel->reset()->where('t1.invoice_id', $_GET['invoice_id']);
@@ -454,7 +464,7 @@ class pjInvoice extends pjInvoiceAppController
 			{
 				$pjInvoiceItemModel->reset()->where('t1.tmp', $_GET['tmp']);
 			}
-			
+
 			$data = $pjInvoiceItemModel
 				->select('t1.*, t2.currency')
 				->join('pjInvoice', 't2.id=t1.invoice_id', 'left outer')
@@ -464,22 +474,22 @@ class pjInvoice extends pjInvoiceAppController
 				$data[$k]['unit_price_formated'] = pjUtil::formatCurrencySign(number_format($v['unit_price'], 2), !empty($v['currency']) ? $v['currency'] : $this->option_arr['o_currency']);
 				$data[$k]['amount_formated'] = pjUtil::formatCurrencySign(number_format($v['amount'], 2), !empty($v['currency']) ? $v['currency'] : $this->option_arr['o_currency']);
 			}
-			
+
 			pjAppController::jsonResponse(compact('data', 'column', 'direction'));
 		}
 		exit;
 	}
-	
+
 	public function pjActionIndex()
 	{
 		$this->checkLogin();
-		
+
 		if (!$this->isInvoiceReady())
 		{
 			$this->set('status', 2);
 			return;
 		}
-		
+
 		if (isset($_POST['invoice_post']))
 		{
 			if (isset($_FILES['y_logo']) && !empty($_FILES['y_logo']['tmp_name']))
@@ -496,14 +506,14 @@ class pjInvoice extends pjInvoiceAppController
 					if ($pjImage->save($original))
 					{
 						$pjImage->loadImage($original)->resizeSmart(120, 60)->saveImage($thumb);
-						
+
 						$_POST['y_logo'] = $thumb;
 						@unlink($original);
 					}
 				} else {
 					$time = time();
 					$_SESSION[$this->invoiceErrors][$time] = $pjImage->getError();
-				
+
 					pjUtil::redirect(PJ_INSTALL_URL . "index.php?controller=pjInvoice&action=pjActionIndex&err=PIN03&errTime=" . $time);
 				}
 			}
@@ -533,32 +543,32 @@ class pjInvoice extends pjInvoiceAppController
 			$data['si_shipping'] = isset($_POST['si_shipping']) ? 1 : 0;
 			$data['o_qty_is_int'] = isset($_POST['o_qty_is_int']) ? 1 : 0;
 			$data['o_use_qty_unit_price'] = isset($_POST['o_use_qty_unit_price']) ? 1 : 0;
-			
+
 			pjInvoiceConfigModel::factory()
 				->set('id', 1)
 				->modify(array_merge($_POST, $data));
-			
+
 			if (isset($_POST['i18n']))
 			{
 				pjMultiLangModel::factory()->updateMultiLang($_POST['i18n'], 1, 'pjInvoiceConfig');
 			}
-			
+
 			pjUtil::redirect(PJ_INSTALL_URL . "index.php?controller=pjInvoice&action=pjActionIndex&err=PIN02&tab_id=" . $_POST['tab_id']);
 		}
-		
+
 		$this->set('timezones', $this->sortTimezones(__('timezones', true)));
 		$this->set('country_arr', pjCountryModel::factory()
 			->select('t1.*, t2.content AS `name`')
 			->join('pjMultiLang', "t2.model='pjCountry' AND t2.foreign_id=t1.id AND t2.field='name' AND t2.locale='".$this->getLocaleId()."'", 'left outer')
 			->orderBy('`name` ASC')
 			->findAll()->getData());
-		
+
 		$arr = pjInvoiceConfigModel::factory()->find(1)->getData();
 		if (!empty($arr))
 		{
 			$arr['i18n'] = pjMultiLangModel::factory()->getMultiLang($arr['id'], 'pjInvoiceConfig');
 		}
-		
+
 		$locale_arr = pjLocaleModel::factory()
 			->select('t1.*, t2.file')
 			->join('pjLocaleLanguage', 't2.iso=t1.language_iso', 'left outer')
@@ -566,7 +576,7 @@ class pjInvoice extends pjInvoiceAppController
 			->orderBy('t1.sort ASC')
 			->findAll()
 			->getData();
-		
+
 		$lp_arr = array();
 		foreach ($locale_arr as $item)
 		{
@@ -574,9 +584,9 @@ class pjInvoice extends pjInvoiceAppController
 		}
 		$this->set('lp_arr', $locale_arr);
 		$this->set('locale_str', pjAppController::jsonEncode($lp_arr));
-		
+
 		$this->set('is_flag_ready', $this->requestAction(array('controller' => 'pjLocale', 'action' => 'pjActionIsFlagReady'), array('return')));
-		
+
 		$this
 			->set('arr', $arr)
 			->appendJs('tinymce.min.js', PJ_THIRD_PARTY_PATH . 'tinymce/')
@@ -588,17 +598,17 @@ class pjInvoice extends pjInvoiceAppController
 			->appendJs('index.php?controller=pjAdmin&action=pjActionMessages', PJ_INSTALL_URL, true)
 		;
 	}
-	
+
 	public function pjActionInvoices()
 	{
 		$this->checkLogin();
-		
+
 		if (!$this->isInvoiceReady())
 		{
 			$this->set('status', 2);
 			return;
 		}
-		
+
 		$this
 			->set('invoice_config_arr', pjInvoiceConfigModel::factory()->getConfigData($this->getLocaleId()))
 			->appendJs('jquery.datagrid.js', PJ_FRAMEWORK_LIBS_PATH . 'pj/js/')
@@ -607,19 +617,19 @@ class pjInvoice extends pjInvoiceAppController
 			->appendJs('index.php?controller=pjAdmin&action=pjActionMessages', PJ_INSTALL_URL, true)
 		;
 	}
-	
+
 	public function pjActionPayment()
 	{
 		$this->setLayout('pjActionEmpty');
-		
+
 		$arr = pjInvoiceModel::factory()->where('t1.uuid', $_POST['uuid'])->limit(1)->findAll()->getDataIndex(0);
 		if ($arr === FALSE || empty($arr))
 		{
 			return;
 		}
-		
+
 		$config_arr = pjInvoiceConfigModel::factory()->getConfigData($this->getLocaleId());
-		
+
 		$data = array();
 		if($_POST['payment_method'] == 'creditcard')
 		{
@@ -631,7 +641,7 @@ class pjInvoice extends pjInvoiceAppController
 		}
 		$data['payment_method'] = $_POST['payment_method'];
 		pjInvoiceModel::factory()->set('id', $arr['id'])->modify($data);
-		
+
 		switch ($_POST['payment_method'])
 		{
 			case 'paypal':
@@ -663,7 +673,7 @@ class pjInvoice extends pjInvoiceAppController
 				));
 				break;
 		}
-		
+
 		$this
 			->set('config_arr', $config_arr)
 			->resetCss()
@@ -671,16 +681,16 @@ class pjInvoice extends pjInvoiceAppController
 			->appendCss('invoice.css', $this->getConst('PLUGIN_CSS_PATH'))
 		;
 	}
-	
+
 	public function pjActionPrint()
 	{
 		$this->pjActionView();
 	}
-	
+
 	public function pjActionSaveItem()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR() && $this->isLoged() && $this->isInvoiceReady())
 		{
 			$pjInvoiceItemModel = pjInvoiceItemModel::factory();
@@ -693,11 +703,11 @@ class pjInvoice extends pjInvoiceAppController
 		}
 		exit;
 	}
-	
+
 	public function pjActionSend()
 	{
 		$this->setAjax(true);
-		
+
 		if ($this->isXHR() && $this->isLoged() && $this->isInvoiceReady())
 		{
 			if (isset($_GET['uuid']) && !empty($_GET['uuid']))
@@ -706,10 +716,10 @@ class pjInvoice extends pjInvoiceAppController
 					->join('pjMultiLang', "t2.model='pjCountry' AND t2.foreign_id=t1.y_country AND t2.field='name' AND t2.locale='".$this->getLocaleId()."'", 'left outer')
 					->join('pjMultiLang', "t3.model='pjCountry' AND t3.foreign_id=t1.b_country AND t3.field='name' AND t3.locale='".$this->getLocaleId()."'", 'left outer')
 					->join('pjMultiLang', "t4.model='pjCountry' AND t4.foreign_id=t1.s_country AND t4.field='name' AND t4.locale='".$this->getLocaleId()."'", 'left outer')
-					->select("t1.*, t2.content as y_country_title, t3.content as b_country_title, t3.content as s_country_title, 
-						AES_DECRYPT(t1.cc_type, '".PJ_SALT."') AS cc_type, 
-						AES_DECRYPT(t1.cc_num, '".PJ_SALT."') AS cc_num, 
-						AES_DECRYPT(t1.cc_exp_month, '".PJ_SALT."') AS cc_exp_month, 
+					->select("t1.*, t2.content as y_country_title, t3.content as b_country_title, t3.content as s_country_title,
+						AES_DECRYPT(t1.cc_type, '".PJ_SALT."') AS cc_type,
+						AES_DECRYPT(t1.cc_num, '".PJ_SALT."') AS cc_num,
+						AES_DECRYPT(t1.cc_exp_month, '".PJ_SALT."') AS cc_exp_month,
 						AES_DECRYPT(t1.cc_exp_year, '".PJ_SALT."') AS cc_exp_year,
 						AES_DECRYPT(t1.cc_code, '".PJ_SALT."') AS cc_code")
 					->where('t1.uuid', $_GET['id'])
@@ -718,7 +728,7 @@ class pjInvoice extends pjInvoiceAppController
 				$this->set('arr', $arr);
 				$this->set('config_arr', pjInvoiceConfigModel::factory()->getConfigData($this->getLocaleId()));
 			}
-			
+
 			if (isset($_POST['uuid']) && !empty($_POST['uuid']))
 			{
 				// Validate data
@@ -728,7 +738,7 @@ class pjInvoice extends pjInvoiceAppController
 				{
 					pjAppController::jsonResponse(array('status' => 'ERR', 'code' => 101, 'text' => 'Email(s) not selected.'));
 				}
-				
+
 				// Build message
 				$arr = pjInvoiceModel::factory()->where('t1.uuid', $_POST['id'])->where('t1.order_id', $_POST['uuid'])->limit(1)->findAll()->getDataIndex(0);
 				if ($arr === FALSE || empty($arr))
@@ -739,7 +749,7 @@ class pjInvoice extends pjInvoiceAppController
 				$confi_arr = pjInvoiceConfigModel::factory()->find(1)->getData();
 				$arr['y_logo'] = '<img src="'.PJ_INSTALL_URL.$confi_arr['y_logo'].'" />';
 				$arr['o_use_qty_unit_price'] = $confi_arr['o_use_qty_unit_price'];
-				
+
 				$view_url = PJ_INSTALL_URL . 'index.php?controller=pjInvoice&action=pjActionView&id=' . $_POST['id'] . '&uuid=' . $_POST['uuid'];
 				$view_url = '<a href="'.$view_url.'">'.$view_url.'</a>';
 				// Send message
@@ -754,7 +764,7 @@ class pjInvoice extends pjInvoiceAppController
 						->setSmtpPass($this->option_arr['o_smtp_pass'])
 					;
 				}
-				
+
 				if ($b_send && $s_send)
 				{
 					$pjEmail
@@ -773,7 +783,7 @@ class pjInvoice extends pjInvoiceAppController
 					$message .= $view_url . '<br/><br/><br/><br/>';
 				}
 				$message .= $this->pjActionTokenizer($arr);
-				
+
 				$master_admin = pjUserModel::factory()->find(1)->getData();
 				$y_email = $master_admin['email'];
 				if(!empty($arr['y_email']) && pjValidation::pjActionEmail($arr['y_email']))
@@ -787,7 +797,7 @@ class pjInvoice extends pjInvoiceAppController
 					->setSubject(__('plugin_invoice_send_subject', true))
 					->send($message)
 				;
-				
+
 				if ($result)
 				{
 					pjAppController::jsonResponse(array('status' => 'OK', 'code' => 200, 'text' => 'Email has been sent.'));
@@ -797,16 +807,16 @@ class pjInvoice extends pjInvoiceAppController
 			}
 		}
 	}
-	
+
 	private function pjActionTokenizer($a, $locale_id=NULL)
 	{
 		if (is_null($locale_id))
 		{
 			$locale_id = !empty($a['locale_id']) ? $a['locale_id'] : $this->getLocaleID();
 		}
-		
+
 		$config = pjInvoiceConfigModel::factory()->getConfigData($locale_id);
-		
+
 		$items = "";
 		if (isset($a['items']) && is_array($a['items']) && !empty($a['items']))
 		{
@@ -960,32 +970,32 @@ class pjInvoice extends pjInvoiceAppController
 			$config['y_template']
 		);
 	}
-	
+
 	public function pjActionSaveInvoice()
 	{
 		$this->setAjax(true);
-	
+
 		if ($this->isXHR())
 		{
-			$value = $_POST['value'];				
+			$value = $_POST['value'];
 			pjInvoiceModel::factory()->where('id', $_GET['id'])->limit(1)->modifyAll(array($_POST['column'] => $value));
 		}
 		exit;
 	}
-	
-	
+
+
 	public function pjActionUpdate()
 	{
 		$this->checkLogin();
-		
+
 		if (!$this->isInvoiceReady())
 		{
 			$this->set('status', 2);
 			return;
 		}
-		
+
 		$pjInvoiceModel = pjInvoiceModel::factory();
-		
+
 		if (isset($_POST['invoice_update']))
 		{
 			$arr = $pjInvoiceModel->find($_POST['id'])->getData();
@@ -993,7 +1003,7 @@ class pjInvoice extends pjInvoiceAppController
 			{
 				pjUtil::redirect(PJ_INSTALL_URL . "index.php?controller=pjInvoice&action=pjActionInvoices&err=PIN04");
 			}
-			
+
 			$data = array();
 			$data['foreign_id'] = $arr['foreign_id'];
 			$data['modified'] = ':NOW()';
@@ -1008,7 +1018,7 @@ class pjInvoice extends pjInvoiceAppController
 			$pjInvoiceModel->set('id', $_POST['id'])->modify($data);
 			pjUtil::redirect(PJ_INSTALL_URL . "index.php?controller=pjInvoice&action=pjActionUpdate&id=".$_POST['id']."&err=PIN05");
 		}
-		
+
 		$arr = $pjInvoiceModel->find($_GET['id'])->getData();
 		if (empty($arr))
 		{
@@ -1032,15 +1042,15 @@ class pjInvoice extends pjInvoiceAppController
 	public function pjActionView()
 	{
 		$this->setLayout('pjActionEmpty');
-		
+
 		$arr = pjInvoiceModel::factory()
 			->join('pjMultiLang', sprintf("t2.model='pjCountry' AND t2.foreign_id=t1.y_country AND t2.field='name' AND t2.locale='%u'", $this->getLocaleId()), 'left outer')
 			->join('pjMultiLang', sprintf("t3.model='pjCountry' AND t3.foreign_id=t1.b_country AND t3.field='name' AND t3.locale='%u'", $this->getLocaleId()), 'left outer')
 			->join('pjMultiLang', sprintf("t4.model='pjCountry' AND t4.foreign_id=t1.s_country AND t4.field='name' AND t4.locale='%u'", $this->getLocaleId()), 'left outer')
-			->select("t1.*, t2.content as y_country_title, t3.content as b_country_title, t3.content as s_country_title, 
-						AES_DECRYPT(t1.cc_type, '".PJ_SALT."') AS cc_type, 
-						AES_DECRYPT(t1.cc_num, '".PJ_SALT."') AS cc_num, 
-						AES_DECRYPT(t1.cc_exp_month, '".PJ_SALT."') AS cc_exp_month, 
+			->select("t1.*, t2.content as y_country_title, t3.content as b_country_title, t3.content as s_country_title,
+						AES_DECRYPT(t1.cc_type, '".PJ_SALT."') AS cc_type,
+						AES_DECRYPT(t1.cc_num, '".PJ_SALT."') AS cc_num,
+						AES_DECRYPT(t1.cc_exp_month, '".PJ_SALT."') AS cc_exp_month,
 						AES_DECRYPT(t1.cc_exp_year, '".PJ_SALT."') AS cc_exp_year,
 						AES_DECRYPT(t1.cc_code, '".PJ_SALT."') AS cc_code")
 			->where('t1.uuid', @$_GET['id'])
@@ -1048,7 +1058,6 @@ class pjInvoice extends pjInvoiceAppController
 			->limit(1)
 			->findAll()
 			->getDataIndex(0);
-		
 		if ($arr === FALSE || empty($arr))
 		{
 			pjUtil::redirect(PJ_INSTALL_URL . "index.php?controller=pjInvoice&action=pjActionInvoices&err=PIN04");

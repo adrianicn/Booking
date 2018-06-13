@@ -76,6 +76,17 @@ $STORAGE = @$_SESSION[$controller->defaultCalendar];
 			</div>
 			<?php
 		}
+		if ((int) $tpl['option_arr']['o_bf_lastname'] !== 1)
+		{
+			?>
+			<div class="abParagraph">
+				<div class="abParagraphInner">
+					<label class="abTitle"><?php echo "Lastname"; ?></label>
+					<span class="abValue"><?php echo stripslashes(@$STORAGE['c_lastname']); ?></span>
+				</div>
+			</div>
+			<?php
+		}
 		if ((int) $tpl['option_arr']['o_bf_email'] !== 1)
 		{
 			?>
@@ -83,6 +94,17 @@ $STORAGE = @$_SESSION[$controller->defaultCalendar];
 				<div class="abParagraphInner">
 					<label class="abTitle"><?php __('bf_email'); ?></label>
 					<span class="abValue"><?php echo stripslashes(@$STORAGE['c_email']); ?></span>
+				</div>
+			</div>
+			<?php
+		}
+		if ((int) $tpl['option_arr']['o_bf_email'] !== 1)
+		{
+			?>
+			<div class="abParagraph">
+				<div class="abParagraphInner">
+					<label class="abTitle"><?php echo "Identificacion"; ?></label>
+					<span class="abValue"><?php echo stripslashes(@$STORAGE['c_cedula']); ?></span>
 				</div>
 			</div>
 			<?php
@@ -187,7 +209,7 @@ $STORAGE = @$_SESSION[$controller->defaultCalendar];
 			<?php
 			switch (@$STORAGE['payment_method'])
 			{
-				case 'creditcard':
+				/*case 'creditcard':
 					?>
 					<div class="abParagraph">
 						<div class="abParagraphInner">
@@ -225,7 +247,7 @@ $STORAGE = @$_SESSION[$controller->defaultCalendar];
 						</div>
 					</div>
 					<?php
-					break;
+					break; */
 				case 'bank':
 					?>
 					<div class="abParagraph">
@@ -243,7 +265,8 @@ $STORAGE = @$_SESSION[$controller->defaultCalendar];
 			<div class="abParagraphInner">
 				<label class="abTitle">&nbsp;</label>
 				<span class="abControl">
-					<button type="button" class="abButton abButtonDefault abSelectorConfirm abFloatleft abMR5"><?php __('bf_continue'); ?></button>
+					<!--<button type="button" class="abButton abButtonDefault abSelectorConfirm abFloatleft abMR5"><?php __('bf_continue'); ?></button> -->
+					<button type="button" class="abButton abButtonDefault abSelectorConfirm abFloatleft abMR5"><?php echo "Finalizar"; ?></button>
 					<button type="button" class="abButton abButtonCancel abSelectorReturn abFloatleft"><?php __('bf_cancel'); ?></button>
 				</span>
 			</div>

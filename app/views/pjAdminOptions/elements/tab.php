@@ -68,9 +68,42 @@ if (isset($tpl['arr']))
 							</td>
 						</tr>
 						<tr>
+							<td>Agrupamiento</td>
+							<td>
+								<select name="id_agrupamiento" id="id_agrupamiento" class="pj-form-field required" data-msg-required="Agrupamiento es Requerido" style="width: 100% !important;">
+									<option value="">-- <?php echo "Seleccione Agrupamiento" ?>--</option>
+									<?php
+									if (isset($tpl['agrupamiento_arr']) && is_array($tpl['agrupamiento_arr']))
+									{
+
+										foreach ($tpl['agrupamiento_arr'] as $v)
+										{
+											echo $v['id'];
+											?><option value="<?php echo $v['id']; ?>"<?php echo @$tpl['calendar_arr']['id_agrupamiento'] == $v['id'] ? ' selected="selected"' : NULL; ?>><?php echo pjSanitize::html($v['nombre']); ?></option><?php
+										}
+									}
+									?>
+								</select>
+							</td>
+						</tr>
+						
+						<tr>
+							<td>Correo Operador</td>
+							<td>
+							<input type="text" name="correo_operador" id="correo_operador" class="pj-form-field w300" value="<?php echo $tpl['calendar_arr'] ["correo_operador"]; ?>" data-msg-required="Correo del Operador es Requerido" />								
+							</td>
+						</tr>
+
+						<tr>
 							<td>Descripcion</td>
 							<td>
 							<textarea name="descripcion" id="descripcion" style="resize: none;text-align: left;" rows="4" cols="43" maxlength="250" class="pj-form-field" data-msg-required="Descripcion es Requerido"><?php echo $tpl['calendar_arr'] ["descripcion"];?></textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>Descripcion Ingles</td>
+							<td>
+							<textarea name="descripcion_eng" id="descripcion_eng" style="resize: none;text-align: left;" rows="4" cols="43" maxlength="250" class="pj-form-field" data-msg-required="Descripcion Ingles es Requerido"><?php echo $tpl['calendar_arr'] ["descripcion_eng"];?></textarea>
 							</td>
 						</tr>
 						<tr>
@@ -82,11 +115,12 @@ if (isset($tpl['arr']))
 							</div>
 						</td>
 			<td>
-				<div class="image_upload_div" style="display: inline-table;width: 100%;">
-				<form action="http://localhost/Booking/index.php?controller=pjAdminCalendars&action=pjActionFotos" class="dropzone" enctype= multipart/form-data >
-				<input type="hidden" name="id_usuario_servicio" value="<?php echo $_SESSION['usuario_servicio']; ?> " >
-				<input type="hidden" name="calendar_id" value="<?php echo $tpl['calendar_arr'] ['id'];?>" >
-			    	</form>
+			<div class="image_upload_div" style="display: inline-table;width: 100%;">
+
+	<form action="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminCalendars&amp;action=pjActionFotos" class="dropzone" enctype= multipart/form-data >
+			<input type="hidden" name="id_usuario_servicio" value="<?php echo $_SESSION['usuario_servicio']; ?> " >
+			<input type="hidden" name="calendar_id" value="<?php echo $tpl['calendar_arr'] ['id'];?>" >
+			</form>
 			</div>
 
 			<td>
@@ -141,7 +175,18 @@ if (isset($tpl['arr']))
 				}
 				?>
 				<tr class="pj-table-row-odd<?php echo $rowClass; ?>" style="<?php echo $rowStyle; ?>">
-					<td><?php __('opt_' . $tpl['arr'][$i]['key']); ?></td>
+					<td>
+					<?php
+						if($tpl['arr'][$i]['key'] == "o_bf_cedula"){
+							echo "Identificacion";
+						}elseif ($tpl['arr'][$i]['key'] == "o_bf_lastname"){
+							echo "Lastname";
+						}else{
+							__('opt_' . $tpl['arr'][$i]['key']);
+						}
+					?>
+
+					</td>
 					<td>
 						<?php
 						switch ($tpl['arr'][$i]['type'])
@@ -263,7 +308,7 @@ if (isset($tpl['arr']))
 
 		<?php if(isset($tpl['fotos_calendario']) &&  $tpl['contador_fotos_calendario']>0){ ?>
 
-			<form action="http://localhost/Booking/index.php?controller=pjAdminCalendars&action=pjActionDeleteFotos" >
+	<form action="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminCalendars&amp;action=pjActionDeleteFotos" >
 			<div class="container">
     				<div class="row">
         					<div class="span12">

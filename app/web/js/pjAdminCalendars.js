@@ -36,7 +36,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				}
 			});
 		}
-		
+
 		$("#content").on("click", ".pj-checkbox", function () {
 			var $this = $(this);
 			if ($this.find("input[type='checkbox']").is(":checked")) {
@@ -63,24 +63,24 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 			});
 			return false;
 		});
-			
+
 		function formatOwner(val, obj) {
 			return ['<a href="index.php?controller=pjAdminUsers&action=pjActionUpdate&id=', obj.user_id, '">', obj.user_name, '</a>'].join("");
 		}
-		
+
 		function formatName(val, obj) {
 			return ['<a href="index.php?controller=pjAdmin&action=pjActionRedirect&nextController=pjAdminCalendars&nextAction=pjActionView&calendar_id=', obj.id, '&nextParams=', encodeURIComponent("id=" + obj.id), '">', val, '</a>'].join("");
 		}
-		
+
 		function onBeforeShow (obj) {
 			if (parseInt(obj.id, 10) === pjGrid.currentCalendarId) {
 				return false;
 			}
 			return true;
 		}
-		
+
 		if ($("#grid").length > 0 && datagrid) {
-			
+
 			var gridOpts = {
 				buttons: [{type: "settings", title: myLabel.settings, url: "index.php?controller=pjAdmin&action=pjActionRedirect&nextController=pjAdminOptions&nextAction=pjActionIndex&nextParams=tab%3D1&calendar_id={:id}"},
 				          {type: "prices", title: myLabel.prices, url: "index.php?controller=pjAdmin&action=pjActionRedirect&nextController=pjAdminCalendars&nextAction=pjActionPrices&calendar_id={:id}"},
@@ -113,9 +113,9 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 					name: "record[]"
 				}
 			};
-			
+
 			var $grid = $("#grid").datagrid(gridOpts);
-			
+
 			$(document).on("submit", ".frm-filter", function (e) {
 				if (e && e.preventDefault) {
 					e.preventDefault();
@@ -130,9 +130,9 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				$grid.datagrid("load", "index.php?controller=pjAdminCalendars&action=pjActionGetCalendar", "id", "ASC", content.page, content.rowCount);
 				return false;
 			});
-			
+
 		}
-		
+
 		function formatCurrency(val) {
 			if(val == null)
 			{
@@ -141,7 +141,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				return pjGrid.currencySign.replace('99', val);
 			}
 		}
-		
+
 		function formatData(val, obj) {
 			return ['<div style="line-height: 22px"><span class="w60 bold inline_block">', myLabel.status, ':</span><span class="pj-table-cell-label pj-status pj-status-', obj.status, '" style="display: inline-block">', obj.status, '</span>',
 			        '<br><span class="w60 bold inline_block">', myLabel.id, ':</span>', obj.uuid,
@@ -153,9 +153,9 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 			        '</div>'
 			        ].join("");
 		}
-		
+
 		if ($("#gridReservations").length > 0 && datagrid) {
-			
+
 			var $gridReservations = $("#gridReservations").datagrid({
 				buttons: [{type: "edit", url: "index.php?controller=pjAdminReservations&action=pjActionUpdate&id={:id}"},
 				          {type: "delete", url: "index.php?controller=pjAdminReservations&action=pjActionDeleteReservation&id={:id}"}
@@ -173,13 +173,14 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 						cache = $gridReservations.datagrid("option", "cache");
 					if (cache.time !== undefined && cache.time !== null) {
 						var dt = new Date(cache.time * 1000),
-							iso = [dt.getFullYear(), dt.getMonth()+1, dt.getDate()].join("-");
+							iso = [dt.getFullYear(), dt.getMonth()+1, dt.getDate()+1].join("-");
 						$a.attr("href", href.replace(/&date_from=\d{4}\-\d{2}\-\d{2}/, '&date_from=' + iso));
 						$gridReservations.find("th:first").html($.datagrid._formatDate(iso, pjGrid.jsDateFormat));
+
 					}
 				}
 			});
-			
+
 			$("#content").on("click", ".abCalendarLinkDate", function (e) {
 				if (e && e.preventDefault) {
 					e.preventDefault();
@@ -199,7 +200,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				$gridReservations.datagrid("load", "index.php?controller=pjAdminReservations&action=pjActionGetReservation&calendar_id="+view_calendar_id, "id", "DESC", content.page, content.rowCount);
 				return false;
 			});
-			
+
 			var m = window.location.search.match(/&time=(\d{10})/);
 			if (m !== null) {
 				var content = $gridReservations.datagrid("option", "content"),
@@ -211,7 +212,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				$gridReservations.datagrid("option", "cache", cache);
 				$gridReservations.datagrid("load", "index.php?controller=pjAdminReservations&action=pjActionGetReservation", "id", "DESC", content.page, content.rowCount);
 			}
-			
+
 		}
 	});
 })(jQuery_1_8_2);

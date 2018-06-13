@@ -63,16 +63,16 @@ if (isset($tpl['status']))
 	}
 	</style>
 	<?php include PJ_VIEWS_PATH . 'pjLayouts/elements/calmenu.php'; ?>
-	
+
 	<?php pjUtil::printNotice(@$titles['ACR12'], @$bodies['ACR12']); ?>
-	
+
 	<div id="abWrapper_<?php echo $controller->getForeignId(); ?>">
 		<div id="abCalendar_<?php echo $controller->getForeignId(); ?>" class="abBackendView">
 		<?php include dirname(__FILE__) . '/pjActionGetCal.php'; ?>
 		</div>
 	</div>
-	<?php /*<div id="boxCalendarData" class="clear_left"></div>*/ ?>
-	
+	<!--<div id="boxCalendarData" class="clear_left"></div> -->
+
 	<div id="gridReservations" class="float_right w350"></div>
 	<div class="float_right w350 t10">
 		<a class="pj-button newReserv" href="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminReservations&amp;action=pjActionCreate&amp;calendar_id=<?php echo $controller->getForeignId(); ?>&amp;date_from=<?php echo date("Y-m-d"); ?>"><?php __('lblCalendarNewReserv'); ?></a>

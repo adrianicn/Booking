@@ -36,7 +36,6 @@ if (isset($tpl['status']))
 		<div class="float_right t5"></div>
 		<br class="clear_both" />
 	</div>
-
 	<div id="grid"></div>
 	<script type="text/javascript">
 	var pjGrid = pjGrid || {};

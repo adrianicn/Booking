@@ -6,8 +6,7 @@ if (!defined("ROOT_PATH"))
 }
 class pjAdminCalendars extends pjAdmin
 {
-	public function pjActionCreate()
-	{
+	public function pjActionCreate(){
 		$this->checkLogin();
 
 		if ($this->isAdmin() || $this->isOwner())
@@ -18,14 +17,8 @@ class pjAdminCalendars extends pjAdmin
 
 				$id = pjCalendarModel::factory($_POST)->insert()->getInsertId();
 
-				if ($id !== false && (int) $id > 0)
-				{
-					$dbHost = 'localhost';
-					$dbUsername = 'root';
-					$dbPassword = '12345';
-					$dbName = 'igtrip';
-
-					$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+				if ($id !== false && (int) $id > 0){
+					$conn = new mysqli(PJ_DB_HOST, PJ_DB_USERNAME, PJ_DB_PASS, PJ_DB_NAME);
 					if($mysqli->connect_errno){
 					        echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 					}
@@ -49,22 +42,28 @@ class pjAdminCalendars extends pjAdmin
 					//************************************************************************//
 					//          SELECT Y UPDATE AL SEACHENGINE PARA EL; USUARIO SERVICIO          //
 					//************************************************************************//
-					 $searchEngine = "SELECT search FROM searchengine WHERE id_usuario_servicio = '".$_POST["id_usuario_servicio"]."' ";
-					$conn->query($sqlMD5);
+        			$nombreCalendario = $_POST['i18n'][2]['name'];
+        			$descripcion = $_POST['descripcion'];
 
-					$search = "";
-					foreach ($conn->query($searchEngine) as $row1) {
-		        				$search = $row1['search'];
-		        			}
-		        			//$_POST['i18n'][1]['name'];
-					$_POST['i18n'][2]['name'];
-		        			$nombreCalendario = $_POST['i18n'][2]['name'];
-		        			$descripcion = $_POST['descripcion'];
-		        			$search = $search." ".$nombreCalendario." ".$descripcion;
-		        			$updateSearchEngine = "UPDATE searchengine SET search = '$search'
-	    					WHERE id_usuario_servicio = '".$_POST["id_usuario_servicio"]."' ";
+					$search = $nombreCalendario." ".$descripcion;
+					$conn->query("INSERT INTO searchengine (id_usuario_servicio, search, estado_search, created_at, updated_at,tipo_busqueda) VALUES(".$id.",'".$search."', '1','".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."','8')");
 
-	    				$conn->query($updateSearchEngine);
+					 /*$searchEngine = "SELECT search FROM searchengine WHERE id_usuario_servicio = '".$_POST["id_usuario_servicio"]."' AND tipo_busqueda = 8";
+					$conn->query($searchEngine);
+					$comprobar  = $conn->query($searchEngine);
+					if($comprobar->num_rows == 0){
+						$search = $nombreCalendario." ".$descripcion;
+						$conn->query("INSERT INTO searchengine (id_usuario_servicio, search, estado_search, created_at, updated_at,tipo_busqueda) VALUES(".$_POST['id_usuario_servicio'].",'".$search."', '1','".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."','8')");
+					}else{
+						$search = "";
+						foreach ($conn->query($searchEngine) as $row1) {
+			        				$search = $row1['search'];
+			        			}
+			        			$search = $search." ".$nombreCalendario." ".$descripcion;
+			        			$updateSearchEngine = "UPDATE searchengine SET search = '$search'
+		    					WHERE id_usuario_servicio = '".$_POST["id_usuario_servicio"]."' AND  tipo_busqueda = 8";
+		    				$conn->query($updateSearchEngine);
+					}*/
 
 					//*******************************************************************//
 					//     UPDATE DE LOS DATOS PREDETERMINADOS DEL CALENDARIO  //
@@ -73,33 +72,40 @@ class pjAdminCalendars extends pjAdmin
 
 					$pjOptionModel = pjOptionModel::factory();
 					$ramdomKey = md5(uniqid(rand(1,6)));
-					$url_Paypal = "http://localhost/Booking/index.php?controller=pjAdmin&action=pjActionLogin&rk=".$ramdomKey;
+					$url_Paypal = PJ_PAYPAL_URL.$ramdomKey;
 	                    			$dataKey = ["o_allow_authorize","o_allow_bank","o_allow_cash","o_allow_creditcard",
 	                    				"o_allow_paypal","o_authorize_hash","o_authorize_key","o_authorize_mid",
 	                    				"o_authorize_tz", "o_bank_account","o_cancel_url","o_currency","o_paypal_address",
 	                    				"o_send_email","o_smtp_host","o_smtp_pass","o_smtp_port","o_smtp_user",
-	                    				"o_thankyou_page"];
-	    				$dataValue = ["1|0::1","1|0::0","1|0::1","1|0::0","1|0::1","SIMON","59C8zvj42qPZ66Ff",
-	    						"287qPpCha","-43200|-39600|-36000|-32400|-28800|-25200|-21600|-18000|-14400|-10800|-7200|-3600|0|3600|7200|10800|14400|18000|21600|25200|28800|32400|36000|39600|43200|46800::0","info",
-	    						"http://localhost/Booking/index.php?controller=pjAdmin&action=pjActionError",
-	    						"AED|AFN|ALL|AMD|ANG|AOA|ARS|AUD|AWG|AZN|BAM|BBD|BDT|BGN|BHD|BIF|BMD|BND|BOB|BOV|BRL|BSD|BTN|BWP|BYR|BZD|CAD|CDF|CHE|CHF|CHW|CLF|CLP|CNY|COP|COU|CRC|CUC|CUP|CVE|CZK|DJF|DKK|DOP|DZD|EEK|EGP|ERN|ETB|EUR|FJD|FKP|GBP|GEL|GHS|GIP|GMD|GNF|GTQ|GYD|HKD|HNL|HRK|HTG|HUF|IDR|ILS|INR|IQD|IRR|ISK|JMD|JOD|JPY|KES|KGS|KHR|KMF|KPW|KRW|KWD|KYD|KZT|LAK|LBP|LKR|LRD|LSL|LTL|LVL|LYD|MAD|MDL|MGA|MKD|MMK|MNT|MOP|MRO|MUR|MVR|MWK|MXN|MXV|MYR|MZN|NAD|NGN|NIO|NOK|NPR|NZD|OMR|PAB|PEN|PGK|PHP|PKR|PLN|PYG|QAR|RON|RSD|RUB|RWF|SAR|SBD|SCR|SDG|SEK|SGD|SHP|SLL|SOS|SRD|STD|SYP|SZL|THB|TJS|TMT|TND|TOP|TRY|TTD|TWD|TZS|UAH|UGX|USD|USN|USS|UYU|UZS|VEF|VND|VUV|WST|XAF|XAG|XAU|XBA|XBB|XBC|XBD|XCD|XDR|XFU|XOF|XPD|XPF|XPT|XTS|XXX|YER|ZAR|ZMK|ZWL::USD", "iwannatrip1@gmail.com",
-	    						"mail|smtp::smtp","smtp.gmail.com","iwannatrip123","587",
-	    						"iwannatriptest@gmail.com",$url_Paypal];
+	                    				"o_thankyou_page","o_bf_lastname","o_bf_cedula"];
 
-	    				$dataVisible = ["0","0","0","0","0","0","0","0","0","0","0","1","0","0","0","0","0","0","0"];
+	    				$dataValue = ["1|0::0","1|0::0","1|0::1","1|0::1","1|0::0",
+	    						PJ_O_AUHTORIZE_HASH,PJ_O_AUHTORIZE_KEY,
+	    						PJ_O_AUHTORIZE_MID,"-43200|-39600|-36000|-32400|-28800|-25200|-21600|-18000|-14400|-10800|-7200|-3600|0|3600|7200|10800|14400|18000|21600|25200|28800|32400|36000|39600|43200|46800::0","info",
+	    						$_SERVER['PHP_SELF']."?controller=pjAdmin&action=pjActionError",
+	    						"AED|AFN|ALL|AMD|ANG|AOA|ARS|AUD|AWG|AZN|BAM|BBD|BDT|BGN|BHD|BIF|BMD|BND|BOB|BOV|BRL|BSD|BTN|BWP|BYR|BZD|CAD|CDF|CHE|CHF|CHW|CLF|CLP|CNY|COP|COU|CRC|CUC|CUP|CVE|CZK|DJF|DKK|DOP|DZD|EEK|EGP|ERN|ETB|EUR|FJD|FKP|GBP|GEL|GHS|GIP|GMD|GNF|GTQ|GYD|HKD|HNL|HRK|HTG|HUF|IDR|ILS|INR|IQD|IRR|ISK|JMD|JOD|JPY|KES|KGS|KHR|KMF|KPW|KRW|KWD|KYD|KZT|LAK|LBP|LKR|LRD|LSL|LTL|LVL|LYD|MAD|MDL|MGA|MKD|MMK|MNT|MOP|MRO|MUR|MVR|MWK|MXN|MXV|MYR|MZN|NAD|NGN|NIO|NOK|NPR|NZD|OMR|PAB|PEN|PGK|PHP|PKR|PLN|PYG|QAR|RON|RSD|RUB|RWF|SAR|SBD|SCR|SDG|SEK|SGD|SHP|SLL|SOS|SRD|STD|SYP|SZL|THB|TJS|TMT|TND|TOP|TRY|TTD|TWD|TZS|UAH|UGX|USD|USN|USS|UYU|UZS|VEF|VND|VUV|WST|XAF|XAG|XAU|XBA|XBB|XBC|XBD|XCD|XDR|XFU|XOF|XPD|XPF|XPT|XTS|XXX|YER|ZAR|ZMK|ZWL::USD",
+	    						PJ_O_PAYPAL_ADDRESS, "mail|smtp::smtp",PJ_O_SMTP_HOST,
+	    						PJ_O_SMTP_PASS,PJ_O_SMTP_PORT, PJ_O_SMTP_USER,
+	    						$url_Paypal,"1|2|3::3","1|2|3::3"];
+
+	    				$dataVisible = ["0","0","0","0","0","0","0","0","0","0","0","1","0","0","0","0","0","0","0","1","1"];
 	    				$contador = count($dataVisible);
 
 	    				for($i = 0; $i < $contador; $i++){
-
-						$sql = "UPDATE booking_abcalendar_options
-	    					SET value = '$dataValue[$i]' , is_visible = '$dataVisible[$i]'
-	    					WHERE foreign_id = $id AND  `key` = '$dataKey[$i]'";
-
-	    					if ($conn->query($sql) === TRUE) {
-						    echo "Record updated successfully";
-						} else {
-						    echo "Error updating record: " . $conn->error;
-						}
+	    					if($dataKey[$i] ==  "o_bf_lastname" ){
+		    					$conn->query("INSERT INTO booking_abcalendar_options(foreign_id, `key`, tab_id, `value`, label, type, `order`, is_visible, style) VALUES($id,'o_bf_lastname','4','1|2|3::3','No|Yes|Yes (Required)','enum','1','1',NULL)");
+	    					}elseif ($dataKey[$i] == "o_bf_cedula") {
+	    						$conn->query("INSERT INTO booking_abcalendar_options(foreign_id, `key`, tab_id, `value`, label, type, `order`, is_visible, style) VALUES($id,'o_bf_cedula', '4','1|2|3::3', 'No|Yes|Yes (Required)','enum','2','1','NULL')");
+	    					}else{
+		    					$sql = "UPDATE booking_abcalendar_options
+		    					SET value = '$dataValue[$i]' , is_visible = '$dataVisible[$i]'
+		    					WHERE foreign_id = $id AND  `key` = '$dataKey[$i]'";
+		    					if ($conn->query($sql) === TRUE) {
+						    		//echo "Record updated successfully";
+								} else {
+								    echo "Error updating record: " . $conn->error;
+								}
+	    					}
 	    				}
 
 				} else {
@@ -121,6 +127,7 @@ class pjAdminCalendars extends pjAdmin
 				$this->set('locale_str', pjAppController::jsonEncode($lp_arr));
 
 				$this->set('user_arr', pjUserModel::factory()->orderBy('t1.name ASC')->findAll()->getData());
+				$this->set('agrupamiento_arr', pjCalendarGroupModel::factory()->where('id_usuario_servicio',$_SESSION['usuario_servicio'])->orderBy('t1.nombre ASC')->findAll()->getData());
 
 				$this->appendJs('jquery.validate.min.js', PJ_THIRD_PARTY_PATH . 'validate/');
 				$this->appendJs('jquery.multilang.js', PJ_FRAMEWORK_LIBS_PATH . 'pj/js/');
@@ -134,73 +141,59 @@ class pjAdminCalendars extends pjAdmin
 		}
 	}
 
-	public function pjActionFotos()
-	{
+	public function pjActionFotos(){
 
-	$this->checkLogin();
-	if(!empty($_FILES)){
-		//*****************************************************//
-		//                SUBO EL ARCHIVO A LA CARPETA                     //
-		//*****************************************************//
-		$directorio = '/var/www/html/Booking/app/web/uploads/';
-		$directorio1 = '/var/www/html/Booking/app/web/icon/';
-		$targetDir = $directorio;
-		$id_auxiliar = trim($_POST['calendar_id']);
-		$usuarioServ = trim($_POST['id_usuario_servicio']);
-		$nombreFoto =  $_FILES['file']['name'];
-		$fileName = $id_auxiliar.$_FILES['file']['name'];
-		$fileName1 = "icon".$id_auxiliar.$_FILES['file']['name'];
-		$targetFile = $targetDir.$fileName;
-		$targetFileIcon = $targetDir.$fileName1;
-		$targetFileIconDest = $directorio1.$fileName;
-
-		if(move_uploaded_file($_FILES['file']['tmp_name'],$targetFile)){
-
-		$imagen = new Imagick($targetFile);
-		$imagen->thumbnailImage(300, 300);
-		$imagen->writeImage($targetFileIcon);
-		$source = $targetFileIcon;
-		$dest = $targetFileIconDest;
-		copy($source, $dest);
-		unlink($source);
-
+		$this->checkLogin();
+		if(!empty($_FILES)){
 			//*****************************************************//
-			//           GUARDO EN LA BASE DE DATOS IMAGES                //
+			//                SUBO EL ARCHIVO A LA CARPETA                     //
 			//*****************************************************//
-			$dbHost = 'localhost';
-			$dbUsername = 'root';
-			$dbPassword = '12345';
-			$dbName = 'igtrip';
+			$directorio = '/Applications/MAMP/htdocs/Booking/app/web/uploads/';
+			$directorio1 = '/Applications/MAMP/htdocs/Booking/app/web/icon/';			
+			$targetDir = $directorio;
+			$id_auxiliar = trim($_POST['calendar_id']);
+			$usuarioServ = trim($_POST['id_usuario_servicio']);
+			$nombreFoto =  $_FILES['file']['name'];
+			$fileName = $id_auxiliar.$_FILES['file']['name'];
+			$fileName1 = "icon".$id_auxiliar.$_FILES['file']['name'];
+			$targetFile = $targetDir.$fileName;
+			$targetFileIcon = $targetDir.$fileName1;
+			$targetFileIconDest = $directorio1.$fileName;
 
-			$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
-			if($mysqli->connect_errno){
-			        echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+			if(move_uploaded_file($_FILES['file']['tmp_name'],$targetFile)){
+
+				$imagen = new Imagick($targetFile);
+				$imagen->thumbnailImage(300, 300);
+				$imagen->writeImage($targetFileIcon);
+				$source = $targetFileIcon;
+				$dest = $targetFileIconDest;
+				copy($source, $dest);
+				unlink($source);
+
+				//*****************************************************//
+				//           GUARDO EN LA BASE DE DATOS IMAGES                //
+				//*****************************************************//
+				$conn = new mysqli(PJ_DB_HOST, PJ_DB_USERNAME, PJ_DB_PASS, PJ_DB_NAME);
+				if($mysqli->connect_errno){
+				        echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+				}
+				$conn->query("INSERT INTO images (filename, original_name, created_at, updated_at, id_auxiliar, id_catalogo_fotografia, id_usuario_servicio, estado_fotografia)
+					VALUES('".$fileName."','".$nombreFoto."', '".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."',
+						'".$id_auxiliar."', 10, ".$usuarioServ.", 1 )");
+
 			}
-
-
-			$conn->query("INSERT INTO images (filename, original_name, created_at, updated_at, id_auxiliar, id_catalogo_fotografia, id_usuario_servicio, estado_fotografia)
-				VALUES('".$fileName."','".$nombreFoto."', '".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."',
-					'".$id_auxiliar."', 10, ".$usuarioServ.", 1 )");
-
 		}
-	}
 
 	}
 
-	public function pjActionCargarFotos()
-	{
+	public function pjActionCargarFotos(){
 
 		$idCalendario = $_GET['calendar'];
 		$this->setAjax(true);
 		//*****************************************************//
 		//  BUSCO EN LA BASE LAS IMAGENES DEL CALENDARIO     //
 		//*****************************************************//
-		$dbHost = 'localhost';
-		$dbUsername = 'root';
-		$dbPassword = '12345';
-		$dbName = 'igtrip';
-
-		$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+		$conn = new mysqli(PJ_DB_HOST, PJ_DB_USERNAME, PJ_DB_PASS, PJ_DB_NAME);
 		if($mysqli->connect_errno){
 		 echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 		}
@@ -226,19 +219,13 @@ class pjAdminCalendars extends pjAdmin
 		exit;
 	}
 
-	public function pjActionDeleteFotos()
-	{
+	public function pjActionDeleteFotos(){
 		$idFoto = $_GET['foto'];
 		$this->setAjax(true);
 		//*****************************************************//
 		//  ELIMINO DE LA BD LA FOTO DEL CALENDARIO                //
 		//*****************************************************//
-		$dbHost = 'localhost';
-		$dbUsername = 'root';
-		$dbPassword = '12345';
-		$dbName = 'igtrip';
-
-		$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
+		$conn = new mysqli(PJ_DB_HOST, PJ_DB_USERNAME, PJ_DB_PASS, PJ_DB_NAME);
 		if($mysqli->connect_errno){
 		 echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 		}
@@ -254,8 +241,7 @@ class pjAdminCalendars extends pjAdmin
 		exit;
 	}
 
-	public function pjActionDeleteCalendar()
-	{
+	public function pjActionDeleteCalendar(){
 		$this->setAjax(true);
 
 		if ($this->isXHR() && $this->isAdmin())
@@ -291,8 +277,7 @@ class pjAdminCalendars extends pjAdmin
 		exit;
 	}
 
-	private function pjActionDeleteImages($cid)
-	{
+	private function pjActionDeleteImages($cid){
 		$arr = array(
 			PJ_UPLOAD_PATH . '%u_reserved_start.jpg',
 			PJ_UPLOAD_PATH . '%u_reserved_end.jpg',
@@ -321,8 +306,7 @@ class pjAdminCalendars extends pjAdmin
 		}
 	}
 
-	public function pjActionDeleteCalendarBulk()
-	{
+	public function pjActionDeleteCalendarBulk(){
 		$this->setAjax(true);
 
 		if ($this->isXHR() && $this->isAdmin())
@@ -355,8 +339,7 @@ class pjAdminCalendars extends pjAdmin
 		exit;
 	}
 
-	public function pjActionGetCalendar()
-	{
+	public function pjActionGetCalendar(){
 		$this->setAjax(true);
 
 		if ($this->isXHR() && $this->isAdmin())
@@ -404,7 +387,6 @@ class pjAdminCalendars extends pjAdmin
 				->join('pjMultiLang', "t2.foreign_id = t1.id AND t2.model = 'pjCalendar' AND t2.locale = '".$this->getLocaleId()."' AND t2.field = 'name'", 'left')
 				->join('pjUser', "t3.id=t1.user_id", 'left')
 				->where('t1.id_usuario_servicio', $_SESSION['usuario_servicio']);
-
 			if (isset($_GET['q']) && !empty($_GET['q']))
 			{
 				$q = $pjCalendarModel->escapeString($_GET['q']);
@@ -438,8 +420,7 @@ class pjAdminCalendars extends pjAdmin
 		exit;
 	}
 
-	public function pjActionIndex()
-	{
+	public function pjActionIndex(){
 		$this->checkLogin();
 
 		if ($this->isAdmin())
@@ -450,7 +431,6 @@ class pjAdminCalendars extends pjAdmin
 		}
 		elseif ($this->isOwner()){
 			$_SESSION["comprobar"] = true;
-
 			$this->appendJs('jquery.datagrid.js', PJ_FRAMEWORK_LIBS_PATH . 'pj/js/');
 			$this->appendJs('pjAdminCalendarsOwner.js');
 			$this->appendJs('index.php?controller=pjAdmin&action=pjActionMessages', PJ_INSTALL_URL, true);
@@ -459,8 +439,7 @@ class pjAdminCalendars extends pjAdmin
 		}
 	}
 
-	public function pjActionSaveCalendar()
-	{
+	public function pjActionSaveCalendar(){
 		$this->setAjax(true);
 
 		if ($this->isXHR() && $this->isAdmin())
@@ -477,8 +456,7 @@ class pjAdminCalendars extends pjAdmin
 		exit;
 	}
 
-	private function __getCalendar($cid, $year, $month, $view=1)
-	{
+	private function __getCalendar($cid, $year, $month, $view=1){
 		$ABCalendar = new pjABCalendar();
 		$ABCalendar
 			->setShowNextLink((int) $view > 1 ? false : true)
@@ -524,11 +502,10 @@ class pjAdminCalendars extends pjAdmin
 		$this->set('ABCalendar', $ABCalendar);
 	}
 
-	public function pjActionGetCal()
-	{
+	public function pjActionGetCal(){
 		$this->setAjax(true);
-
-		if ($this->isXHR() && $this->isAdmin())
+		//if ($this->isXHR() && $this->isAdmin())
+		if ($this->isXHR())
 		{
 			$this->__getCalendar($_GET['cid'], $_GET['year'], $_GET['month']);
 		}

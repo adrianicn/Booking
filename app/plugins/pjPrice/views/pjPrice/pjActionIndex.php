@@ -14,7 +14,7 @@ if (isset($tpl['status']))
 	{
 		include $plugin_menu;
 	}
-	
+
 	$titles = __('error_titles', true);
 	$bodies = __('error_bodies', true);
 	if (isset($_GET['err']))
@@ -24,15 +24,19 @@ if (isset($tpl['status']))
 	$week_start = isset($tpl['option_arr']['o_week_start']) && in_array((int) $tpl['option_arr']['o_week_start'], range(0,6)) ? (int) $tpl['option_arr']['o_week_start'] : 0;
 	$jqDateFormat = pjUtil::jqDateFormat($tpl['option_arr']['o_date_format']);
 	?>
-	
+
 	<?php pjUtil::printNotice(@$titles['PPR03'], @$bodies['PPR03']); ?>
 	<?php
 	if (isset($tpl['overlap_arr']) && !empty($tpl['overlap_arr']))
 	{
 		pjUtil::printNotice(@$titles['PPR09'], @$bodies['PPR09']);
 	}
+
+	$titulo = "Deshabilitar Dias";
+	$cuerpo = "Estimado Usuario, al configurar un precio igual a x0.16, automaticamente se deshabilitara el dia en el calendario.";
+		pjUtil::printNotice($titulo, $cuerpo);
 	?>
-	
+
 	<style type="text/css">
 	.ui-tabs .ui-tabs-panel {padding: 5px 3px}
 	#tabs{margin: 0 0 10px}
@@ -53,7 +57,7 @@ if (isset($tpl['status']))
 					}
 					$idx = array_unique($idx);
 					sort($idx, SORT_NUMERIC);
-				
+
 					$br = 0;
 					foreach ($tpl['arr'] as $season => $season_arr)
 					{
@@ -298,9 +302,9 @@ if (isset($tpl['status']))
 		<input type="submit" class="pj-button" value="<?php __('plugin_price_save'); ?>" />
 		<input type="button" class="pj-button button_add_season" value="<?php __('plugin_price_add_season'); ?>" />
 	</form>
-	
+
 	<div class="bxPriceErrors" style="height: 0 !important; display: none; overflow: hidden"></div>
-	
+
 	<div id="dialogPrices" title="<?php __('plugin_price_season_title'); ?>" style="display: none">
 		<form class="form" action="" method="get">
 			<p>
@@ -316,7 +320,7 @@ if (isset($tpl['status']))
 		<span class="bxPriceStatus bxPriceStatusEnd" style="display: none"><?php __('plugin_price_status_end'); ?></span>
 		<span class="bxPriceStatus bxPriceStatusFail" style="display: none"><?php __('plugin_price_status_fail'); ?></span>
 	</div>
-	
+
 	<div id="tmplSeason" style="display: none">
 	<?php
 	$prices_include = 'season';

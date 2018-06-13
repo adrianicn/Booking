@@ -8,10 +8,14 @@
 				|| ($_GET['controller'] == 'pjAdminOptions' && (isset($_GET['tab']) && in_array($_GET['tab'], array(1,2,3,4,5,6,7,10))))
 			? 'menu-focus' : NULL; ?>"><span class="menu-browse">&nbsp;</span><?php __('menuCalendars'); ?></a>
 		</li>
+		<li><a href="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminGroup&amp;action=pjActionIndex" class="<?php
+			echo in_array($_GET['controller'], array('pjAdminGroup', 'pjPrice', 'pjPeriod'))
+				|| ($_GET['controller'] == 'pjAdminOptions' && (isset($_GET['tab']) && in_array($_GET['tab'], array(1,2,3,4,5,6,7,10))))
+			? 'menu-focus' : NULL; ?>"><span class="menu-add">&nbsp;</span><?php echo "Agrupamientos" ?></a>
+		</li>
 		<li><a href="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminReservations&amp;action=pjActionDashboard" class="<?php echo $_GET['controller'] == 'pjAdminReservations' && $_GET['action'] == 'pjActionDashboard' ? 'menu-focus' : NULL; ?>"><span class="menu-availability">&nbsp;</span><?php __('menuAvailability'); ?></a></li>
 		<li><a href="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdminReservations&amp;action=pjActionIndex" class="<?php echo ($_GET['controller'] == 'pjAdminReservations' && $_GET['action'] != 'pjActionDashboard') || ($_GET['controller'] == 'pjInvoice' && in_array($_GET['action'], array('pjActionInvoices', 'pjActionUpdate', 'pjActionCreateInvoice'))) ? 'menu-focus' : NULL; ?>"><span class="menu-reservations">&nbsp;</span><?php __('menuReservations'); ?></a></li>
-		<!--
-		<li><a href="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdmin&amp;action=pjActionProfile" class="<?php echo $_GET['controller'] == 'pjAdmin' && $_GET['action'] == 'pjActionProfile' ? 'menu-focus' : NULL; ?>"><span class="menu-users">&nbsp;</span><?php __('menuProfile'); ?></a></li> -->
+
 		<li><a href="<?php echo $_SERVER['PHP_SELF']; ?>?controller=pjAdmin&amp;action=pjActionLogout"><span class="menu-logout">&nbsp;</span><?php __('menuLogout'); ?></a></li>
 	</ul>
 </div>

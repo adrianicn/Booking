@@ -36,7 +36,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				}
 			});
 		}
-		
+
 		$("#content").on("click", ".pj-checkbox", function () {
 			var $this = $(this);
 			if ($this.find("input[type='checkbox']").is(":checked")) {
@@ -63,24 +63,24 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 			});
 			return false;
 		});
-			
+
 		function formatOwner(val, obj) {
 			return ['<a href="index.php?controller=pjAdminUsers&action=pjActionUpdate&id=', obj.user_id, '">', obj.user_name, '</a>'].join("");
 		}
-		
+
 		function formatName(val, obj) {
 			return ['<a href="index.php?controller=pjAdmin&action=pjActionRedirect&nextController=pjAdminCalendars&nextAction=pjActionView&calendar_id=', obj.id, '&nextParams=', encodeURIComponent("id=" + obj.id), '">', val, '</a>'].join("");
 		}
-		
+
 		function onBeforeShow (obj) {
 			if (parseInt(obj.id, 10) === pjGrid.currentCalendarId) {
 				return false;
 			}
 			return true;
 		}
-		
+
 		if ($("#grid").length > 0 && datagrid) {
-			
+
 			var gridOpts = {
 				buttons: [{type: "settings", title: myLabel.settings, url: "index.php?controller=pjAdmin&action=pjActionRedirect&nextController=pjAdminOptions&nextAction=pjActionIndex&nextParams=tab%3D1&calendar_id={:id}"},
 				          {type: "prices", title: myLabel.prices, url: "index.php?controller=pjAdmin&action=pjActionRedirect&nextController=pjAdminCalendars&nextAction=pjActionPrices&calendar_id={:id}"},
@@ -90,14 +90,14 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				              {text: myLabel.viewReservations, url: "index.php?controller=pjAdminReservations&action=pjActionIndex&calendar_id={:id}"},
 				              {text: myLabel.installPreview, url: "index.php?controller=pjAdminOptions&action=pjActionInstall&calendar_id={:id}"}
 				           ]}],
-				columns: [{text: myLabel.id, type: "text", sortable: true, editable: false},
+				columns: [//{text: myLabel.id, type: "text", sortable: true, editable: false},
 				          {text: myLabel.calendar, type: "text", sortable: true, width: 200, renderer: formatName},
 				          {text: myLabel.user, type: "text", sortable: true, editable: false, width: 150, renderer: formatOwner}
 					//{text: myLabel.descripcion, type: "text", sortable: false, editable: false, width: 150, renderer: formatOwner}
 				],
 				dataUrl: "index.php?controller=pjAdminCalendars&action=pjActionGetCalendar" + pjGrid.queryString,
 				dataType: "json",
-				fields: ['id', 'name', 'user_name'],
+				fields: ['name', 'user_name'],
 				paginator: {
 					actions: [
 						{text: myLabel.deleteSelected, url: "index.php?controller=pjAdminCalendars&action=pjActionDeleteCalendarBulk", render: true, confirmation: myLabel.deleteConfirmation}
@@ -113,9 +113,9 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 					name: "record[]"
 				}
 			};
-			
+
 			var $grid = $("#grid").datagrid(gridOpts);
-			
+
 			$(document).on("submit", ".frm-filter", function (e) {
 				if (e && e.preventDefault) {
 					e.preventDefault();
@@ -130,9 +130,9 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				$grid.datagrid("load", "index.php?controller=pjAdminCalendars&action=pjActionGetCalendar", "id", "ASC", content.page, content.rowCount);
 				return false;
 			});
-			
+
 		}
-		
+
 		function formatCurrency(val) {
 			if(val == null)
 			{
@@ -141,7 +141,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				return pjGrid.currencySign.replace('99', val);
 			}
 		}
-		
+
 		function formatData(val, obj) {
 			return ['<div style="line-height: 22px"><span class="w60 bold inline_block">', myLabel.status, ':</span><span class="pj-table-cell-label pj-status pj-status-', obj.status, '" style="display: inline-block">', obj.status, '</span>',
 			        '<br><span class="w60 bold inline_block">', myLabel.id, ':</span>', obj.uuid,
@@ -153,9 +153,9 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 			        '</div>'
 			        ].join("");
 		}
-		
+
 		if ($("#gridReservations").length > 0 && datagrid) {
-			
+
 			var $gridReservations = $("#gridReservations").datagrid({
 				buttons: [{type: "edit", url: "index.php?controller=pjAdminReservations&action=pjActionUpdate&id={:id}"},
 				          {type: "delete", url: "index.php?controller=pjAdminReservations&action=pjActionDeleteReservation&id={:id}"}
@@ -179,7 +179,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 					}
 				}
 			});
-			
+
 			$("#content").on("click", ".abCalendarLinkDate", function (e) {
 				if (e && e.preventDefault) {
 					e.preventDefault();
@@ -199,7 +199,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				$gridReservations.datagrid("load", "index.php?controller=pjAdminReservations&action=pjActionGetReservation&calendar_id="+view_calendar_id, "id", "DESC", content.page, content.rowCount);
 				return false;
 			});
-			
+
 			var m = window.location.search.match(/&time=(\d{10})/);
 			if (m !== null) {
 				var content = $gridReservations.datagrid("option", "content"),
@@ -211,7 +211,7 @@ var jQuery_1_8_2 = jQuery_1_8_2 || $.noConflict();
 				$gridReservations.datagrid("option", "cache", cache);
 				$gridReservations.datagrid("load", "index.php?controller=pjAdminReservations&action=pjActionGetReservation", "id", "DESC", content.page, content.rowCount);
 			}
-			
+
 		}
 	});
 })(jQuery_1_8_2);
